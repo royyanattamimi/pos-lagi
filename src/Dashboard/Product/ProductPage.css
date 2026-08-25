@@ -207,6 +207,11 @@
   font: inherit;
 }
 
+.product-form-page input[type="file"] {
+  min-height: auto;
+  padding: 10px;
+}
+
 .product-form-page input:focus,
 .product-form-page select:focus {
   border-color: #0f766e;
@@ -217,6 +222,31 @@
   display: grid;
   grid-template-columns: 120px minmax(0, 1fr);
   gap: 12px;
+}
+
+.image-preview {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.image-preview img {
+  width: 92px;
+  height: 72px;
+  border-radius: 8px;
+  object-fit: cover;
+  background: #f1f5f9;
+}
+
+.image-preview span {
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 800;
 }
 
 .product-table {

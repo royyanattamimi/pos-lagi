@@ -77,6 +77,7 @@ export function ProductPage({ onDashboard, onProduct, onTransaction, onLogout }:
     category: 'Makanan',
     stock: '',
     price: '',
+    image: '',
   })
 
   const totalStock = products.reduce((total, product) => total + product.stock, 0)
@@ -97,11 +98,24 @@ export function ProductPage({ onDashboard, onProduct, onTransaction, onLogout }:
         stock,
         price,
         status: stock <= 20 ? 'Stok Rendah' : 'Aktif',
-        image: '/product-images/snack-real.png',
+        image: form.image || '/product-images/snack-real.png',
       },
       ...currentProducts,
     ])
-    setForm({ name: '', category: 'Makanan', stock: '', price: '' })
+    setForm({ name: '', category: 'Makanan', stock: '', price: '', image: '' })
+  }
+
+  function handleImageChange(file: File | undefined) {
+    if (!file) return
+
+    const reader = new FileReader()
+    reader.onload = () => {
+      setForm((currentForm) => ({
+        ...currentForm,
+        image: typeof reader.result === 'string' ? reader.result : '',
+      }))
+    }
+    reader.readAsDataURL(file)
   }
 
   return (
@@ -201,6 +215,20 @@ export function ProductPage({ onDashboard, onProduct, onTransaction, onLogout }:
                     placeholder="25000"
                   />
                 </label>
+              </div>
+
+              <label>
+                Image Product
+                <input
+                  accept="image/*"
+                  type="file"
+                  onChange={(event) => handleImageChange(event.target.files?.[0])}
+                />
+              </label>
+
+              <div className="image-preview">
+                <img src={form.image || '/product-images/snack-real.png'} alt="Preview product" />
+                <span>{form.image ? 'Image siap digunakan' : 'Default image akan digunakan'}</span>
               </div>
 
               <button className="product-primary" type="submit">Simpan Product</button>
