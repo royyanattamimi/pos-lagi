@@ -3,7 +3,9 @@ import type { FormEvent } from 'react'
 import './ProductPage.css'
 
 type ProductPageProps = {
-  onBack: () => void
+  onDashboard: () => void
+  onProduct: () => void
+  onTransaction: () => void
   onLogout: () => void
 }
 
@@ -25,7 +27,7 @@ const initialProducts: Product[] = [
     stock: 24,
     price: 18000,
     status: 'Aktif',
-    image: '/product-images/coffee.svg',
+    image: '/product-images/coffee-real.png',
   },
   {
     id: 2,
@@ -34,7 +36,7 @@ const initialProducts: Product[] = [
     stock: 16,
     price: 22000,
     status: 'Stok Rendah',
-    image: '/product-images/bread.svg',
+    image: '/product-images/bread-real.png',
   },
   {
     id: 3,
@@ -43,7 +45,7 @@ const initialProducts: Product[] = [
     stock: 12,
     price: 78000,
     status: 'Stok Rendah',
-    image: '/product-images/rice.svg',
+    image: '/product-images/rice-real.png',
   },
   {
     id: 4,
@@ -52,7 +54,7 @@ const initialProducts: Product[] = [
     stock: 42,
     price: 7000,
     status: 'Aktif',
-    image: '/product-images/tea.svg',
+    image: '/product-images/tea-real.png',
   },
 ]
 
@@ -68,7 +70,7 @@ function formatCurrency(value: number) {
   return currency.format(value)
 }
 
-export function ProductPage({ onBack, onLogout }: ProductPageProps) {
+export function ProductPage({ onDashboard, onProduct, onTransaction, onLogout }: ProductPageProps) {
   const [products, setProducts] = useState(initialProducts)
   const [form, setForm] = useState({
     name: '',
@@ -95,7 +97,7 @@ export function ProductPage({ onBack, onLogout }: ProductPageProps) {
         stock,
         price,
         status: stock <= 20 ? 'Stok Rendah' : 'Aktif',
-        image: '/product-images/product.svg',
+        image: '/product-images/snack-real.png',
       },
       ...currentProducts,
     ])
@@ -114,8 +116,9 @@ export function ProductPage({ onBack, onLogout }: ProductPageProps) {
         </div>
 
         <nav className="product-nav" aria-label="Navigasi product">
-          <button type="button" onClick={onBack}>Dashboard</button>
-          <button className="active" type="button">Product</button>
+          <button type="button" onClick={onDashboard}>Dashboard</button>
+          <button className="active" type="button" onClick={onProduct}>Product</button>
+          <button type="button" onClick={onTransaction}>Transaksi</button>
         </nav>
 
         <button className="product-logout" type="button" onClick={onLogout}>Logout</button>
@@ -128,7 +131,7 @@ export function ProductPage({ onBack, onLogout }: ProductPageProps) {
             <h1>Kelola data product</h1>
             <span>Tambah product baru, lihat stok, harga jual, dan status ketersediaan barang.</span>
           </div>
-          <button type="button" onClick={onBack}>Kembali</button>
+          <button type="button" onClick={onDashboard}>Kembali</button>
         </header>
 
         <section className="product-stats" aria-label="Ringkasan product">

@@ -2,7 +2,9 @@ import { useMemo, useState } from 'react'
 import './TransactionPage.css'
 
 type TransactionPageProps = {
-  onBack: () => void
+  onDashboard: () => void
+  onProduct: () => void
+  onTransaction: () => void
   onLogout: () => void
 }
 
@@ -14,6 +16,7 @@ type Product = {
   category: string
   price: number
   stock: number
+  image: string
 }
 
 type CartItem = {
@@ -22,11 +25,46 @@ type CartItem = {
 }
 
 const products: Product[] = [
-  { id: 1, name: 'Kopi Susu Botol', category: 'Minuman', price: 18000, stock: 24 },
-  { id: 2, name: 'Roti Gandum', category: 'Makanan', price: 22000, stock: 16 },
-  { id: 3, name: 'Beras Premium 5kg', category: 'Sembako', price: 78000, stock: 12 },
-  { id: 4, name: 'Teh Melati 350ml', category: 'Minuman', price: 7000, stock: 42 },
-  { id: 5, name: 'Paket Snack Hemat', category: 'Promo', price: 29500, stock: 18 },
+  {
+    id: 1,
+    name: 'Kopi Susu Botol',
+    category: 'Minuman',
+    price: 18000,
+    stock: 24,
+    image: '/product-images/coffee-real.png',
+  },
+  {
+    id: 2,
+    name: 'Roti Gandum',
+    category: 'Makanan',
+    price: 22000,
+    stock: 16,
+    image: '/product-images/bread-real.png',
+  },
+  {
+    id: 3,
+    name: 'Beras Premium 5kg',
+    category: 'Sembako',
+    price: 78000,
+    stock: 12,
+    image: '/product-images/rice-real.png',
+  },
+  {
+    id: 4,
+    name: 'Teh Melati 350ml',
+    category: 'Minuman',
+    price: 7000,
+    stock: 42,
+    image: '/product-images/tea-real.png',
+  },
+  {
+    id: 5,
+    name: 'Paket Snack Hemat',
+    category: 'Promo',
+    price: 29500,
+    stock: 18,
+    image: '/product-images/snack-real.png',
+  },
 ]
 
 const categories = ['Semua', 'Makanan', 'Minuman', 'Sembako', 'Promo']
@@ -49,7 +87,7 @@ function formatCurrency(value: number) {
   return currency.format(value)
 }
 
-export function TransactionPage({ onBack, onLogout }: TransactionPageProps) {
+export function TransactionPage({ onDashboard, onProduct, onTransaction, onLogout }: TransactionPageProps) {
   const [step, setStep] = useState<Step>('select')
   const [selectedCategory, setSelectedCategory] = useState('Semua')
   const [cart, setCart] = useState<CartItem[]>([])
@@ -125,8 +163,9 @@ export function TransactionPage({ onBack, onLogout }: TransactionPageProps) {
         </div>
 
         <nav className="transaction-nav" aria-label="Navigasi transaksi">
-          <button type="button" onClick={onBack}>Dashboard</button>
-          <button className="active" type="button">Transaksi</button>
+          <button type="button" onClick={onDashboard}>Dashboard</button>
+          <button type="button" onClick={onProduct}>Product</button>
+          <button className="active" type="button" onClick={onTransaction}>Transaksi</button>
         </nav>
 
         <button className="transaction-logout" type="button" onClick={onLogout}>Logout</button>
@@ -181,6 +220,7 @@ export function TransactionPage({ onBack, onLogout }: TransactionPageProps) {
                     key={product.id}
                     onClick={() => addProduct(product)}
                   >
+                    <img src={product.image} alt={product.name} />
                     <strong>{product.name}</strong>
                     <span>{product.category}</span>
                     <b>{formatCurrency(product.price)}</b>
@@ -332,7 +372,7 @@ export function TransactionPage({ onBack, onLogout }: TransactionPageProps) {
             <span>{cartItems.reduce((total, item) => total + item.quantity, 0)} item berhasil dibayar.</span>
             <strong>{formatCurrency(grandTotal)}</strong>
             <div className="transaction-actions">
-              <button type="button" onClick={onBack}>Kembali ke Dashboard</button>
+              <button type="button" onClick={onDashboard}>Kembali ke Dashboard</button>
               <button className="primary-action" type="button" onClick={resetTransaction}>
                 Transaksi Baru
               </button>

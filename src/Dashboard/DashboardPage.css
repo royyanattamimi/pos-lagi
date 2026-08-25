@@ -68,6 +68,11 @@
   color: #ffffff;
 }
 
+.dashboard-nav button.active {
+  background: #0f766e;
+  color: #ffffff;
+}
+
 .logout-button {
   min-height: 42px;
   margin-top: auto;
@@ -195,7 +200,7 @@
 }
 
 .product-row {
-  grid-template-columns: minmax(160px, 1fr) 90px 110px;
+  grid-template-columns: minmax(230px, 1fr) 90px 110px;
 }
 
 .transaction-row {
@@ -207,8 +212,27 @@
   border-bottom: 0;
 }
 
-.product-row div,
 .transaction-row div {
+  display: grid;
+  gap: 3px;
+}
+
+.dashboard-product-name {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dashboard-product-name img {
+  width: 58px;
+  height: 46px;
+  flex: 0 0 auto;
+  border-radius: 8px;
+  object-fit: cover;
+  background: #f1f5f9;
+}
+
+.dashboard-product-name div {
   display: grid;
   gap: 3px;
 }

@@ -16,9 +16,27 @@ const stats = [
 ]
 
 const products = [
-  { name: 'Kopi Susu Botol', category: 'Minuman', stock: 24, price: 'Rp 18.000' },
-  { name: 'Roti Gandum', category: 'Makanan', stock: 16, price: 'Rp 22.000' },
-  { name: 'Beras Premium 5kg', category: 'Sembako', stock: 12, price: 'Rp 78.000' },
+  {
+    name: 'Kopi Susu Botol',
+    category: 'Minuman',
+    stock: 24,
+    price: 'Rp 18.000',
+    image: '/product-images/coffee-real.png',
+  },
+  {
+    name: 'Roti Gandum',
+    category: 'Makanan',
+    stock: 16,
+    price: 'Rp 22.000',
+    image: '/product-images/bread-real.png',
+  },
+  {
+    name: 'Beras Premium 5kg',
+    category: 'Sembako',
+    stock: 12,
+    price: 'Rp 78.000',
+    image: '/product-images/rice-real.png',
+  },
 ]
 
 const transactions = [
@@ -33,7 +51,9 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
   if (activePage === 'transaction') {
     return (
       <TransactionPage
-        onBack={() => setActivePage('dashboard')}
+        onDashboard={() => setActivePage('dashboard')}
+        onProduct={() => setActivePage('product')}
+        onTransaction={() => setActivePage('transaction')}
         onLogout={onLogout}
       />
     )
@@ -42,7 +62,9 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
   if (activePage === 'product') {
     return (
       <ProductPage
-        onBack={() => setActivePage('dashboard')}
+        onDashboard={() => setActivePage('dashboard')}
+        onProduct={() => setActivePage('product')}
+        onTransaction={() => setActivePage('transaction')}
         onLogout={onLogout}
       />
     )
@@ -60,7 +82,7 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
         </div>
 
         <nav className="dashboard-nav" aria-label="Navigasi dashboard">
-          <a href="#dashboard">Dashboard</a>
+          <button className="active" type="button">Dashboard</button>
           <button type="button" onClick={() => setActivePage('product')}>Product</button>
           <button type="button" onClick={() => setActivePage('transaction')}>Transaksi</button>
         </nav>
@@ -99,9 +121,12 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
             <div className="product-list">
               {products.map((product) => (
                 <div className="product-row" key={product.name}>
-                  <div>
-                    <strong>{product.name}</strong>
-                    <span>{product.category}</span>
+                  <div className="dashboard-product-name">
+                    <img src={product.image} alt={product.name} />
+                    <div>
+                      <strong>{product.name}</strong>
+                      <span>{product.category}</span>
+                    </div>
                   </div>
                   <span>{product.stock} stok</span>
                   <strong>{product.price}</strong>

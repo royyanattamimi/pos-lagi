@@ -61,9 +61,13 @@
   cursor: pointer;
 }
 
-.product-nav button:hover,
-.product-nav button.active {
+.product-nav button:hover {
   background: #243244;
+  color: #ffffff;
+}
+
+.product-nav button.active {
+  background: #0f766e;
   color: #ffffff;
 }
 
