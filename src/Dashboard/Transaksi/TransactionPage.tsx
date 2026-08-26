@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { Sidebar } from '../Sidebar/Sidebar'
 import './TransactionPage.css'
 
 type TransactionPageProps = {
@@ -153,23 +154,13 @@ export function TransactionPage({ onDashboard, onProduct, onTransaction, onLogou
 
   return (
     <main className="transaction-page">
-      <aside className="transaction-sidebar">
-        <div className="transaction-brand">
-          <span>PL</span>
-          <div>
-            <strong>POS Lagi</strong>
-            <small>Page Transaksi</small>
-          </div>
-        </div>
-
-        <nav className="transaction-nav" aria-label="Navigasi transaksi">
-          <button type="button" onClick={onDashboard}>Dashboard</button>
-          <button type="button" onClick={onProduct}>Product</button>
-          <button className="active" type="button" onClick={onTransaction}>Transaksi</button>
-        </nav>
-
-        <button className="transaction-logout" type="button" onClick={onLogout}>Logout</button>
-      </aside>
+      <Sidebar
+        activePage="transaction"
+        onDashboard={onDashboard}
+        onProduct={onProduct}
+        onTransaction={onTransaction}
+        onLogout={onLogout}
+      />
 
       <section className="transaction-content">
         <header className="transaction-header">

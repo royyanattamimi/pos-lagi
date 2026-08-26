@@ -6,79 +6,6 @@
   color: #172033;
 }
 
-.transaction-sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 28px;
-  padding: 28px 22px;
-  background: #111827;
-  color: #e5e7eb;
-}
-
-.transaction-brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.transaction-brand > span {
-  width: 44px;
-  height: 44px;
-  display: grid;
-  place-items: center;
-  border-radius: 8px;
-  background: #2dd4bf;
-  color: #042f2e;
-  font-weight: 900;
-}
-
-.transaction-brand strong,
-.transaction-brand small {
-  display: block;
-}
-
-.transaction-brand small {
-  margin-top: 2px;
-  color: #9ca3af;
-}
-
-.transaction-nav {
-  display: grid;
-  gap: 8px;
-}
-
-.transaction-nav button,
-.transaction-logout {
-  min-height: 42px;
-  border: 0;
-  border-radius: 8px;
-  padding: 0 12px;
-  color: #cbd5e1;
-  background: transparent;
-  font: inherit;
-  font-weight: 800;
-  text-align: left;
-  cursor: pointer;
-}
-
-.transaction-nav button:hover {
-  background: #243244;
-  color: #ffffff;
-}
-
-.transaction-nav button.active {
-  background: #0f766e;
-  color: #ffffff;
-}
-
-.transaction-logout {
-  margin-top: auto;
-  border: 1px solid #334155;
-  background: #172033;
-  color: #ffffff;
-  text-align: center;
-}
-
 .transaction-content {
   min-width: 0;
   padding: 30px;
@@ -413,17 +340,9 @@ button:disabled {
     grid-template-columns: 1fr;
   }
 
-  .transaction-sidebar {
-    gap: 18px;
-  }
-
-  .transaction-logout {
-    margin-top: 0;
-  }
 }
 
 @media (max-width: 620px) {
-  .transaction-sidebar,
   .transaction-content {
     padding: 20px;
   }

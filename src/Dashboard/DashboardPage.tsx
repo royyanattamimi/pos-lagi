@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import './DashboardPage.css'
 import { ProductPage } from './Product/ProductPage'
+import { Sidebar } from './Sidebar/Sidebar'
 import { TransactionPage } from './Transaksi/TransactionPage'
 
 type DashboardPageProps = {
@@ -8,11 +9,19 @@ type DashboardPageProps = {
 }
 
 type ActivePage = 'dashboard' | 'product' | 'transaction'
+type DashboardDetail = 'sales-today' | 'transactions' | 'active-products' | null
 
 const stats = [
-  { label: 'Penjualan Hari Ini', value: 'Rp 12.450.000' },
-  { label: 'Transaksi', value: '86' },
-  { label: 'Product Aktif', value: '128' },
+  { key: 'sales-today', label: 'Penjualan Hari Ini', value: 'Rp 12.450.000' },
+  { key: 'transactions', label: 'Transaksi', value: '86' },
+  { key: 'active-products', label: 'Product Aktif', value: '128' },
+]
+
+const salesToday = [
+  { time: '08:00 - 10:00', orders: 24, total: 'Rp 3.420.000', method: 'Cash' },
+  { time: '10:00 - 12:00', orders: 31, total: 'Rp 4.780.000', method: 'QRIS' },
+  { time: '12:00 - 14:00', orders: 18, total: 'Rp 2.650.000', method: 'Debit' },
+  { time: '14:00 - 16:00', orders: 13, total: 'Rp 1.600.000', method: 'Cash' },
 ]
 
 const products = [
@@ -47,6 +56,7 @@ const transactions = [
 
 export function DashboardPage({ onLogout }: DashboardPageProps) {
   const [activePage, setActivePage] = useState<ActivePage>('dashboard')
+  const [activeDetail, setActiveDetail] = useState<DashboardDetail>(null)
 
   if (activePage === 'transaction') {
     return (
@@ -72,23 +82,13 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
 
   return (
     <main className="dashboard-page">
-      <aside className="dashboard-sidebar">
-        <div className="dashboard-brand">
-          <span>PL</span>
-          <div>
-            <strong>POS Lagi</strong>
-            <small>Cabang Utama</small>
-          </div>
-        </div>
-
-        <nav className="dashboard-nav" aria-label="Navigasi dashboard">
-          <button className="active" type="button">Dashboard</button>
-          <button type="button" onClick={() => setActivePage('product')}>Product</button>
-          <button type="button" onClick={() => setActivePage('transaction')}>Transaksi</button>
-        </nav>
-
-        <button className="logout-button" type="button" onClick={onLogout}>Logout</button>
-      </aside>
+      <Sidebar
+        activePage="dashboard"
+        onDashboard={() => setActivePage('dashboard')}
+        onProduct={() => setActivePage('product')}
+        onTransaction={() => setActivePage('transaction')}
+        onLogout={onLogout}
+      />
 
       <section className="dashboard-content">
         <header className="dashboard-header" id="dashboard">
@@ -101,13 +101,83 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
 
         <section className="stats-grid" aria-label="Ringkasan data">
           {stats.map((stat) => (
-            <article className="stat-card" key={stat.label}>
+            <button
+              className="stat-card"
+              type="button"
+              key={stat.label}
+              onClick={() => setActiveDetail(stat.key as DashboardDetail)}
+            >
               <span>{stat.label}</span>
               <strong>{stat.value}</strong>
-            </article>
+              <small>Lihat rincian</small>
+            </button>
           ))}
         </section>
 
+        {activeDetail ? (
+          <section className="dashboard-detail-panel">
+            <div className="panel-header">
+              <div>
+                <p>Rincian Dashboard</p>
+                <h2>
+                  {activeDetail === 'sales-today' && 'Penjualan Hari Ini'}
+                  {activeDetail === 'transactions' && 'Transaksi'}
+                  {activeDetail === 'active-products' && 'Product Aktif'}
+                </h2>
+              </div>
+              <button type="button" onClick={() => setActiveDetail(null)}>Kembali</button>
+            </div>
+
+            {activeDetail === 'sales-today' && (
+              <div className="dashboard-detail-list">
+                {salesToday.map((sale) => (
+                  <div className="sales-detail-row" key={sale.time}>
+                    <div>
+                      <strong>{sale.time}</strong>
+                      <span>{sale.orders} transaksi</span>
+                    </div>
+                    <span>{sale.method}</span>
+                    <strong>{sale.total}</strong>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {activeDetail === 'transactions' && (
+              <div className="dashboard-detail-list">
+                {transactions.map((transaction) => (
+                  <div className="transaction-row" key={transaction.id}>
+                    <div>
+                      <strong>{transaction.id}</strong>
+                      <span>{transaction.cashier}</span>
+                    </div>
+                    <span>{transaction.items}</span>
+                    <strong>{transaction.total}</strong>
+                    <em className={transaction.status === 'Refund' ? 'refund' : ''}>{transaction.status}</em>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {activeDetail === 'active-products' && (
+              <div className="dashboard-detail-list">
+                {products.map((product) => (
+                  <div className="product-row" key={product.name}>
+                    <div className="dashboard-product-name">
+                      <img src={product.image} alt={product.name} />
+                      <div>
+                        <strong>{product.name}</strong>
+                        <span>{product.category}</span>
+                      </div>
+                    </div>
+                    <span>{product.stock} stok</span>
+                    <strong>{product.price}</strong>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+        ) : (
         <section className="dashboard-grid">
           <article className="panel" id="product">
             <div className="panel-header">
@@ -159,6 +229,7 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
             </div>
           </article>
         </section>
+        )}
       </section>
     </main>
   )

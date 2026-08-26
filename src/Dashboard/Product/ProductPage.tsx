@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
+import { Sidebar } from '../Sidebar/Sidebar'
 import './ProductPage.css'
 
 type ProductPageProps = {
@@ -18,6 +19,8 @@ type Product = {
   status: 'Aktif' | 'Stok Rendah'
   image: string
 }
+
+type ProductDetail = 'total-product' | 'total-stock' | 'low-stock' | null
 
 const initialProducts: Product[] = [
   {
@@ -72,6 +75,7 @@ function formatCurrency(value: number) {
 
 export function ProductPage({ onDashboard, onProduct, onTransaction, onLogout }: ProductPageProps) {
   const [products, setProducts] = useState(initialProducts)
+  const [selectedDetail, setSelectedDetail] = useState<ProductDetail>(null)
   const [form, setForm] = useState({
     name: '',
     category: 'Makanan',
@@ -82,6 +86,23 @@ export function ProductPage({ onDashboard, onProduct, onTransaction, onLogout }:
 
   const totalStock = products.reduce((total, product) => total + product.stock, 0)
   const lowStock = products.filter((product) => product.stock <= 20).length
+  const activeProducts = products.filter((product) => product.status === 'Aktif').length
+  const totalCategories = new Set(products.map((product) => product.category)).size
+  const lowStockItems = products
+    .filter((product) => product.stock <= 20)
+    .reduce((total, product) => total + product.stock, 0)
+  const safeStock = products.filter((product) => product.stock > 20).length
+  const categoryBreakdown = categories.map((category) => ({
+    category,
+    total: products.filter((product) => product.category === category).length,
+    stock: products
+      .filter((product) => product.category === category)
+      .reduce((total, product) => total + product.stock, 0),
+  }))
+  const detailProducts =
+    selectedDetail === 'low-stock'
+      ? products.filter((product) => product.stock <= 20)
+      : products
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -120,23 +141,13 @@ export function ProductPage({ onDashboard, onProduct, onTransaction, onLogout }:
 
   return (
     <main className="product-page">
-      <aside className="product-sidebar">
-        <div className="product-brand">
-          <span>PL</span>
-          <div>
-            <strong>POS Lagi</strong>
-            <small>Page Product</small>
-          </div>
-        </div>
-
-        <nav className="product-nav" aria-label="Navigasi product">
-          <button type="button" onClick={onDashboard}>Dashboard</button>
-          <button className="active" type="button" onClick={onProduct}>Product</button>
-          <button type="button" onClick={onTransaction}>Transaksi</button>
-        </nav>
-
-        <button className="product-logout" type="button" onClick={onLogout}>Logout</button>
-      </aside>
+      <Sidebar
+        activePage="product"
+        onDashboard={onDashboard}
+        onProduct={onProduct}
+        onTransaction={onTransaction}
+        onLogout={onLogout}
+      />
 
       <section className="product-content">
         <header className="product-header">
@@ -149,20 +160,129 @@ export function ProductPage({ onDashboard, onProduct, onTransaction, onLogout }:
         </header>
 
         <section className="product-stats" aria-label="Ringkasan product">
-          <article>
+          <button type="button" onClick={() => setSelectedDetail('total-product')}>
             <span>Total Product</span>
             <strong>{products.length}</strong>
-          </article>
-          <article>
+            <div className="stat-detail">
+              <small>{activeProducts} product aktif</small>
+              <small>{totalCategories} kategori tersedia</small>
+            </div>
+          </button>
+          <button type="button" onClick={() => setSelectedDetail('total-stock')}>
             <span>Total Stok</span>
             <strong>{totalStock}</strong>
-          </article>
-          <article>
+            <div className="stat-detail">
+              <small>{safeStock} product stok aman</small>
+              <small>{lowStockItems} item masuk stok rendah</small>
+            </div>
+          </button>
+          <button type="button" onClick={() => setSelectedDetail('low-stock')}>
             <span>Stok Rendah</span>
             <strong>{lowStock}</strong>
-          </article>
+            <div className="stat-detail">
+              <small>Batas stok rendah: 20 item</small>
+              <small>{products.length - lowStock} product masih aman</small>
+            </div>
+          </button>
         </section>
 
+        {selectedDetail ? (
+          <section className="product-detail-page">
+            <div className="product-panel-header">
+              <div>
+                <p>Rincian Product</p>
+                <h2>
+                  {selectedDetail === 'total-product' && 'Rincian Total Product'}
+                  {selectedDetail === 'total-stock' && 'Rincian Total Stok'}
+                  {selectedDetail === 'low-stock' && 'Rincian Stok Rendah'}
+                </h2>
+              </div>
+              <button type="button" onClick={() => setSelectedDetail(null)}>Kembali ke Product</button>
+            </div>
+
+            <div className="detail-summary-grid">
+              {selectedDetail === 'total-product' && (
+                <>
+                  <article>
+                    <span>Product Aktif</span>
+                    <strong>{activeProducts}</strong>
+                  </article>
+                  <article>
+                    <span>Kategori</span>
+                    <strong>{totalCategories}</strong>
+                  </article>
+                  <article>
+                    <span>Total Data</span>
+                    <strong>{products.length}</strong>
+                  </article>
+                </>
+              )}
+
+              {selectedDetail === 'total-stock' && (
+                <>
+                  <article>
+                    <span>Total Stok</span>
+                    <strong>{totalStock}</strong>
+                  </article>
+                  <article>
+                    <span>Stok Aman</span>
+                    <strong>{safeStock}</strong>
+                  </article>
+                  <article>
+                    <span>Item Stok Rendah</span>
+                    <strong>{lowStockItems}</strong>
+                  </article>
+                </>
+              )}
+
+              {selectedDetail === 'low-stock' && (
+                <>
+                  <article>
+                    <span>Product Stok Rendah</span>
+                    <strong>{lowStock}</strong>
+                  </article>
+                  <article>
+                    <span>Batas Minimum</span>
+                    <strong>20</strong>
+                  </article>
+                  <article>
+                    <span>Stok Aman</span>
+                    <strong>{products.length - lowStock}</strong>
+                  </article>
+                </>
+              )}
+            </div>
+
+            {selectedDetail !== 'low-stock' && (
+              <div className="category-breakdown">
+                {categoryBreakdown.map((item) => (
+                  <article key={item.category}>
+                    <span>{item.category}</span>
+                    <strong>{item.total} product</strong>
+                    <small>{item.stock} total stok</small>
+                  </article>
+                ))}
+              </div>
+            )}
+
+            <div className="product-table detail-table">
+              {detailProducts.map((product) => (
+                <div className="product-table-row" key={product.id}>
+                  <div className="product-name-cell">
+                    <img src={product.image} alt={product.name} />
+                    <div>
+                      <strong>{product.name}</strong>
+                      <span>{product.category}</span>
+                    </div>
+                  </div>
+                  <span>{product.stock} stok</span>
+                  <strong>{formatCurrency(product.price)}</strong>
+                  <em className={product.status === 'Stok Rendah' ? 'low' : ''}>{product.status}</em>
+                </div>
+              ))}
+            </div>
+          </section>
+        ) : (
         <section className="product-grid-page">
           <article className="product-panel">
             <div className="product-panel-header">
@@ -261,6 +381,7 @@ export function ProductPage({ onDashboard, onProduct, onTransaction, onLogout }:
             </div>
           </article>
         </section>
+        )}
       </section>
     </main>
   )
