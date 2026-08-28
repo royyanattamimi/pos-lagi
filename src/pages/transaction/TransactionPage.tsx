@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
-import { Sidebar } from '../Sidebar/Sidebar'
-import { ReceiptPage } from './Receipt/ReceiptPage'
+import { Sidebar } from '../../component/sidebar/Sidebar'
+import { ReceiptPage } from './receipt/ReceiptPage'
 import './TransactionPage.css'
 
 type TransactionPageProps = {

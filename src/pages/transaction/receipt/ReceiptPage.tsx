@@ -1,4 +1,4 @@
-import { Sidebar } from '../../Sidebar/Sidebar'
+import { Sidebar } from '../../../component/sidebar/Sidebar'
 import './ReceiptPage.css'
 
 type ReceiptItem = {

@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { DashboardPage } from './Dashboard/DashboardPage'
-import { LoginPage } from './Login/LoginPage'
-import { StartShiftPage } from './Shift/StartShiftPage'
+import { DashboardPage } from './pages/dashboard/DashboardPage'
+import { LoginPage } from './pages/login/LoginPage'
+import { StartShiftPage } from './pages/shift/StartShiftPage'
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)

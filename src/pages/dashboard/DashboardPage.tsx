@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import './DashboardPage.css'
-import { ProductPage } from './Product/ProductPage'
-import { ProfilePage } from './Profile/ProfilePage'
-import { ShiftPage } from './Shift/ShiftPage'
-import { Sidebar } from './Sidebar/Sidebar'
-import { TransactionPage } from './Transaksi/TransactionPage'
+import { Sidebar } from '../../component/sidebar/Sidebar'
+import { ProductPage } from '../product/ProductPage'
+import { ProfilePage } from '../profile/ProfilePage'
+import { ShiftPage } from '../shift/ShiftPage'
+import { TransactionPage } from '../transaction/TransactionPage'
 
 type DashboardPageProps = {
   onLogout: () => void

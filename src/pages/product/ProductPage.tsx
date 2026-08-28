@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { Sidebar } from '../Sidebar/Sidebar'
+import { Sidebar } from '../../component/sidebar/Sidebar'
 import './ProductPage.css'
 
 type ProductPageProps = {
