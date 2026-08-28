@@ -2,6 +2,7 @@ import { useState } from 'react'
 import './DashboardPage.css'
 import { ProductPage } from './Product/ProductPage'
 import { ProfilePage } from './Profile/ProfilePage'
+import { ShiftPage } from './Shift/ShiftPage'
 import { Sidebar } from './Sidebar/Sidebar'
 import { TransactionPage } from './Transaksi/TransactionPage'
 
@@ -9,7 +10,7 @@ type DashboardPageProps = {
   onLogout: () => void
 }
 
-type ActivePage = 'dashboard' | 'product' | 'transaction' | 'profile'
+type ActivePage = 'dashboard' | 'product' | 'transaction' | 'shift' | 'profile'
 type DashboardDetail = 'sales-today' | 'transactions' | 'active-products' | null
 
 const stats = [
@@ -65,6 +66,7 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
         onDashboard={() => setActivePage('dashboard')}
         onProduct={() => setActivePage('product')}
         onTransaction={() => setActivePage('transaction')}
+        onShift={() => setActivePage('shift')}
         onProfile={() => setActivePage('profile')}
         onLogout={onLogout}
       />
@@ -77,6 +79,7 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
         onDashboard={() => setActivePage('dashboard')}
         onProduct={() => setActivePage('product')}
         onTransaction={() => setActivePage('transaction')}
+        onShift={() => setActivePage('shift')}
         onProfile={() => setActivePage('profile')}
         onLogout={onLogout}
       />
@@ -89,6 +92,20 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
         onDashboard={() => setActivePage('dashboard')}
         onProduct={() => setActivePage('product')}
         onTransaction={() => setActivePage('transaction')}
+        onShift={() => setActivePage('shift')}
+        onProfile={() => setActivePage('profile')}
+        onLogout={onLogout}
+      />
+    )
+  }
+
+  if (activePage === 'shift') {
+    return (
+      <ShiftPage
+        onDashboard={() => setActivePage('dashboard')}
+        onProduct={() => setActivePage('product')}
+        onTransaction={() => setActivePage('transaction')}
+        onShift={() => setActivePage('shift')}
         onProfile={() => setActivePage('profile')}
         onLogout={onLogout}
       />
@@ -102,6 +119,7 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
         onDashboard={() => setActivePage('dashboard')}
         onProduct={() => setActivePage('product')}
         onTransaction={() => setActivePage('transaction')}
+        onShift={() => setActivePage('shift')}
         onProfile={() => setActivePage('profile')}
         onLogout={onLogout}
       />

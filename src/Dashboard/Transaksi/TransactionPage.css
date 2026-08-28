@@ -20,8 +20,7 @@
 }
 
 .transaction-header p,
-.transaction-panel-header p,
-.finish-panel p {
+.transaction-panel-header p {
   margin: 0 0 6px;
   color: #0f766e;
   font-size: 13px;
@@ -31,8 +30,7 @@
 }
 
 .transaction-header h1,
-.transaction-panel-header h2,
-.finish-panel h2 {
+.transaction-panel-header h2 {
   margin: 0;
   color: #111827;
 }
@@ -304,24 +302,6 @@ button:disabled {
   padding: 0 13px;
   color: #172033;
   font: inherit;
-}
-
-.finish-panel {
-  min-height: 360px;
-  display: grid;
-  place-items: center;
-  align-content: center;
-  gap: 10px;
-  text-align: center;
-}
-
-.finish-panel h2 {
-  font-size: 34px;
-}
-
-.finish-panel > strong {
-  color: #0f766e;
-  font-size: 30px;
 }
 
 @media (max-width: 1080px) {

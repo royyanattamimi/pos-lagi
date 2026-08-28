@@ -1,12 +1,13 @@
 import './Sidebar.css'
 
-type SidebarPage = 'dashboard' | 'product' | 'transaction' | 'profile'
+type SidebarPage = 'dashboard' | 'product' | 'transaction' | 'shift' | 'profile'
 
 type SidebarProps = {
   activePage: SidebarPage
   onDashboard: () => void
   onProduct: () => void
   onTransaction: () => void
+  onShift: () => void
   onProfile: () => void
   onLogout: () => void
 }
@@ -16,6 +17,7 @@ export function Sidebar({
   onDashboard,
   onProduct,
   onTransaction,
+  onShift,
   onProfile,
   onLogout,
 }: SidebarProps) {
@@ -50,6 +52,13 @@ export function Sidebar({
           onClick={onTransaction}
         >
           Transaksi
+        </button>
+        <button
+          className={activePage === 'shift' ? 'active' : ''}
+          type="button"
+          onClick={onShift}
+        >
+          Shift
         </button>
         <button
           className={activePage === 'profile' ? 'active' : ''}

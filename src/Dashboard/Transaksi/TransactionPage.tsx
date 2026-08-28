@@ -1,11 +1,13 @@
 import { useMemo, useState } from 'react'
 import { Sidebar } from '../Sidebar/Sidebar'
+import { ReceiptPage } from './Receipt/ReceiptPage'
 import './TransactionPage.css'
 
 type TransactionPageProps = {
   onDashboard: () => void
   onProduct: () => void
   onTransaction: () => void
+  onShift: () => void
   onProfile: () => void
   onLogout: () => void
 }
@@ -93,6 +95,7 @@ export function TransactionPage({
   onDashboard,
   onProduct,
   onTransaction,
+  onShift,
   onProfile,
   onLogout,
 }: TransactionPageProps) {
@@ -159,6 +162,27 @@ export function TransactionPage({
     setPaidAmount('')
   }
 
+  if (step === 'finish') {
+    return (
+      <ReceiptPage
+        items={cartItems}
+        subtotal={subtotal}
+        tax={tax}
+        grandTotal={grandTotal}
+        paid={paid}
+        change={change}
+        paymentMethod={paymentMethod}
+        onNewTransaction={resetTransaction}
+        onDashboard={onDashboard}
+        onProduct={onProduct}
+        onTransaction={onTransaction}
+        onShift={onShift}
+        onProfile={onProfile}
+        onLogout={onLogout}
+      />
+    )
+  }
+
   return (
     <main className="transaction-page">
       <Sidebar
@@ -166,6 +190,7 @@ export function TransactionPage({
         onDashboard={onDashboard}
         onProduct={onProduct}
         onTransaction={onTransaction}
+        onShift={onShift}
         onProfile={onProfile}
         onLogout={onLogout}
       />
@@ -364,20 +389,6 @@ export function TransactionPage({
           </section>
         )}
 
-        {step === 'finish' && (
-          <section className="transaction-panel finish-panel">
-            <p>Transaksi Selesai</p>
-            <h2>#POS-1050</h2>
-            <span>{cartItems.reduce((total, item) => total + item.quantity, 0)} item berhasil dibayar.</span>
-            <strong>{formatCurrency(grandTotal)}</strong>
-            <div className="transaction-actions">
-              <button type="button" onClick={onDashboard}>Kembali ke Dashboard</button>
-              <button className="primary-action" type="button" onClick={resetTransaction}>
-                Transaksi Baru
-              </button>
-            </div>
-          </section>
-        )}
       </section>
     </main>
   )
