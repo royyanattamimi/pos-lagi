@@ -39,8 +39,7 @@
   gap: 8px;
 }
 
-.sidebar-nav button,
-.sidebar-logout {
+.sidebar-nav button {
   min-height: 42px;
   border: 0;
   border-radius: 8px;
@@ -63,12 +62,77 @@
   color: #ffffff;
 }
 
-.sidebar-logout {
+.sidebar-profile {
   margin-top: auto;
+  display: grid;
+  gap: 10px;
+}
+
+.profile-button {
+  min-height: 58px;
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  width: 100%;
   border: 1px solid #334155;
+  border-radius: 8px;
+  padding: 10px;
   background: #172033;
   color: #ffffff;
-  text-align: center;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.profile-button:hover {
+  border-color: #0f766e;
+}
+
+.profile-button.active {
+  border-color: #0f766e;
+  background: #0f766e;
+}
+
+.profile-avatar {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: #0f766e;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.profile-button span:last-child {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.profile-button strong,
+.profile-button small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-button small {
+  color: #9ca3af;
+  font-size: 12px;
+}
+
+.profile-logout {
+  min-height: 38px;
+  border: 0;
+  border-radius: 8px;
+  background: #0f766e;
+  color: #ffffff;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
 }
 
 @media (max-width: 980px) {
@@ -80,7 +144,7 @@
     grid-template-columns: 1fr;
   }
 
-  .sidebar-logout {
+  .sidebar-profile {
     margin-top: 0;
   }
 }

@@ -7,6 +7,7 @@ type ProductPageProps = {
   onDashboard: () => void
   onProduct: () => void
   onTransaction: () => void
+  onProfile: () => void
   onLogout: () => void
 }
 
@@ -73,7 +74,13 @@ function formatCurrency(value: number) {
   return currency.format(value)
 }
 
-export function ProductPage({ onDashboard, onProduct, onTransaction, onLogout }: ProductPageProps) {
+export function ProductPage({
+  onDashboard,
+  onProduct,
+  onTransaction,
+  onProfile,
+  onLogout,
+}: ProductPageProps) {
   const [products, setProducts] = useState(initialProducts)
   const [selectedDetail, setSelectedDetail] = useState<ProductDetail>(null)
   const [form, setForm] = useState({
@@ -146,6 +153,7 @@ export function ProductPage({ onDashboard, onProduct, onTransaction, onLogout }:
         onDashboard={onDashboard}
         onProduct={onProduct}
         onTransaction={onTransaction}
+        onProfile={onProfile}
         onLogout={onLogout}
       />
 

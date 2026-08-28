@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import './DashboardPage.css'
 import { ProductPage } from './Product/ProductPage'
+import { ProfilePage } from './Profile/ProfilePage'
 import { Sidebar } from './Sidebar/Sidebar'
 import { TransactionPage } from './Transaksi/TransactionPage'
 
@@ -8,7 +9,7 @@ type DashboardPageProps = {
   onLogout: () => void
 }
 
-type ActivePage = 'dashboard' | 'product' | 'transaction'
+type ActivePage = 'dashboard' | 'product' | 'transaction' | 'profile'
 type DashboardDetail = 'sales-today' | 'transactions' | 'active-products' | null
 
 const stats = [
@@ -64,6 +65,7 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
         onDashboard={() => setActivePage('dashboard')}
         onProduct={() => setActivePage('product')}
         onTransaction={() => setActivePage('transaction')}
+        onProfile={() => setActivePage('profile')}
         onLogout={onLogout}
       />
     )
@@ -75,6 +77,19 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
         onDashboard={() => setActivePage('dashboard')}
         onProduct={() => setActivePage('product')}
         onTransaction={() => setActivePage('transaction')}
+        onProfile={() => setActivePage('profile')}
+        onLogout={onLogout}
+      />
+    )
+  }
+
+  if (activePage === 'profile') {
+    return (
+      <ProfilePage
+        onDashboard={() => setActivePage('dashboard')}
+        onProduct={() => setActivePage('product')}
+        onTransaction={() => setActivePage('transaction')}
+        onProfile={() => setActivePage('profile')}
         onLogout={onLogout}
       />
     )
@@ -87,6 +102,7 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
         onDashboard={() => setActivePage('dashboard')}
         onProduct={() => setActivePage('product')}
         onTransaction={() => setActivePage('transaction')}
+        onProfile={() => setActivePage('profile')}
         onLogout={onLogout}
       />
 

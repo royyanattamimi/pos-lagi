@@ -1,12 +1,13 @@
 import './Sidebar.css'
 
-type SidebarPage = 'dashboard' | 'product' | 'transaction'
+type SidebarPage = 'dashboard' | 'product' | 'transaction' | 'profile'
 
 type SidebarProps = {
   activePage: SidebarPage
   onDashboard: () => void
   onProduct: () => void
   onTransaction: () => void
+  onProfile: () => void
   onLogout: () => void
 }
 
@@ -15,6 +16,7 @@ export function Sidebar({
   onDashboard,
   onProduct,
   onTransaction,
+  onProfile,
   onLogout,
 }: SidebarProps) {
   return (
@@ -49,9 +51,29 @@ export function Sidebar({
         >
           Transaksi
         </button>
+        <button
+          className={activePage === 'profile' ? 'active' : ''}
+          type="button"
+          onClick={onProfile}
+        >
+          Profile
+        </button>
       </nav>
 
-      <button className="sidebar-logout" type="button" onClick={onLogout}>Logout</button>
+      <section className="sidebar-profile">
+        <button
+          className={activePage === 'profile' ? 'profile-button active' : 'profile-button'}
+          type="button"
+          onClick={onProfile}
+        >
+          <span className="profile-avatar">AK</span>
+          <span>
+            <strong>Admin Kasir</strong>
+            <small>Atur profile</small>
+          </span>
+        </button>
+        <button className="profile-logout" type="button" onClick={onLogout}>Logout</button>
+      </section>
     </aside>
   )
 }

@@ -6,6 +6,7 @@ type TransactionPageProps = {
   onDashboard: () => void
   onProduct: () => void
   onTransaction: () => void
+  onProfile: () => void
   onLogout: () => void
 }
 
@@ -88,7 +89,13 @@ function formatCurrency(value: number) {
   return currency.format(value)
 }
 
-export function TransactionPage({ onDashboard, onProduct, onTransaction, onLogout }: TransactionPageProps) {
+export function TransactionPage({
+  onDashboard,
+  onProduct,
+  onTransaction,
+  onProfile,
+  onLogout,
+}: TransactionPageProps) {
   const [step, setStep] = useState<Step>('select')
   const [selectedCategory, setSelectedCategory] = useState('Semua')
   const [cart, setCart] = useState<CartItem[]>([])
@@ -159,6 +166,7 @@ export function TransactionPage({ onDashboard, onProduct, onTransaction, onLogou
         onDashboard={onDashboard}
         onProduct={onProduct}
         onTransaction={onTransaction}
+        onProfile={onProfile}
         onLogout={onLogout}
       />
 
