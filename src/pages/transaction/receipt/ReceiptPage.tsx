@@ -25,7 +25,6 @@ type ReceiptPageProps = {
   onTransaction: () => void
   onShift: () => void
   onProfile: () => void
-  onLogout: () => void
 }
 
 const currency = new Intl.NumberFormat('id-ID', {
@@ -52,7 +51,6 @@ export function ReceiptPage({
   onTransaction,
   onShift,
   onProfile,
-  onLogout,
 }: ReceiptPageProps) {
   const receiptId = '#POS-1050'
   const totalItems = items.reduce((total, item) => total + item.quantity, 0)
@@ -70,7 +68,6 @@ export function ReceiptPage({
         onTransaction={onTransaction}
         onShift={onShift}
         onProfile={onProfile}
-        onLogout={onLogout}
       />
 
       <section className="receipt-content">

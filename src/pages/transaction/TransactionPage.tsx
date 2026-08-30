@@ -9,7 +9,6 @@ type TransactionPageProps = {
   onTransaction: () => void
   onShift: () => void
   onProfile: () => void
-  onLogout: () => void
 }
 
 type Step = 'select' | 'review' | 'payment' | 'finish'
@@ -97,7 +96,6 @@ export function TransactionPage({
   onTransaction,
   onShift,
   onProfile,
-  onLogout,
 }: TransactionPageProps) {
   const [step, setStep] = useState<Step>('select')
   const [selectedCategory, setSelectedCategory] = useState('Semua')
@@ -178,7 +176,6 @@ export function TransactionPage({
         onTransaction={onTransaction}
         onShift={onShift}
         onProfile={onProfile}
-        onLogout={onLogout}
       />
     )
   }
@@ -192,7 +189,6 @@ export function TransactionPage({
         onTransaction={onTransaction}
         onShift={onShift}
         onProfile={onProfile}
-        onLogout={onLogout}
       />
 
       <section className="transaction-content">

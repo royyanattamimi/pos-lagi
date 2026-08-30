@@ -9,7 +9,6 @@ type SidebarProps = {
   onTransaction: () => void
   onShift: () => void
   onProfile: () => void
-  onLogout: () => void
 }
 
 export function Sidebar({
@@ -19,7 +18,6 @@ export function Sidebar({
   onTransaction,
   onShift,
   onProfile,
-  onLogout,
 }: SidebarProps) {
   return (
     <aside className="app-sidebar">
@@ -81,7 +79,6 @@ export function Sidebar({
             <small>Atur profile</small>
           </span>
         </button>
-        <button className="profile-logout" type="button" onClick={onLogout}>Logout</button>
       </section>
     </aside>
   )

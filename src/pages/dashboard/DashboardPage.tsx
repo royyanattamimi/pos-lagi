@@ -59,6 +59,7 @@ const transactions = [
 export function DashboardPage({ onLogout }: DashboardPageProps) {
   const [activePage, setActivePage] = useState<ActivePage>('dashboard')
   const [activeDetail, setActiveDetail] = useState<DashboardDetail>(null)
+  const [isShiftOpen, setIsShiftOpen] = useState(true)
 
   if (activePage === 'transaction') {
     return (
@@ -68,7 +69,6 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
         onTransaction={() => setActivePage('transaction')}
         onShift={() => setActivePage('shift')}
         onProfile={() => setActivePage('profile')}
-        onLogout={onLogout}
       />
     )
   }
@@ -81,7 +81,6 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
         onTransaction={() => setActivePage('transaction')}
         onShift={() => setActivePage('shift')}
         onProfile={() => setActivePage('profile')}
-        onLogout={onLogout}
       />
     )
   }
@@ -95,6 +94,7 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
         onShift={() => setActivePage('shift')}
         onProfile={() => setActivePage('profile')}
         onLogout={onLogout}
+        isShiftOpen={isShiftOpen}
       />
     )
   }
@@ -107,7 +107,8 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
         onTransaction={() => setActivePage('transaction')}
         onShift={() => setActivePage('shift')}
         onProfile={() => setActivePage('profile')}
-        onLogout={onLogout}
+        isShiftOpen={isShiftOpen}
+        onToggleShift={() => setIsShiftOpen((currentValue) => !currentValue)}
       />
     )
   }
@@ -121,7 +122,6 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
         onTransaction={() => setActivePage('transaction')}
         onShift={() => setActivePage('shift')}
         onProfile={() => setActivePage('profile')}
-        onLogout={onLogout}
       />
 
       <section className="dashboard-content">

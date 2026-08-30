@@ -9,6 +9,7 @@ type ProfilePageProps = {
   onShift: () => void
   onProfile: () => void
   onLogout: () => void
+  isShiftOpen: boolean
 }
 
 export function ProfilePage({
@@ -18,7 +19,9 @@ export function ProfilePage({
   onShift,
   onProfile,
   onLogout,
+  isShiftOpen,
 }: ProfilePageProps) {
+  const [showLogoutReminder, setShowLogoutReminder] = useState(false)
   const [profile, setProfile] = useState({
     name: 'Admin Kasir',
     email: 'admin@poslagi.com',
@@ -37,7 +40,6 @@ export function ProfilePage({
         onTransaction={onTransaction}
         onShift={onShift}
         onProfile={onProfile}
-        onLogout={onLogout}
       />
 
       <section className="profile-content">
@@ -141,8 +143,35 @@ export function ProfilePage({
               <p>Session</p>
               <h2>Keluar dari akun</h2>
             </div>
-            <span>Akhiri session aktif dan kembali ke halaman login.</span>
-            <button type="button" onClick={onLogout}>Logout</button>
+            <span>
+              {isShiftOpen
+                ? 'Untuk logout dengan aman, tutup shift kasir yang sedang berjalan terlebih dahulu.'
+                : 'Shift sudah selesai. Kamu bisa logout dan kembali ke halaman login.'}
+            </span>
+            {showLogoutReminder && isShiftOpen && (
+              <div className="logout-reminder">
+                <strong>Shift masih aktif</strong>
+                <span>Silakan masuk ke halaman Shift, klik End Shift, lalu logout setelah shift selesai.</span>
+              </div>
+            )}
+            <div className="profile-session-actions">
+              <button
+                type="button"
+                onClick={() => {
+                  if (isShiftOpen) {
+                    setShowLogoutReminder(true)
+                    return
+                  }
+
+                  onLogout()
+                }}
+              >
+                Logout
+              </button>
+              {isShiftOpen && (
+                <button className="end-shift-button" type="button" onClick={onShift}>Ke End Shift</button>
+              )}
+            </div>
           </article>
         </section>
       </section>

@@ -9,7 +9,6 @@ type ProductPageProps = {
   onTransaction: () => void
   onShift: () => void
   onProfile: () => void
-  onLogout: () => void
 }
 
 type Product = {
@@ -81,7 +80,6 @@ export function ProductPage({
   onTransaction,
   onShift,
   onProfile,
-  onLogout,
 }: ProductPageProps) {
   const [products, setProducts] = useState(initialProducts)
   const [selectedDetail, setSelectedDetail] = useState<ProductDetail>(null)
@@ -157,7 +155,6 @@ export function ProductPage({
         onTransaction={onTransaction}
         onShift={onShift}
         onProfile={onProfile}
-        onLogout={onLogout}
       />
 
       <section className="product-content">

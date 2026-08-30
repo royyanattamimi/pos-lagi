@@ -8,7 +8,8 @@ type ShiftPageProps = {
   onTransaction: () => void
   onShift: () => void
   onProfile: () => void
-  onLogout: () => void
+  isShiftOpen: boolean
+  onToggleShift: () => void
 }
 
 type RecapView = 'daily' | 'monthly' | 'yearly'
@@ -34,9 +35,9 @@ export function ShiftPage({
   onTransaction,
   onShift,
   onProfile,
-  onLogout,
+  isShiftOpen,
+  onToggleShift,
 }: ShiftPageProps) {
-  const [isShiftOpen, setIsShiftOpen] = useState(true)
   const [recapView, setRecapView] = useState<RecapView>('daily')
   const activeRecaps = shiftRecaps[recapView]
 
@@ -49,7 +50,6 @@ export function ShiftPage({
         onTransaction={onTransaction}
         onShift={onShift}
         onProfile={onProfile}
-        onLogout={onLogout}
       />
 
       <section className="shift-content">
@@ -59,7 +59,7 @@ export function ShiftPage({
             <h1>Start dan end shift</h1>
             <span>Pantau shift berjalan dan lihat rekap kasir per hari, bulan, dan tahun.</span>
           </div>
-          <button type="button" onClick={() => setIsShiftOpen((currentValue) => !currentValue)}>
+          <button type="button" onClick={onToggleShift}>
             {isShiftOpen ? 'End Shift' : 'Start Shift'}
           </button>
         </header>
