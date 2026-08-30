@@ -5,61 +5,56 @@ import { ProductPage } from '../product/ProductPage'
 import { ProfilePage } from '../profile/ProfilePage'
 import { ShiftPage } from '../shift/ShiftPage'
 import { TransactionPage } from '../transaction/TransactionPage'
+import type { Product, ProductInput, ShiftSession, TransactionRecord } from '../../types'
 
 type DashboardPageProps = {
+  products: Product[]
+  transactions: TransactionRecord[]
+  currentShift: ShiftSession | null
+  shiftHistory: ShiftSession[]
+  onAddProduct: (product: ProductInput) => void
+  onCompleteTransaction: (transaction: TransactionRecord) => void
+  onEndShift: () => void
   onLogout: () => void
 }
 
 type ActivePage = 'dashboard' | 'product' | 'transaction' | 'shift' | 'profile'
 type DashboardDetail = 'sales-today' | 'transactions' | 'active-products' | null
 
-const stats = [
-  { key: 'sales-today', label: 'Penjualan Hari Ini', value: 'Rp 12.450.000' },
-  { key: 'transactions', label: 'Transaksi', value: '86' },
-  { key: 'active-products', label: 'Product Aktif', value: '128' },
-]
+const currency = new Intl.NumberFormat('id-ID', {
+  style: 'currency',
+  currency: 'IDR',
+  maximumFractionDigits: 0,
+})
 
-const salesToday = [
-  { time: '08:00 - 10:00', orders: 24, total: 'Rp 3.420.000', method: 'Cash' },
-  { time: '10:00 - 12:00', orders: 31, total: 'Rp 4.780.000', method: 'QRIS' },
-  { time: '12:00 - 14:00', orders: 18, total: 'Rp 2.650.000', method: 'Debit' },
-  { time: '14:00 - 16:00', orders: 13, total: 'Rp 1.600.000', method: 'Cash' },
-]
+function formatCurrency(value: number) {
+  return currency.format(value)
+}
 
-const products = [
-  {
-    name: 'Kopi Susu Botol',
-    category: 'Minuman',
-    stock: 24,
-    price: 'Rp 18.000',
-    image: '/product-images/coffee-real.png',
-  },
-  {
-    name: 'Roti Gandum',
-    category: 'Makanan',
-    stock: 16,
-    price: 'Rp 22.000',
-    image: '/product-images/bread-real.png',
-  },
-  {
-    name: 'Beras Premium 5kg',
-    category: 'Sembako',
-    stock: 12,
-    price: 'Rp 78.000',
-    image: '/product-images/rice-real.png',
-  },
-]
-
-const transactions = [
-  { id: '#POS-1048', cashier: 'Admin', items: '6 item', total: 'Rp 428.000', status: 'Lunas' },
-  { id: '#POS-1047', cashier: 'Admin', items: '14 item', total: 'Rp 1.240.000', status: 'Lunas' },
-  { id: '#POS-1046', cashier: 'Admin', items: '3 item', total: 'Rp 89.000', status: 'Refund' },
-]
-
-export function DashboardPage({ onLogout }: DashboardPageProps) {
+export function DashboardPage({
+  products,
+  transactions,
+  currentShift,
+  shiftHistory,
+  onAddProduct,
+  onCompleteTransaction,
+  onEndShift,
+  onLogout,
+}: DashboardPageProps) {
   const [activePage, setActivePage] = useState<ActivePage>('dashboard')
   const [activeDetail, setActiveDetail] = useState<DashboardDetail>(null)
-  const [isShiftOpen, setIsShiftOpen] = useState(true)
+  const isShiftOpen = currentShift?.status === 'Berjalan'
+  const todayKey = new Date().toLocaleDateString('id-ID')
+  const todayTransactions = transactions.filter(
+    (transaction) => new Date(transaction.createdAt).toLocaleDateString('id-ID') === todayKey,
+  )
+  const salesToday = todayTransactions.reduce((total, transaction) => total + transaction.grandTotal, 0)
+  const activeProducts = products.filter((product) => product.stock > 0)
+  const stats = [
+    { key: 'sales-today', label: 'Penjualan Hari Ini', value: formatCurrency(salesToday) },
+    { key: 'transactions', label: 'Transaksi', value: String(transactions.length) },
+    { key: 'active-products', label: 'Product Aktif', value: String(activeProducts.length) },
+  ]
 
   if (activePage === 'transaction') {
     return (
@@ -69,6 +64,9 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
         onTransaction={() => setActivePage('transaction')}
         onShift={() => setActivePage('shift')}
         onProfile={() => setActivePage('profile')}
+        products={products}
+        currentShift={currentShift}
+        onCompleteTransaction={onCompleteTransaction}
       />
     )
   }
@@ -81,6 +79,8 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
         onTransaction={() => setActivePage('transaction')}
         onShift={() => setActivePage('shift')}
         onProfile={() => setActivePage('profile')}
+        products={products}
+        onAddProduct={onAddProduct}
       />
     )
   }
@@ -95,6 +95,7 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
         onProfile={() => setActivePage('profile')}
         onLogout={onLogout}
         isShiftOpen={isShiftOpen}
+        currentShift={currentShift}
       />
     )
   }
@@ -107,8 +108,10 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
         onTransaction={() => setActivePage('transaction')}
         onShift={() => setActivePage('shift')}
         onProfile={() => setActivePage('profile')}
-        isShiftOpen={isShiftOpen}
-        onToggleShift={() => setIsShiftOpen((currentValue) => !currentValue)}
+        currentShift={currentShift}
+        shiftHistory={shiftHistory}
+        transactions={transactions}
+        onEndShift={onEndShift}
       />
     )
   }
@@ -164,14 +167,16 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
 
             {activeDetail === 'sales-today' && (
               <div className="dashboard-detail-list">
-                {salesToday.map((sale) => (
-                  <div className="sales-detail-row" key={sale.time}>
+                {todayTransactions.length === 0 ? (
+                  <div className="empty-dashboard-state">Belum ada penjualan hari ini.</div>
+                ) : todayTransactions.map((sale) => (
+                  <div className="sales-detail-row" key={sale.id}>
                     <div>
-                      <strong>{sale.time}</strong>
-                      <span>{sale.orders} transaksi</span>
+                      <strong>{new Date(sale.createdAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</strong>
+                      <span>{sale.itemCount} item</span>
                     </div>
-                    <span>{sale.method}</span>
-                    <strong>{sale.total}</strong>
+                    <span>{sale.paymentMethod}</span>
+                    <strong>{formatCurrency(sale.grandTotal)}</strong>
                   </div>
                 ))}
               </div>
@@ -179,15 +184,17 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
 
             {activeDetail === 'transactions' && (
               <div className="dashboard-detail-list">
-                {transactions.map((transaction) => (
+                {transactions.length === 0 ? (
+                  <div className="empty-dashboard-state">Belum ada transaksi. Buat transaksi baru setelah product tersedia.</div>
+                ) : transactions.map((transaction) => (
                   <div className="transaction-row" key={transaction.id}>
                     <div>
                       <strong>{transaction.id}</strong>
                       <span>{transaction.cashier}</span>
                     </div>
-                    <span>{transaction.items}</span>
-                    <strong>{transaction.total}</strong>
-                    <em className={transaction.status === 'Refund' ? 'refund' : ''}>{transaction.status}</em>
+                    <span>{transaction.itemCount} item</span>
+                    <strong>{formatCurrency(transaction.grandTotal)}</strong>
+                    <em>{transaction.status}</em>
                   </div>
                 ))}
               </div>
@@ -195,7 +202,9 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
 
             {activeDetail === 'active-products' && (
               <div className="dashboard-detail-list">
-                {products.map((product) => (
+                {activeProducts.length === 0 ? (
+                  <div className="empty-dashboard-state">Belum ada product aktif. Tambahkan product manual dulu.</div>
+                ) : activeProducts.map((product) => (
                   <div className="product-row" key={product.name}>
                     <div className="dashboard-product-name">
                       <img src={product.image} alt={product.name} />
@@ -205,7 +214,7 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
                       </div>
                     </div>
                     <span>{product.stock} stok</span>
-                    <strong>{product.price}</strong>
+                    <strong>{formatCurrency(product.price)}</strong>
                   </div>
                 ))}
               </div>
@@ -223,7 +232,9 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
             </div>
 
             <div className="product-list">
-              {products.map((product) => (
+              {products.length === 0 ? (
+                <div className="empty-dashboard-state">Belum ada product. Klik Add Product untuk input manual.</div>
+              ) : products.map((product) => (
                 <div className="product-row" key={product.name}>
                   <div className="dashboard-product-name">
                     <img src={product.image} alt={product.name} />
@@ -233,7 +244,7 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
                     </div>
                   </div>
                   <span>{product.stock} stok</span>
-                  <strong>{product.price}</strong>
+                  <strong>{formatCurrency(product.price)}</strong>
                 </div>
               ))}
             </div>
@@ -249,15 +260,17 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
             </div>
 
             <div className="transaction-list">
-              {transactions.map((transaction) => (
+              {transactions.length === 0 ? (
+                <div className="empty-dashboard-state">Belum ada transaksi yang dibuat.</div>
+              ) : transactions.map((transaction) => (
                 <div className="transaction-row" key={transaction.id}>
                   <div>
                     <strong>{transaction.id}</strong>
                     <span>{transaction.cashier}</span>
                   </div>
-                  <span>{transaction.items}</span>
-                  <strong>{transaction.total}</strong>
-                  <em className={transaction.status === 'Refund' ? 'refund' : ''}>{transaction.status}</em>
+                  <span>{transaction.itemCount} item</span>
+                  <strong>{formatCurrency(transaction.grandTotal)}</strong>
+                  <em>{transaction.status}</em>
                 </div>
               ))}
             </div>

@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Sidebar } from '../../component/sidebar/Sidebar'
 import { ReceiptPage } from './receipt/ReceiptPage'
+import type { Product, ShiftSession, TransactionItem, TransactionRecord } from '../../types'
 import './TransactionPage.css'
 
 type TransactionPageProps = {
@@ -9,68 +10,18 @@ type TransactionPageProps = {
   onTransaction: () => void
   onShift: () => void
   onProfile: () => void
+  products: Product[]
+  currentShift: ShiftSession | null
+  onCompleteTransaction: (transaction: TransactionRecord) => void
 }
 
 type Step = 'select' | 'review' | 'payment' | 'finish'
-
-type Product = {
-  id: number
-  name: string
-  category: string
-  price: number
-  stock: number
-  image: string
-}
 
 type CartItem = {
   productId: number
   quantity: number
 }
 
-const products: Product[] = [
-  {
-    id: 1,
-    name: 'Kopi Susu Botol',
-    category: 'Minuman',
-    price: 18000,
-    stock: 24,
-    image: '/product-images/coffee-real.png',
-  },
-  {
-    id: 2,
-    name: 'Roti Gandum',
-    category: 'Makanan',
-    price: 22000,
-    stock: 16,
-    image: '/product-images/bread-real.png',
-  },
-  {
-    id: 3,
-    name: 'Beras Premium 5kg',
-    category: 'Sembako',
-    price: 78000,
-    stock: 12,
-    image: '/product-images/rice-real.png',
-  },
-  {
-    id: 4,
-    name: 'Teh Melati 350ml',
-    category: 'Minuman',
-    price: 7000,
-    stock: 42,
-    image: '/product-images/tea-real.png',
-  },
-  {
-    id: 5,
-    name: 'Paket Snack Hemat',
-    category: 'Promo',
-    price: 29500,
-    stock: 18,
-    image: '/product-images/snack-real.png',
-  },
-]
-
-const categories = ['Semua', 'Makanan', 'Minuman', 'Sembako', 'Promo']
 const steps: Step[] = ['select', 'review', 'payment', 'finish']
 
 const stepLabel: Record<Step, string> = {
@@ -96,12 +47,20 @@ export function TransactionPage({
   onTransaction,
   onShift,
   onProfile,
+  products,
+  currentShift,
+  onCompleteTransaction,
 }: TransactionPageProps) {
   const [step, setStep] = useState<Step>('select')
   const [selectedCategory, setSelectedCategory] = useState('Semua')
   const [cart, setCart] = useState<CartItem[]>([])
   const [paymentMethod, setPaymentMethod] = useState('Cash')
   const [paidAmount, setPaidAmount] = useState('')
+  const [receipt, setReceipt] = useState<TransactionRecord | null>(null)
+  const categories = useMemo(
+    () => ['Semua', ...Array.from(new Set(products.map((product) => product.category)))],
+    [products],
+  )
 
   const cartItems = useMemo(
     () =>
@@ -111,7 +70,7 @@ export function TransactionPage({
           return product ? { ...item, product, total: product.price * item.quantity } : null
         })
         .filter((item): item is CartItem & { product: Product; total: number } => Boolean(item)),
-    [cart],
+    [cart, products],
   )
 
   const subtotal = cartItems.reduce((total, item) => total + item.total, 0)
@@ -158,18 +117,44 @@ export function TransactionPage({
     setCart([])
     setPaymentMethod('Cash')
     setPaidAmount('')
+    setReceipt(null)
+  }
+
+  function finishPayment() {
+    const items: TransactionItem[] = cartItems.map((item) => ({
+      productId: item.productId,
+      name: item.product.name,
+      price: item.product.price,
+      quantity: item.quantity,
+      total: item.total,
+    }))
+    const createdAt = new Date().toISOString()
+    const transaction: TransactionRecord = {
+      id: `#POS-${createdAt.replace(/\D/g, '').slice(0, 14)}`,
+      cashier: currentShift?.cashierName || '-',
+      createdAt,
+      items,
+      itemCount: items.reduce((total, item) => total + item.quantity, 0),
+      subtotal,
+      tax,
+      grandTotal,
+      paid: paymentMethod === 'Cash' ? paid : grandTotal,
+      change: paymentMethod === 'Cash' ? change : 0,
+      paymentMethod,
+      status: 'Lunas',
+    }
+
+    setReceipt(transaction)
+    onCompleteTransaction(transaction)
+    setStep('finish')
   }
 
   if (step === 'finish') {
+    if (!receipt) return null
+
     return (
       <ReceiptPage
-        items={cartItems}
-        subtotal={subtotal}
-        tax={tax}
-        grandTotal={grandTotal}
-        paid={paid}
-        change={change}
-        paymentMethod={paymentMethod}
+        transaction={receipt}
         onNewTransaction={resetTransaction}
         onDashboard={onDashboard}
         onProduct={onProduct}
@@ -233,7 +218,9 @@ export function TransactionPage({
               </div>
 
               <div className="product-catalog">
-                {filteredProducts.map((product) => (
+                {products.length === 0 ? (
+                  <div className="empty-order">Belum ada product. Input product manual dulu di halaman Product.</div>
+                ) : filteredProducts.map((product) => (
                   <button
                     className="catalog-item"
                     type="button"
@@ -377,7 +364,7 @@ export function TransactionPage({
                 className="primary-action"
                 type="button"
                 disabled={!canFinish}
-                onClick={() => setStep('finish')}
+                onClick={finishPayment}
               >
                 Finish
               </button>

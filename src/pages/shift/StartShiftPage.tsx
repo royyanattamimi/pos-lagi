@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
+import type { ShiftInput } from '../../types'
 import './StartShiftPage.css'
 
 type StartShiftPageProps = {
-  onStartShift: () => void
+  onStartShift: (data: ShiftInput) => void
   onBackToLogin: () => void
 }
 
@@ -16,14 +17,20 @@ function formatRupiah(value: string) {
 }
 
 export function StartShiftPage({ onStartShift, onBackToLogin }: StartShiftPageProps) {
-  const [cashierName, setCashierName] = useState('Admin Kasir')
-  const [shiftTime, setShiftTime] = useState('08:00 - 16:00')
+  const [cashierName, setCashierName] = useState('')
+  const [shiftTime, setShiftTime] = useState('')
   const [openingCash, setOpeningCash] = useState('')
   const [note, setNote] = useState('')
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    onStartShift()
+
+    onStartShift({
+      cashierName: cashierName.trim(),
+      shiftTime,
+      openingCash: Number(openingCash || 0),
+      note: note.trim(),
+    })
   }
 
   function handleOpeningCashChange(value: string) {
@@ -60,6 +67,7 @@ export function StartShiftPage({ onStartShift, onBackToLogin }: StartShiftPagePr
           <label>
             Pilih Shift
             <select value={shiftTime} onChange={(event) => setShiftTime(event.target.value)}>
+              <option value="">Pilih jam shift</option>
               <option>08:00 - 16:00</option>
               <option>16:00 - 22:00</option>
               <option>22:00 - 06:00</option>

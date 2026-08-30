@@ -1,24 +1,9 @@
 import { Sidebar } from '../../../component/sidebar/Sidebar'
+import type { TransactionRecord } from '../../../types'
 import './ReceiptPage.css'
 
-type ReceiptItem = {
-  productId: number
-  quantity: number
-  product: {
-    name: string
-    price: number
-  }
-  total: number
-}
-
 type ReceiptPageProps = {
-  items: ReceiptItem[]
-  subtotal: number
-  tax: number
-  grandTotal: number
-  paid: number
-  change: number
-  paymentMethod: string
+  transaction: TransactionRecord
   onNewTransaction: () => void
   onDashboard: () => void
   onProduct: () => void
@@ -38,13 +23,7 @@ function formatCurrency(value: number) {
 }
 
 export function ReceiptPage({
-  items,
-  subtotal,
-  tax,
-  grandTotal,
-  paid,
-  change,
-  paymentMethod,
+  transaction,
   onNewTransaction,
   onDashboard,
   onProduct,
@@ -52,8 +31,7 @@ export function ReceiptPage({
   onShift,
   onProfile,
 }: ReceiptPageProps) {
-  const receiptId = '#POS-1050'
-  const totalItems = items.reduce((total, item) => total + item.quantity, 0)
+  const totalItems = transaction.items.reduce((total, item) => total + item.quantity, 0)
 
   function handlePrint() {
     window.print()
@@ -94,17 +72,17 @@ export function ReceiptPage({
             </div>
 
             <div className="receipt-meta">
-              <span>No. Receipt <strong>{receiptId}</strong></span>
-              <span>Kasir <strong>Admin Kasir</strong></span>
-              <span>Metode <strong>{paymentMethod}</strong></span>
+              <span>No. Receipt <strong>{transaction.id}</strong></span>
+              <span>Kasir <strong>{transaction.cashier}</strong></span>
+              <span>Metode <strong>{transaction.paymentMethod}</strong></span>
             </div>
 
             <div className="receipt-items">
-              {items.map((item) => (
+              {transaction.items.map((item) => (
                 <div className="receipt-item" key={item.productId}>
                   <div>
-                    <strong>{item.product.name}</strong>
-                    <span>{item.quantity} x {formatCurrency(item.product.price)}</span>
+                    <strong>{item.name}</strong>
+                    <span>{item.quantity} x {formatCurrency(item.price)}</span>
                   </div>
                   <b>{formatCurrency(item.total)}</b>
                 </div>
@@ -112,11 +90,11 @@ export function ReceiptPage({
             </div>
 
             <div className="receipt-total">
-              <span>Subtotal <strong>{formatCurrency(subtotal)}</strong></span>
-              <span>PPN 10% <strong>{formatCurrency(tax)}</strong></span>
-              <span>Total <strong>{formatCurrency(grandTotal)}</strong></span>
-              <span>Dibayar <strong>{paymentMethod === 'Cash' ? formatCurrency(paid) : paymentMethod}</strong></span>
-              <span>Kembalian <strong>{formatCurrency(change)}</strong></span>
+              <span>Subtotal <strong>{formatCurrency(transaction.subtotal)}</strong></span>
+              <span>PPN 10% <strong>{formatCurrency(transaction.tax)}</strong></span>
+              <span>Total <strong>{formatCurrency(transaction.grandTotal)}</strong></span>
+              <span>Dibayar <strong>{transaction.paymentMethod === 'Cash' ? formatCurrency(transaction.paid) : transaction.paymentMethod}</strong></span>
+              <span>Kembalian <strong>{formatCurrency(transaction.change)}</strong></span>
             </div>
 
             <footer className="receipt-footer">
@@ -133,7 +111,7 @@ export function ReceiptPage({
             </article>
             <article>
               <span>Total Bayar</span>
-              <strong>{formatCurrency(grandTotal)}</strong>
+              <strong>{formatCurrency(transaction.grandTotal)}</strong>
             </article>
             <article>
               <span>Status</span>

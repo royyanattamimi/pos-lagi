@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Sidebar } from '../../component/sidebar/Sidebar'
+import type { ShiftSession, TransactionRecord } from '../../types'
 import './ShiftPage.css'
 
 type ShiftPageProps = {
@@ -8,25 +9,31 @@ type ShiftPageProps = {
   onTransaction: () => void
   onShift: () => void
   onProfile: () => void
-  isShiftOpen: boolean
-  onToggleShift: () => void
+  currentShift: ShiftSession | null
+  shiftHistory: ShiftSession[]
+  transactions: TransactionRecord[]
+  onEndShift: () => void
 }
 
 type RecapView = 'daily' | 'monthly' | 'yearly'
 
-const shiftRecaps = {
-  daily: [
-    { period: 'Hari Ini', start: '08:00', end: '-', sales: 'Rp 12.450.000', cash: 'Rp 5.200.000', status: 'Berjalan' },
-    { period: 'Kemarin', start: '08:00', end: '16:05', sales: 'Rp 10.870.000', cash: 'Rp 4.750.000', status: 'Selesai' },
-  ],
-  monthly: [
-    { period: 'Agustus 2026', start: '26 shift', end: '25 selesai', sales: 'Rp 284.300.000', cash: 'Rp 118.450.000', status: 'Aktif' },
-    { period: 'Juli 2026', start: '31 shift', end: '31 selesai', sales: 'Rp 326.900.000', cash: 'Rp 132.700.000', status: 'Selesai' },
-  ],
-  yearly: [
-    { period: '2026', start: '238 shift', end: '237 selesai', sales: 'Rp 2.840.000.000', cash: 'Rp 1.130.000.000', status: 'Aktif' },
-    { period: '2025', start: '365 shift', end: '365 selesai', sales: 'Rp 3.960.000.000', cash: 'Rp 1.620.000.000', status: 'Selesai' },
-  ],
+const currency = new Intl.NumberFormat('id-ID', {
+  style: 'currency',
+  currency: 'IDR',
+  maximumFractionDigits: 0,
+})
+
+function formatCurrency(value: number) {
+  return currency.format(value)
+}
+
+function formatTime(value?: string) {
+  if (!value) return '-'
+
+  return new Date(value).toLocaleTimeString('id-ID', {
+    hour: '2-digit',
+    minute: '2-digit',
+  })
 }
 
 export function ShiftPage({
@@ -35,11 +42,32 @@ export function ShiftPage({
   onTransaction,
   onShift,
   onProfile,
-  isShiftOpen,
-  onToggleShift,
+  currentShift,
+  shiftHistory,
+  transactions,
+  onEndShift,
 }: ShiftPageProps) {
   const [recapView, setRecapView] = useState<RecapView>('daily')
-  const activeRecaps = shiftRecaps[recapView]
+  const isShiftOpen = currentShift?.status === 'Berjalan'
+  const cashSales = transactions
+    .filter((transaction) => transaction.paymentMethod === 'Cash')
+    .reduce((total, transaction) => total + transaction.grandTotal, 0)
+  const totalSales = transactions.reduce((total, transaction) => total + transaction.grandTotal, 0)
+  const estimatedCash = (currentShift?.openingCash ?? 0) + cashSales
+  const activeRecaps = shiftHistory.map((shift) => ({
+    period:
+      recapView === 'daily'
+        ? new Date(shift.startAt).toLocaleDateString('id-ID')
+        : new Date(shift.startAt).toLocaleDateString('id-ID', {
+            month: recapView === 'monthly' ? 'long' : undefined,
+            year: 'numeric',
+          }),
+    start: formatTime(shift.startAt),
+    end: formatTime(shift.endAt),
+    sales: formatCurrency(totalSales),
+    cash: formatCurrency(shift.openingCash + cashSales),
+    status: shift.status,
+  }))
 
   return (
     <main className="shift-page">
@@ -59,8 +87,8 @@ export function ShiftPage({
             <h1>Start dan end shift</h1>
             <span>Pantau shift berjalan dan lihat rekap kasir per hari, bulan, dan tahun.</span>
           </div>
-          <button type="button" onClick={onToggleShift}>
-            {isShiftOpen ? 'End Shift' : 'Start Shift'}
+          <button type="button" onClick={onEndShift} disabled={!isShiftOpen}>
+            {isShiftOpen ? 'End Shift' : 'Shift Selesai'}
           </button>
         </header>
 
@@ -68,16 +96,20 @@ export function ShiftPage({
           <article>
             <span>Status Shift</span>
             <strong>{isShiftOpen ? 'Berjalan' : 'Selesai'}</strong>
-            <small>{isShiftOpen ? 'Shift dibuka pukul 08:00' : 'Shift ditutup pukul 16:05'}</small>
+            <small>
+              {currentShift
+                ? `Start ${formatTime(currentShift.startAt)} - End ${formatTime(currentShift.endAt)}`
+                : 'Belum ada shift'}
+            </small>
           </article>
           <article>
             <span>Kas Awal</span>
-            <strong>Rp 500.000</strong>
+            <strong>{formatCurrency(currentShift?.openingCash ?? 0)}</strong>
             <small>Modal uang tunai saat start shift</small>
           </article>
           <article>
             <span>Estimasi Kas Akhir</span>
-            <strong>Rp 5.700.000</strong>
+            <strong>{formatCurrency(estimatedCash)}</strong>
             <small>Kas awal + pembayaran cash</small>
           </article>
         </section>
@@ -114,8 +146,15 @@ export function ShiftPage({
           </div>
 
           <div className="shift-recap-table">
-            {activeRecaps.map((recap) => (
-              <div className="shift-recap-row" key={recap.period}>
+            {activeRecaps.length === 0 ? (
+              <div className="shift-recap-row">
+                <div>
+                  <strong>Belum ada rekap</strong>
+                  <span>Start shift dulu agar data muncul.</span>
+                </div>
+              </div>
+            ) : activeRecaps.map((recap) => (
+              <div className="shift-recap-row" key={`${recap.period}-${recap.start}`}>
                 <div>
                   <strong>{recap.period}</strong>
                   <span>Status: {recap.status}</span>

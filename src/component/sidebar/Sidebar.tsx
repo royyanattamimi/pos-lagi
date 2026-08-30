@@ -9,6 +9,7 @@ type SidebarProps = {
   onTransaction: () => void
   onShift: () => void
   onProfile: () => void
+  profileName?: string
 }
 
 export function Sidebar({
@@ -18,7 +19,16 @@ export function Sidebar({
   onTransaction,
   onShift,
   onProfile,
+  profileName,
 }: SidebarProps) {
+  const displayName = profileName || 'Profile'
+  const initials = displayName
+    .split(' ')
+    .map((word) => word[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase()
+
   return (
     <aside className="app-sidebar">
       <div className="sidebar-brand">
@@ -73,9 +83,9 @@ export function Sidebar({
           type="button"
           onClick={onProfile}
         >
-          <span className="profile-avatar">AK</span>
+          <span className="profile-avatar">{initials}</span>
           <span>
-            <strong>Admin Kasir</strong>
+            <strong>{displayName}</strong>
             <small>Atur profile</small>
           </span>
         </button>

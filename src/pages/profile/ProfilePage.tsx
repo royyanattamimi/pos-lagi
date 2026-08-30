@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Sidebar } from '../../component/sidebar/Sidebar'
+import type { ShiftSession } from '../../types'
 import './ProfilePage.css'
 
 type ProfilePageProps = {
@@ -10,6 +11,7 @@ type ProfilePageProps = {
   onProfile: () => void
   onLogout: () => void
   isShiftOpen: boolean
+  currentShift: ShiftSession | null
 }
 
 export function ProfilePage({
@@ -20,16 +22,27 @@ export function ProfilePage({
   onProfile,
   onLogout,
   isShiftOpen,
+  currentShift,
 }: ProfilePageProps) {
   const [showLogoutReminder, setShowLogoutReminder] = useState(false)
   const [profile, setProfile] = useState({
-    name: 'Admin Kasir',
-    email: 'admin@poslagi.com',
-    phone: '0812-3456-7890',
-    role: 'Kasir Utama',
-    branch: 'Cabang Utama',
-    shift: '08:00 - 16:00',
+    name: currentShift?.cashierName || '',
+    email: '',
+    phone: '',
+    role: '',
+    branch: '',
+    shift: currentShift?.shiftTime || '',
   })
+  const displayName = profile.name || 'Profile belum diisi'
+  const displayRole = profile.role || 'Role belum diisi'
+  const displayBranch = profile.branch || 'Cabang belum diisi'
+  const displayShift = profile.shift || currentShift?.shiftTime || 'Shift belum diisi'
+  const initials = (profile.name || 'P')
+    .split(' ')
+    .map((word) => word[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase()
 
   return (
     <main className="profile-page">
@@ -40,6 +53,7 @@ export function ProfilePage({
         onTransaction={onTransaction}
         onShift={onShift}
         onProfile={onProfile}
+        profileName={currentShift?.cashierName}
       />
 
       <section className="profile-content">
@@ -53,11 +67,11 @@ export function ProfilePage({
         </header>
 
         <section className="profile-overview">
-          <div className="profile-photo">AK</div>
+          <div className="profile-photo">{initials}</div>
           <div>
-            <h2>{profile.name}</h2>
-            <span>{profile.role}</span>
-            <small>{profile.branch} - Shift {profile.shift}</small>
+            <h2>{displayName}</h2>
+            <span>{displayRole}</span>
+            <small>{displayBranch} - Shift {displayShift}</small>
           </div>
         </section>
 
@@ -108,6 +122,7 @@ export function ProfilePage({
                   value={profile.role}
                   onChange={(event) => setProfile({ ...profile, role: event.target.value })}
                 >
+                  <option value="">Pilih role</option>
                   <option>Kasir Utama</option>
                   <option>Admin Toko</option>
                   <option>Supervisor</option>
@@ -119,6 +134,7 @@ export function ProfilePage({
                   value={profile.branch}
                   onChange={(event) => setProfile({ ...profile, branch: event.target.value })}
                 >
+                  <option value="">Pilih cabang</option>
                   <option>Cabang Utama</option>
                   <option>Cabang Barat</option>
                   <option>Cabang Timur</option>
@@ -130,6 +146,7 @@ export function ProfilePage({
                   value={profile.shift}
                   onChange={(event) => setProfile({ ...profile, shift: event.target.value })}
                 >
+                  <option value="">Pilih shift</option>
                   <option>08:00 - 16:00</option>
                   <option>16:00 - 22:00</option>
                   <option>22:00 - 06:00</option>

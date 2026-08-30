@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { Sidebar } from '../../component/sidebar/Sidebar'
+import type { Product, ProductInput } from '../../types'
 import './ProductPage.css'
 
 type ProductPageProps = {
@@ -9,58 +10,11 @@ type ProductPageProps = {
   onTransaction: () => void
   onShift: () => void
   onProfile: () => void
-}
-
-type Product = {
-  id: number
-  name: string
-  category: string
-  stock: number
-  price: number
-  status: 'Aktif' | 'Stok Rendah'
-  image: string
+  products: Product[]
+  onAddProduct: (product: ProductInput) => void
 }
 
 type ProductDetail = 'total-product' | 'total-stock' | 'low-stock' | null
-
-const initialProducts: Product[] = [
-  {
-    id: 1,
-    name: 'Kopi Susu Botol',
-    category: 'Minuman',
-    stock: 24,
-    price: 18000,
-    status: 'Aktif',
-    image: '/product-images/coffee-real.png',
-  },
-  {
-    id: 2,
-    name: 'Roti Gandum',
-    category: 'Makanan',
-    stock: 16,
-    price: 22000,
-    status: 'Stok Rendah',
-    image: '/product-images/bread-real.png',
-  },
-  {
-    id: 3,
-    name: 'Beras Premium 5kg',
-    category: 'Sembako',
-    stock: 12,
-    price: 78000,
-    status: 'Stok Rendah',
-    image: '/product-images/rice-real.png',
-  },
-  {
-    id: 4,
-    name: 'Teh Melati 350ml',
-    category: 'Minuman',
-    stock: 42,
-    price: 7000,
-    status: 'Aktif',
-    image: '/product-images/tea-real.png',
-  },
-]
 
 const categories = ['Makanan', 'Minuman', 'Sembako', 'Promo']
 
@@ -80,12 +34,13 @@ export function ProductPage({
   onTransaction,
   onShift,
   onProfile,
+  products,
+  onAddProduct,
 }: ProductPageProps) {
-  const [products, setProducts] = useState(initialProducts)
   const [selectedDetail, setSelectedDetail] = useState<ProductDetail>(null)
   const [form, setForm] = useState({
     name: '',
-    category: 'Makanan',
+    category: '',
     stock: '',
     price: '',
     image: '',
@@ -116,21 +71,16 @@ export function ProductPage({
 
     const stock = Number(form.stock)
     const price = Number(form.price)
-    if (!form.name.trim() || stock < 0 || price <= 0) return
+    if (!form.name.trim() || !form.category || stock < 0 || price <= 0) return
 
-    setProducts((currentProducts) => [
-      {
-        id: Date.now(),
-        name: form.name.trim(),
-        category: form.category,
-        stock,
-        price,
-        status: stock <= 20 ? 'Stok Rendah' : 'Aktif',
-        image: form.image || '/product-images/snack-real.png',
-      },
-      ...currentProducts,
-    ])
-    setForm({ name: '', category: 'Makanan', stock: '', price: '', image: '' })
+    onAddProduct({
+      name: form.name.trim(),
+      category: form.category,
+      stock,
+      price,
+      image: form.image || '/product-images/snack-real.png',
+    })
+    setForm({ name: '', category: '', stock: '', price: '', image: '' })
   }
 
   function handleImageChange(file: File | undefined) {
@@ -316,6 +266,7 @@ export function ProductPage({
                   value={form.category}
                   onChange={(event) => setForm({ ...form, category: event.target.value })}
                 >
+                  <option value="">Pilih kategori</option>
                   {categories.map((category) => (
                     <option key={category}>{category}</option>
                   ))}
@@ -356,7 +307,7 @@ export function ProductPage({
 
               <div className="image-preview">
                 <img src={form.image || '/product-images/snack-real.png'} alt="Preview product" />
-                <span>{form.image ? 'Image siap digunakan' : 'Default image akan digunakan'}</span>
+                <span>{form.image ? 'Image siap digunakan' : 'Upload image agar product tampil lebih jelas'}</span>
               </div>
 
               <button className="product-primary" type="submit">Simpan Product</button>
@@ -372,7 +323,9 @@ export function ProductPage({
             </div>
 
             <div className="product-table">
-              {products.map((product) => (
+              {products.length === 0 ? (
+                <div className="empty-product-state">Belum ada product. Tambahkan product manual dari form.</div>
+              ) : products.map((product) => (
                 <div className="product-table-row" key={product.id}>
                   <div className="product-name-cell">
                     <img src={product.image} alt={product.name} />
