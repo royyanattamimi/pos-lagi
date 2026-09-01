@@ -91,7 +91,6 @@ export function ReceiptPage({
 
             <div className="receipt-total">
               <span>Subtotal <strong>{formatCurrency(transaction.subtotal)}</strong></span>
-              <span>PPN 10% <strong>{formatCurrency(transaction.tax)}</strong></span>
               <span>Total <strong>{formatCurrency(transaction.grandTotal)}</strong></span>
               <span>Dibayar <strong>{transaction.paymentMethod === 'Cash' ? formatCurrency(transaction.paid) : transaction.paymentMethod}</strong></span>
               <span>Kembalian <strong>{formatCurrency(transaction.change)}</strong></span>

@@ -74,8 +74,7 @@ export function TransactionPage({
   )
 
   const subtotal = cartItems.reduce((total, item) => total + item.total, 0)
-  const tax = Math.round(subtotal * 0.1)
-  const grandTotal = subtotal + tax
+  const grandTotal = subtotal
   const paid = Number(paidAmount || 0)
   const change = Math.max(paid - grandTotal, 0)
   const canFinish = paymentMethod !== 'Cash' || paid >= grandTotal
@@ -136,7 +135,7 @@ export function TransactionPage({
       items,
       itemCount: items.reduce((total, item) => total + item.quantity, 0),
       subtotal,
-      tax,
+      tax: 0,
       grandTotal,
       paid: paymentMethod === 'Cash' ? paid : grandTotal,
       change: paymentMethod === 'Cash' ? change : 0,
@@ -251,8 +250,28 @@ export function TransactionPage({
                 <div className="mini-cart">
                   {cartItems.map((item) => (
                     <div className="mini-cart-row" key={item.productId}>
-                      <span>{item.product.name}</span>
-                      <strong>{item.quantity}x</strong>
+                      <div className="mini-cart-info">
+                        <strong>{item.product.name}</strong>
+                        <span>{formatCurrency(item.product.price)} per item</span>
+                        <small>Stok tersedia: {item.product.stock}</small>
+                      </div>
+                      <div className="mini-cart-control">
+                        <button type="button" onClick={() => updateQuantity(item.productId, item.quantity - 1)}>
+                          -
+                        </button>
+                        <input
+                          min="1"
+                          max={item.product.stock}
+                          type="number"
+                          value={item.quantity}
+                          onChange={(event) => updateQuantity(item.productId, Number(event.target.value))}
+                          aria-label={`Jumlah ${item.product.name}`}
+                        />
+                        <button type="button" onClick={() => updateQuantity(item.productId, item.quantity + 1)}>
+                          +
+                        </button>
+                      </div>
+                      <b>{formatCurrency(item.total)}</b>
                     </div>
                   ))}
                 </div>
@@ -275,47 +294,63 @@ export function TransactionPage({
         )}
 
         {step === 'review' && (
-          <section className="transaction-panel">
-            <div className="transaction-panel-header">
-              <div>
-                <p>Review Pesanan</p>
-                <h2>Cek product sebelum pembayaran</h2>
-              </div>
-            </div>
-
-            <div className="cart-table">
-              {cartItems.map((item) => (
-                <div className="cart-table-row" key={item.productId}>
-                  <div>
-                    <strong>{item.product.name}</strong>
-                    <span>{formatCurrency(item.product.price)} per item</span>
-                  </div>
-                  <div className="quantity-control">
-                    <button type="button" onClick={() => updateQuantity(item.productId, item.quantity - 1)}>
-                      -
-                    </button>
-                    <strong>{item.quantity}</strong>
-                    <button type="button" onClick={() => updateQuantity(item.productId, item.quantity + 1)}>
-                      +
-                    </button>
-                  </div>
-                  <b>{formatCurrency(item.total)}</b>
+          <section className="review-layout">
+            <article className="transaction-panel review-items-panel">
+              <div className="transaction-panel-header">
+                <div>
+                  <p>Review Pesanan</p>
+                  <h2>Cek product sebelum pembayaran</h2>
                 </div>
-              ))}
-            </div>
+                <strong className="review-item-count">{cartItems.length} product</strong>
+              </div>
 
-            <div className="summary-box">
-              <span>Subtotal <strong>{formatCurrency(subtotal)}</strong></span>
-              <span>PPN 10% <strong>{formatCurrency(tax)}</strong></span>
-              <span>Total <strong>{formatCurrency(grandTotal)}</strong></span>
-            </div>
+              <div className="cart-table">
+                {cartItems.map((item) => (
+                  <div className="cart-table-row" key={item.productId}>
+                    <div className="review-product-cell">
+                      <img src={item.product.image} alt={item.product.name} />
+                      <div>
+                        <strong>{item.product.name}</strong>
+                        <span>{item.product.category}</span>
+                        <small>{formatCurrency(item.product.price)} per item</small>
+                      </div>
+                    </div>
+                    <div className="quantity-control">
+                      <button type="button" onClick={() => updateQuantity(item.productId, item.quantity - 1)}>
+                        -
+                      </button>
+                      <strong>{item.quantity}</strong>
+                      <button type="button" onClick={() => updateQuantity(item.productId, item.quantity + 1)}>
+                        +
+                      </button>
+                    </div>
+                    <b>{formatCurrency(item.total)}</b>
+                  </div>
+                ))}
+              </div>
+            </article>
 
-            <div className="transaction-actions">
-              <button type="button" onClick={() => setStep('select')}>Kembali</button>
-              <button className="primary-action" type="button" onClick={() => setStep('payment')}>
-                Pembayaran
-              </button>
-            </div>
+            <aside className="transaction-panel review-summary-panel">
+              <div className="transaction-panel-header">
+                <div>
+                  <p>Ringkasan</p>
+                  <h2>Total pesanan</h2>
+                </div>
+              </div>
+
+              <div className="review-summary-list">
+                <span>Jumlah Item <strong>{cartItems.reduce((total, item) => total + item.quantity, 0)}</strong></span>
+                <span>Subtotal <strong>{formatCurrency(subtotal)}</strong></span>
+                <span>Total <strong>{formatCurrency(grandTotal)}</strong></span>
+              </div>
+
+              <div className="transaction-actions review-actions">
+                <button type="button" onClick={() => setStep('select')}>Kembali</button>
+                <button className="primary-action" type="button" onClick={() => setStep('payment')}>
+                  Pembayaran
+                </button>
+              </div>
+            </aside>
           </section>
         )}
 
