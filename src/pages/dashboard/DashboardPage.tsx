@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import './DashboardPage.css'
+import { DashboardHeader } from '../../component/header/DashboardHeader'
 import { Sidebar } from '../../component/sidebar/Sidebar'
 import { ProductPage } from '../product/ProductPage'
 import { ProfilePage } from '../profile/ProfilePage'
@@ -55,7 +56,6 @@ export function DashboardPage({
     { key: 'transactions', label: 'Transaksi', value: String(transactions.length) },
     { key: 'active-products', label: 'Product Aktif', value: String(activeProducts.length) },
   ]
-
   if (activePage === 'transaction') {
     return (
       <TransactionPage
@@ -125,16 +125,16 @@ export function DashboardPage({
         onTransaction={() => setActivePage('transaction')}
         onShift={() => setActivePage('shift')}
         onProfile={() => setActivePage('profile')}
+        profileName={currentShift?.cashierName}
       />
 
       <section className="dashboard-content">
-        <header className="dashboard-header" id="dashboard">
-          <div>
-            <p>Dashboard</p>
-            <h1>Ringkasan operasional toko</h1>
-          </div>
-          <button type="button" onClick={() => setActivePage('transaction')}>Transaksi Baru</button>
-        </header>
+        <DashboardHeader onSearch={() => setActivePage('transaction')} />
+
+        <section className="dashboard-page-title">
+          <p>Dashboard</p>
+          <h1>Ringkasan operasional toko</h1>
+        </section>
 
         <section className="stats-grid" aria-label="Ringkasan data">
           {stats.map((stat) => (
