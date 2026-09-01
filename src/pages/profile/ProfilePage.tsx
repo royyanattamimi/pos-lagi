@@ -29,14 +29,22 @@ export function ProfilePage({
     name: currentShift?.cashierName || '',
     email: '',
     phone: '',
+    staffId: '',
     role: '',
     branch: '',
     shift: currentShift?.shiftTime || '',
+    accountStatus: '',
   })
   const displayName = profile.name || 'Profile belum diisi'
   const displayRole = profile.role || 'Role belum diisi'
   const displayBranch = profile.branch || 'Cabang belum diisi'
   const displayShift = profile.shift || currentShift?.shiftTime || 'Shift belum diisi'
+  const configuredAccessCount = [
+    profile.role,
+    profile.branch,
+    profile.shift,
+    profile.accountStatus,
+  ].filter(Boolean).length
   const initials = (profile.name || 'P')
     .split(' ')
     .map((word) => word[0])
@@ -73,6 +81,10 @@ export function ProfilePage({
             <span>{displayRole}</span>
             <small>{displayBranch} - Shift {displayShift}</small>
           </div>
+          <div className="profile-access-score">
+            <strong>{configuredAccessCount}/4</strong>
+            <span>Kelengkapan akses</span>
+          </div>
         </section>
 
         <section className="profile-grid">
@@ -103,6 +115,13 @@ export function ProfilePage({
                 <input
                   value={profile.phone}
                   onChange={(event) => setProfile({ ...profile, phone: event.target.value })}
+                />
+              </label>
+              <label>
+                ID Staff
+                <input
+                  value={profile.staffId}
+                  onChange={(event) => setProfile({ ...profile, staffId: event.target.value })}
                 />
               </label>
               <button type="button">Simpan Profile</button>
@@ -150,6 +169,18 @@ export function ProfilePage({
                   <option>08:00 - 16:00</option>
                   <option>16:00 - 22:00</option>
                   <option>22:00 - 06:00</option>
+                </select>
+              </label>
+              <label>
+                Status Akun
+                <select
+                  value={profile.accountStatus}
+                  onChange={(event) => setProfile({ ...profile, accountStatus: event.target.value })}
+                >
+                  <option value="">Pilih status</option>
+                  <option>Aktif</option>
+                  <option>Nonaktif</option>
+                  <option>Ditahan sementara</option>
                 </select>
               </label>
             </div>
