@@ -129,7 +129,12 @@ export function DashboardPage({
       />
 
       <section className="dashboard-content">
-        <DashboardHeader onSearch={() => setActivePage('transaction')} />
+        <DashboardHeader
+          products={products}
+          transactions={transactions}
+          onOpenProduct={() => setActivePage('product')}
+          onOpenTransaction={() => setActivePage('transaction')}
+        />
 
         <section className="dashboard-page-title">
           <p>Dashboard</p>

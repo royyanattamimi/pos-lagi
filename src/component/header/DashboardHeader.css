@@ -16,6 +16,10 @@
   width: 100%;
 }
 
+.dashboard-search-area {
+  position: relative;
+}
+
 .dashboard-search-buttons {
   display: flex;
   align-items: center;
@@ -23,10 +27,11 @@
 }
 
 .dashboard-search-buttons button {
+  min-width: 260px;
   min-height: 40px;
   border: 1px solid rgba(15, 23, 42, 0.18);
-  border-radius: 8px;
-  padding: 0 14px;
+  border-radius: 16px;
+  padding: 0 18px;
   background: transparent;
   color: rgba(15, 23, 42, 0.48);
   font: inherit;
@@ -38,6 +43,72 @@
   border-color: rgba(15, 23, 42, 0.28);
   background: rgba(15, 23, 42, 0.04);
   color: rgba(15, 23, 42, 0.68);
+}
+
+.dashboard-search-panel {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  z-index: 20;
+  width: min(360px, calc(100vw - 40px));
+  padding: 12px;
+  border: 1px solid #e1e7ef;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.12);
+}
+
+.dashboard-search-panel input {
+  width: 100%;
+  min-height: 40px;
+  border: 1px solid #dbe3ed;
+  border-radius: 8px;
+  padding: 0 12px;
+  color: #111827;
+  font: inherit;
+  outline: none;
+}
+
+.dashboard-search-panel input:focus {
+  border-color: rgba(15, 118, 110, 0.55);
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.1);
+}
+
+.dashboard-search-results {
+  display: grid;
+  gap: 8px;
+  max-height: 260px;
+  margin-top: 10px;
+  overflow: auto;
+}
+
+.dashboard-search-results span {
+  color: #64748b;
+  font-size: 13px;
+}
+
+.dashboard-search-results button {
+  display: grid;
+  gap: 3px;
+  width: 100%;
+  border: 1px solid #edf1f6;
+  border-radius: 8px;
+  padding: 10px;
+  background: #ffffff;
+  color: #111827;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.dashboard-search-results button:hover {
+  border-color: #0f766e;
+  background: #f0fdfa;
+}
+
+.dashboard-search-results small {
+  color: #64748b;
+  font-size: 12px;
 }
 
 .dashboard-date {
@@ -74,6 +145,12 @@
 
   .dashboard-search-buttons {
     display: grid;
+  }
+
+  .dashboard-search-panel {
+    position: static;
+    width: 100%;
+    margin-top: 10px;
   }
 
   .dashboard-date {

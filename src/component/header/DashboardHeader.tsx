@@ -1,12 +1,23 @@
 import { useEffect, useState } from 'react'
+import type { Product, TransactionRecord } from '../../types'
 import './DashboardHeader.css'
 
 type DashboardHeaderProps = {
-  onSearch: () => void
+  products: Product[]
+  transactions: TransactionRecord[]
+  onOpenProduct: () => void
+  onOpenTransaction: () => void
 }
 
-export function DashboardHeader({ onSearch }: DashboardHeaderProps) {
+export function DashboardHeader({
+  products,
+  transactions,
+  onOpenProduct,
+  onOpenTransaction,
+}: DashboardHeaderProps) {
   const [currentDate, setCurrentDate] = useState(new Date())
+  const [isSearchOpen, setIsSearchOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
   const formattedDate = currentDate.toLocaleDateString('id-ID', {
     weekday: 'long',
     day: '2-digit',
@@ -25,11 +36,60 @@ export function DashboardHeader({ onSearch }: DashboardHeaderProps) {
     return () => window.clearInterval(timer)
   }, [])
 
+  const normalizedQuery = searchQuery.trim().toLowerCase()
+  const productResults = normalizedQuery
+    ? products.filter((product) =>
+        [product.name, product.category].some((value) => value.toLowerCase().includes(normalizedQuery)),
+      )
+    : []
+  const transactionResults = normalizedQuery
+    ? transactions.filter((transaction) =>
+        [transaction.id, transaction.cashier, transaction.paymentMethod].some((value) =>
+          value.toLowerCase().includes(normalizedQuery),
+        ),
+      )
+    : []
+  const hasResults = productResults.length > 0 || transactionResults.length > 0
+
   return (
     <header className="dashboard-header" id="dashboard">
       <div className="dashboard-header-actions">
-        <div className="dashboard-search-buttons" aria-label="Pencarian cepat">
-          <button type="button" onClick={onSearch}>Search Product & Transaksi</button>
+        <div className="dashboard-search-area">
+          <div className="dashboard-search-buttons" aria-label="Pencarian cepat">
+            <button type="button" onClick={() => setIsSearchOpen((currentValue) => !currentValue)}>
+              Search Product & Transaksi
+            </button>
+          </div>
+
+          {isSearchOpen && (
+            <div className="dashboard-search-panel">
+              <input
+                autoFocus
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder="Cari product atau transaksi"
+              />
+
+              <div className="dashboard-search-results">
+                {!normalizedQuery && <span>Ketik nama product, kategori, no receipt, atau kasir.</span>}
+                {normalizedQuery && !hasResults && <span>Data tidak ditemukan.</span>}
+
+                {productResults.map((product) => (
+                  <button type="button" key={product.id} onClick={onOpenProduct}>
+                    <strong>{product.name}</strong>
+                    <small>Product - {product.category}</small>
+                  </button>
+                ))}
+
+                {transactionResults.map((transaction) => (
+                  <button type="button" key={transaction.id} onClick={onOpenTransaction}>
+                    <strong>{transaction.id}</strong>
+                    <small>Transaksi - {transaction.cashier}</small>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
         <div className="dashboard-date">
           <strong>{formattedDate}</strong>
