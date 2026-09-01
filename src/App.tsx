@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { DashboardPage } from './pages/dashboard/DashboardPage'
+import { ForgotPasswordPage } from './pages/login/ForgotPasswordPage'
 import { LoginPage } from './pages/login/LoginPage'
 import { StartShiftPage } from './pages/shift/StartShiftPage'
 import type { Product, ProductInput, ShiftInput, ShiftSession, TransactionRecord } from './types'
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false)
   const [isShiftStarted, setIsShiftStarted] = useState(false)
   const [products, setProducts] = useState<Product[]>([])
   const [transactions, setTransactions] = useState<TransactionRecord[]>([])
@@ -14,6 +16,7 @@ function App() {
 
   function handleLogout() {
     setIsLoggedIn(false)
+    setIsForgotPasswordOpen(false)
     setIsShiftStarted(false)
     setCurrentShift(null)
   }
@@ -56,6 +59,20 @@ function App() {
     setProducts((currentProducts) => [nextProduct, ...currentProducts])
   }
 
+  function handleUpdateProduct(productId: number, data: ProductInput) {
+    setProducts((currentProducts) =>
+      currentProducts.map((product) =>
+        product.id === productId
+          ? {
+              ...product,
+              ...data,
+              status: data.stock <= 20 ? 'Stok Rendah' : 'Aktif',
+            }
+          : product,
+      ),
+    )
+  }
+
   function handleCompleteTransaction(transaction: TransactionRecord) {
     setTransactions((currentTransactions) => [transaction, ...currentTransactions])
     setProducts((currentProducts) =>
@@ -81,6 +98,7 @@ function App() {
         currentShift={currentShift}
         shiftHistory={shiftHistory}
         onAddProduct={handleAddProduct}
+        onUpdateProduct={handleUpdateProduct}
         onCompleteTransaction={handleCompleteTransaction}
         onEndShift={handleEndShift}
         onLogout={handleLogout}
@@ -97,7 +115,16 @@ function App() {
     )
   }
 
-  return <LoginPage onLogin={() => setIsLoggedIn(true)} />
+  if (isForgotPasswordOpen) {
+    return <ForgotPasswordPage onBackToLogin={() => setIsForgotPasswordOpen(false)} />
+  }
+
+  return (
+    <LoginPage
+      onLogin={() => setIsLoggedIn(true)}
+      onForgotPassword={() => setIsForgotPasswordOpen(true)}
+    />
+  )
 }
 
 export default App

@@ -12,6 +12,7 @@ type ProductPageProps = {
   onProfile: () => void
   products: Product[]
   onAddProduct: (product: ProductInput) => void
+  onUpdateProduct: (productId: number, product: ProductInput) => void
 }
 
 type ProductDetail = 'total-product' | 'total-stock' | 'low-stock' | null
@@ -36,8 +37,10 @@ export function ProductPage({
   onProfile,
   products,
   onAddProduct,
+  onUpdateProduct,
 }: ProductPageProps) {
   const [selectedDetail, setSelectedDetail] = useState<ProductDetail>(null)
+  const [editingProductId, setEditingProductId] = useState<number | null>(null)
   const [form, setForm] = useState({
     name: '',
     category: '',
@@ -73,13 +76,38 @@ export function ProductPage({
     const price = Number(form.price)
     if (!form.name.trim() || !form.category || stock < 0 || price <= 0) return
 
-    onAddProduct({
+    const productInput = {
       name: form.name.trim(),
       category: form.category,
       stock,
       price,
       image: form.image || '/product-images/snack-real.png',
+    }
+
+    if (editingProductId) {
+      onUpdateProduct(editingProductId, productInput)
+    } else {
+      onAddProduct(productInput)
+    }
+
+    setEditingProductId(null)
+    setForm({ name: '', category: '', stock: '', price: '', image: '' })
+  }
+
+  function handleEditProduct(product: Product) {
+    setSelectedDetail(null)
+    setEditingProductId(product.id)
+    setForm({
+      name: product.name,
+      category: product.category,
+      stock: String(product.stock),
+      price: String(product.price),
+      image: product.image,
     })
+  }
+
+  function handleCancelEdit() {
+    setEditingProductId(null)
     setForm({ name: '', category: '', stock: '', price: '', image: '' })
   }
 
@@ -246,8 +274,13 @@ export function ProductPage({
             <div className="product-panel-header">
               <div>
                 <p>Add Product</p>
-                <h2>Tambah product baru</h2>
+                <h2>{editingProductId ? 'Edit product' : 'Tambah product baru'}</h2>
               </div>
+              {editingProductId && (
+                <button className="product-secondary" type="button" onClick={handleCancelEdit}>
+                  Batal Edit
+                </button>
+              )}
             </div>
 
             <form className="product-form-page" onSubmit={handleSubmit}>
@@ -310,7 +343,9 @@ export function ProductPage({
                 <span>{form.image ? 'Image siap digunakan' : 'Upload image agar product tampil lebih jelas'}</span>
               </div>
 
-              <button className="product-primary" type="submit">Simpan Product</button>
+              <button className="product-primary" type="submit">
+                {editingProductId ? 'Update Product' : 'Simpan Product'}
+              </button>
             </form>
           </article>
 
@@ -337,6 +372,9 @@ export function ProductPage({
                   <span>{product.stock} stok</span>
                   <strong>{formatCurrency(product.price)}</strong>
                   <em className={product.status === 'Stok Rendah' ? 'low' : ''}>{product.status}</em>
+                  <button className="product-edit-button" type="button" onClick={() => handleEditProduct(product)}>
+                    Edit
+                  </button>
                 </div>
               ))}
             </div>

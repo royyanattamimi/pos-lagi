@@ -1,0 +1,74 @@
+import { useState } from 'react'
+import type { FormEvent } from 'react'
+import './LoginPage.css'
+
+type ForgotPasswordPageProps = {
+  onBackToLogin: () => void
+}
+
+export function ForgotPasswordPage({ onBackToLogin }: ForgotPasswordPageProps) {
+  const [email, setEmail] = useState('')
+  const [isSubmitted, setIsSubmitted] = useState(false)
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setIsSubmitted(true)
+  }
+
+  return (
+    <main className="login-page">
+      <section className="login-hero" aria-label="Reset password POS Lagi">
+        <div className="login-brand">
+          <span className="brand-mark">PL</span>
+          <div>
+            <strong>POS Lagi</strong>
+            <span>Cashier Management System</span>
+          </div>
+        </div>
+
+        <div className="hero-copy">
+          <h1>Pulihkan akses akun kasir.</h1>
+          <p>Masukkan email akun untuk memulai proses reset password secara aman.</p>
+        </div>
+      </section>
+
+      <section className="login-card" aria-label="Form lupa password">
+        <div className="login-heading">
+          <p>Lupa Password</p>
+          <h2>Reset password akun</h2>
+        </div>
+
+        <form className="login-form" onSubmit={handleSubmit}>
+          <label>
+            Email akun
+            <input
+              type="email"
+              value={email}
+              onChange={(event) => {
+                setEmail(event.target.value)
+                setIsSubmitted(false)
+              }}
+              placeholder="Masukkan email akun"
+              autoComplete="email"
+              required
+            />
+          </label>
+
+          {isSubmitted && (
+            <div className="reset-password-state">
+              <strong>Permintaan reset dicatat</strong>
+              <span>
+                Jika email terdaftar, sistem akan mengirim instruksi reset password ke email tersebut.
+              </span>
+            </div>
+          )}
+
+          <button className="submit-button" type="submit">Kirim Instruksi Reset</button>
+          <button className="secondary-login-button" type="button" onClick={onBackToLogin}>
+            Kembali ke Login
+          </button>
+        </form>
+      </section>
+    </main>
+  )
+}

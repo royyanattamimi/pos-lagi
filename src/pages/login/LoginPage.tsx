@@ -4,9 +4,10 @@ import './LoginPage.css'
 
 type LoginPageProps = {
   onLogin: () => void
+  onForgotPassword: () => void
 }
 
-export function LoginPage({ onLogin }: LoginPageProps) {
+export function LoginPage({ onLogin, onForgotPassword }: LoginPageProps) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -18,12 +19,12 @@ export function LoginPage({ onLogin }: LoginPageProps) {
 
   return (
     <main className="login-page">
-      <section className="login-hero" aria-label="POS Lagi">
+      <section className="login-hero" aria-label="Kasir">
         <div className="login-brand">
-          <span className="brand-mark">PL</span>
+          <span className="brand-mark"></span>
           <div>
-            <strong>POS Lagi</strong>
-            <span>Cashier Management System</span>
+            <strong>Kasir</strong>
+            <span>Point Of Sale</span>
           </div>
         </div>
 
@@ -61,8 +62,24 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                 placeholder="Masukkan password"
                 autoComplete="current-password"
               />
-              <button type="button" onClick={() => setShowPassword((currentValue) => !currentValue)}>
-                {showPassword ? 'Hide' : 'Show'}
+              <button
+                type="button"
+                onClick={() => setShowPassword((currentValue) => !currentValue)}
+                aria-label={showPassword ? 'Sembunyikan password' : 'Tampilkan password'}
+              >
+                {showPassword ? (
+                  <svg aria-hidden="true" viewBox="0 0 24 24">
+                    <path d="M3 3l18 18" />
+                    <path d="M10.6 10.6a2 2 0 0 0 2.8 2.8" />
+                    <path d="M9.9 4.2A10.7 10.7 0 0 1 12 4c5 0 8.5 4 10 8a12.6 12.6 0 0 1-2.1 3.5" />
+                    <path d="M6.6 6.6A12.3 12.3 0 0 0 2 12c1.5 4 5 8 10 8 1.7 0 3.2-.4 4.5-1.1" />
+                  </svg>
+                ) : (
+                  <svg aria-hidden="true" viewBox="0 0 24 24">
+                    <path d="M2 12s3.5-8 10-8 10 8 10 8-3.5 8-10 8S2 12 2 12z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                )}
               </button>
             </div>
           </label>
@@ -72,7 +89,9 @@ export function LoginPage({ onLogin }: LoginPageProps) {
               <input type="checkbox" defaultChecked />
               Ingat saya
             </label>
-            <a href="#forgot-password">Lupa password?</a>
+            <button className="forgot-password-link" type="button" onClick={onForgotPassword}>
+              Lupa password?
+            </button>
           </div>
 
           <button className="submit-button" type="submit">Masuk</button>
