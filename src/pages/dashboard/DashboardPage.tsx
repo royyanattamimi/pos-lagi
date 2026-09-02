@@ -9,6 +9,7 @@ import { ProfilePage } from '../profile/ProfilePage'
 import { ShiftPage } from '../shift/ShiftPage'
 import { TransactionPage } from '../transaction/TransactionPage'
 import { TransactionDetailPage } from '../transaction/detail/TransactionDetailPage'
+import { TransactionHistoryPage } from '../transaction/history/TransactionHistoryPage'
 import type { Product, ProductInput, ShiftSession, TransactionRecord } from '../../types'
 
 type DashboardPageProps = {
@@ -23,7 +24,7 @@ type DashboardPageProps = {
   onLogout: () => void
 }
 
-type ActivePage = 'dashboard' | 'product' | 'transaction' | 'shift' | 'profile'
+type ActivePage = 'dashboard' | 'product' | 'transaction' | 'checkout' | 'shift' | 'profile'
 type DashboardDetail = 'sales-today' | 'transactions' | 'active-products' | null
 
 const currency = new Intl.NumberFormat('id-ID', {
@@ -62,7 +63,33 @@ export function DashboardPage({
     { key: 'transactions', label: 'Transaksi', value: String(transactions.length) },
     { key: 'active-products', label: 'Product Aktif', value: String(activeProducts.length) },
   ]
-  if (activePage === 'transaction') {
+  if (selectedTransaction) {
+    return (
+      <TransactionDetailPage
+        transaction={selectedTransaction}
+        onBack={() => setSelectedTransaction(null)}
+        onDashboard={() => {
+          setSelectedTransaction(null)
+          setActivePage('dashboard')
+        }}
+        onProduct={() => {
+          setSelectedTransaction(null)
+          setActivePage('product')
+        }}
+        onTransaction={() => {
+          setSelectedTransaction(null)
+          setActivePage('transaction')
+        }}
+        onProfile={() => {
+          setSelectedTransaction(null)
+          setActivePage('profile')
+        }}
+        profileName={currentShift?.cashierName}
+      />
+    )
+  }
+
+  if (activePage === 'checkout') {
     return (
       <TransactionPage
         onDashboard={() => setActivePage('dashboard')}
@@ -73,6 +100,21 @@ export function DashboardPage({
         products={products}
         currentShift={currentShift}
         onCompleteTransaction={onCompleteTransaction}
+      />
+    )
+  }
+
+  if (activePage === 'transaction') {
+    return (
+      <TransactionHistoryPage
+        transactions={transactions}
+        onDashboard={() => setActivePage('dashboard')}
+        onProduct={() => setActivePage('product')}
+        onTransaction={() => setActivePage('transaction')}
+        onProfile={() => setActivePage('profile')}
+        onNewTransaction={() => setActivePage('checkout')}
+        onSelectTransaction={setSelectedTransaction}
+        profileName={currentShift?.cashierName}
       />
     )
   }
@@ -119,29 +161,6 @@ export function DashboardPage({
         shiftHistory={shiftHistory}
         transactions={transactions}
         onEndShift={onEndShift}
-      />
-    )
-  }
-
-  if (selectedTransaction) {
-    return (
-      <TransactionDetailPage
-        transaction={selectedTransaction}
-        onBack={() => setSelectedTransaction(null)}
-        onDashboard={() => setSelectedTransaction(null)}
-        onProduct={() => {
-          setSelectedTransaction(null)
-          setActivePage('product')
-        }}
-        onTransaction={() => {
-          setSelectedTransaction(null)
-          setActivePage('transaction')
-        }}
-        onProfile={() => {
-          setSelectedTransaction(null)
-          setActivePage('profile')
-        }}
-        profileName={currentShift?.cashierName}
       />
     )
   }
