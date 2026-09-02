@@ -8,7 +8,7 @@ type DashboardHeaderProps = {
   products: Product[]
   transactions: TransactionRecord[]
   onOpenProduct: () => void
-  onOpenTransaction: () => void
+  onOpenTransaction: (transaction: TransactionRecord) => void
 }
 
 export function DashboardHeader({
@@ -84,7 +84,7 @@ export function DashboardHeader({
                 ))}
 
                 {transactionResults.map((transaction) => (
-                  <Button type="button" key={transaction.id} onClick={onOpenTransaction}>
+                  <Button type="button" key={transaction.id} onClick={() => onOpenTransaction(transaction)}>
                     <strong>{transaction.id}</strong>
                     <small>Transaksi - {transaction.cashier}</small>
                   </Button>

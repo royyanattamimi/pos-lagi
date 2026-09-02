@@ -8,6 +8,7 @@ import { ProductPage } from '../product/ProductPage'
 import { ProfilePage } from '../profile/ProfilePage'
 import { ShiftPage } from '../shift/ShiftPage'
 import { TransactionPage } from '../transaction/TransactionPage'
+import { TransactionDetailPage } from '../transaction/detail/TransactionDetailPage'
 import type { Product, ProductInput, ShiftSession, TransactionRecord } from '../../types'
 
 type DashboardPageProps = {
@@ -48,6 +49,7 @@ export function DashboardPage({
 }: DashboardPageProps) {
   const [activePage, setActivePage] = useState<ActivePage>('dashboard')
   const [activeDetail, setActiveDetail] = useState<DashboardDetail>(null)
+  const [selectedTransaction, setSelectedTransaction] = useState<TransactionRecord | null>(null)
   const isShiftOpen = currentShift?.status === 'Berjalan'
   const todayKey = new Date().toLocaleDateString('id-ID')
   const todayTransactions = transactions.filter(
@@ -121,6 +123,29 @@ export function DashboardPage({
     )
   }
 
+  if (selectedTransaction) {
+    return (
+      <TransactionDetailPage
+        transaction={selectedTransaction}
+        onBack={() => setSelectedTransaction(null)}
+        onDashboard={() => setSelectedTransaction(null)}
+        onProduct={() => {
+          setSelectedTransaction(null)
+          setActivePage('product')
+        }}
+        onTransaction={() => {
+          setSelectedTransaction(null)
+          setActivePage('transaction')
+        }}
+        onProfile={() => {
+          setSelectedTransaction(null)
+          setActivePage('profile')
+        }}
+        profileName={currentShift?.cashierName}
+      />
+    )
+  }
+
   return (
     <main className="dashboard-page">
       <Sidebar
@@ -138,7 +163,7 @@ export function DashboardPage({
           products={products}
           transactions={transactions}
           onOpenProduct={() => setActivePage('product')}
-          onOpenTransaction={() => setActivePage('transaction')}
+          onOpenTransaction={setSelectedTransaction}
         />
 
         <PageHeader
@@ -181,14 +206,19 @@ export function DashboardPage({
                 {todayTransactions.length === 0 ? (
                   <div className="empty-dashboard-state">Belum ada penjualan hari ini.</div>
                 ) : todayTransactions.map((sale) => (
-                  <div className="sales-detail-row" key={sale.id}>
+                  <Button
+                    className="sales-detail-row transaction-detail-trigger"
+                    type="button"
+                    key={sale.id}
+                    onClick={() => setSelectedTransaction(sale)}
+                  >
                     <div>
                       <strong>{new Date(sale.createdAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</strong>
                       <span>{sale.itemCount} item</span>
                     </div>
                     <span>{sale.paymentMethod}</span>
                     <strong>{formatCurrency(sale.grandTotal)}</strong>
-                  </div>
+                  </Button>
                 ))}
               </div>
             )}
@@ -198,7 +228,12 @@ export function DashboardPage({
                 {transactions.length === 0 ? (
                   <div className="empty-dashboard-state">Belum ada transaksi. Buat transaksi baru setelah product tersedia.</div>
                 ) : transactions.map((transaction) => (
-                  <div className="transaction-row" key={transaction.id}>
+                  <Button
+                    className="transaction-row transaction-detail-trigger"
+                    type="button"
+                    key={transaction.id}
+                    onClick={() => setSelectedTransaction(transaction)}
+                  >
                     <div>
                       <strong>{transaction.id}</strong>
                       <span>{transaction.cashier}</span>
@@ -206,7 +241,7 @@ export function DashboardPage({
                     <span>{transaction.itemCount} item</span>
                     <strong>{formatCurrency(transaction.grandTotal)}</strong>
                     <em>{transaction.status}</em>
-                  </div>
+                  </Button>
                 ))}
               </div>
             )}
