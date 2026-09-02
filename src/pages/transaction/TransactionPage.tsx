@@ -90,7 +90,6 @@ export function TransactionPage({
     setCart((currentCart) => {
       const existingItem = currentCart.find((item) => item.productId === product.id)
       if (!existingItem) return [...currentCart, { productId: product.id, quantity: 1 }]
-      if (existingItem.quantity >= product.stock) return currentCart
 
       return currentCart.map((item) =>
         item.productId === product.id ? { ...item, quantity: item.quantity + 1 } : item,
@@ -104,11 +103,9 @@ export function TransactionPage({
       return
     }
 
-    const product = products.find((currentProduct) => currentProduct.id === productId)
-    const nextQuantity = Math.min(quantity, product?.stock ?? quantity)
     setCart((currentCart) =>
       currentCart.map((item) =>
-        item.productId === productId ? { ...item, quantity: nextQuantity } : item,
+        item.productId === productId ? { ...item, quantity } : item,
       ),
     )
   }
@@ -231,7 +228,6 @@ export function TransactionPage({
                     <strong>{product.name}</strong>
                     <span>{product.category}</span>
                     <b>{formatCurrency(product.price)}</b>
-                    <small>{product.stock} stok</small>
                   </Button>
                 ))}
               </div>
@@ -254,7 +250,6 @@ export function TransactionPage({
                       <div className="mini-cart-info">
                         <strong>{item.product.name}</strong>
                         <span>{formatCurrency(item.product.price)} per item</span>
-                        <small>Stok tersedia: {item.product.stock}</small>
                       </div>
                       <div className="mini-cart-control">
                         <Button type="button" onClick={() => updateQuantity(item.productId, item.quantity - 1)}>
@@ -262,7 +257,6 @@ export function TransactionPage({
                         </Button>
                         <Input
                           min="1"
-                          max={item.product.stock}
                           type="number"
                           value={item.quantity}
                           onChange={(event) => updateQuantity(item.productId, Number(event.target.value))}

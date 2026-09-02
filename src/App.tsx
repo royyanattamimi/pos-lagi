@@ -60,7 +60,6 @@ function App() {
     const nextProduct: Product = {
       ...data,
       id: Date.now(),
-      status: data.stock <= 20 ? 'Stok Rendah' : 'Aktif',
     }
 
     setProducts((currentProducts) => [nextProduct, ...currentProducts])
@@ -73,7 +72,6 @@ function App() {
           ? {
               ...product,
               ...data,
-              status: data.stock <= 20 ? 'Stok Rendah' : 'Aktif',
             }
           : product,
       ),
@@ -82,19 +80,6 @@ function App() {
 
   function handleCompleteTransaction(transaction: TransactionRecord) {
     setTransactions((currentTransactions) => [transaction, ...currentTransactions])
-    setProducts((currentProducts) =>
-      currentProducts.map((product) => {
-        const soldItem = transaction.items.find((item) => item.productId === product.id)
-        if (!soldItem) return product
-
-        const nextStock = Math.max(product.stock - soldItem.quantity, 0)
-        return {
-          ...product,
-          stock: nextStock,
-          status: nextStock <= 20 ? 'Stok Rendah' : 'Aktif',
-        }
-      }),
-    )
   }
 
   if (isLoggedIn && isShiftStarted) {

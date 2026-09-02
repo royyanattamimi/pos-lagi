@@ -2,16 +2,13 @@ export type Product = {
   id: number
   name: string
   category: string
-  stock: number
   price: number
-  status: 'Aktif' | 'Stok Rendah'
   image: string
 }
 
 export type ProductInput = {
   name: string
   category: string
-  stock: number
   price: number
   image: string
 }

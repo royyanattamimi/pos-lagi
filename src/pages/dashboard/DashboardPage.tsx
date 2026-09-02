@@ -54,7 +54,7 @@ export function DashboardPage({
     (transaction) => new Date(transaction.createdAt).toLocaleDateString('id-ID') === todayKey,
   )
   const salesToday = todayTransactions.reduce((total, transaction) => total + transaction.grandTotal, 0)
-  const activeProducts = products.filter((product) => product.stock > 0)
+  const activeProducts = products
   const stats = [
     { key: 'sales-today', label: 'Penjualan Hari Ini', value: formatCurrency(salesToday) },
     { key: 'transactions', label: 'Transaksi', value: String(transactions.length) },
@@ -162,7 +162,7 @@ export function DashboardPage({
           ))}
         </section>
 
-        {activeDetail ? (
+        {activeDetail && (
           <section className="dashboard-detail-panel">
             <div className="panel-header">
               <div>
@@ -224,69 +224,12 @@ export function DashboardPage({
                         <span>{product.category}</span>
                       </div>
                     </div>
-                    <span>{product.stock} stok</span>
                     <strong>{formatCurrency(product.price)}</strong>
                   </div>
                 ))}
               </div>
             )}
           </section>
-        ) : (
-        <section className="dashboard-grid">
-          <article className="panel" id="product">
-            <div className="panel-header">
-              <div>
-                <p>Product</p>
-                <h2>Daftar product</h2>
-              </div>
-              <Button type="button" onClick={() => setActivePage('product')}>Add Product</Button>
-            </div>
-
-            <div className="product-list">
-              {products.length === 0 ? (
-                <div className="empty-dashboard-state">Belum ada product. Klik Add Product untuk input manual.</div>
-              ) : products.map((product) => (
-                <div className="product-row" key={product.name}>
-                  <div className="dashboard-product-name">
-                    <img src={product.image} alt={product.name} />
-                    <div>
-                      <strong>{product.name}</strong>
-                      <span>{product.category}</span>
-                    </div>
-                  </div>
-                  <span>{product.stock} stok</span>
-                  <strong>{formatCurrency(product.price)}</strong>
-                </div>
-              ))}
-            </div>
-          </article>
-
-          <article className="panel" id="transaksi">
-            <div className="panel-header">
-              <div>
-                <p>Transaksi</p>
-                <h2>Transaksi terbaru</h2>
-              </div>
-              <Button type="button" onClick={() => setActivePage('transaction')}>Lihat Semua</Button>
-            </div>
-
-            <div className="transaction-list">
-              {transactions.length === 0 ? (
-                <div className="empty-dashboard-state">Belum ada transaksi yang dibuat.</div>
-              ) : transactions.map((transaction) => (
-                <div className="transaction-row" key={transaction.id}>
-                  <div>
-                    <strong>{transaction.id}</strong>
-                    <span>{transaction.cashier}</span>
-                  </div>
-                  <span>{transaction.itemCount} item</span>
-                  <strong>{formatCurrency(transaction.grandTotal)}</strong>
-                  <em>{transaction.status}</em>
-                </div>
-              ))}
-            </div>
-          </article>
-        </section>
         )}
       </section>
     </main>

@@ -32,7 +32,7 @@ export function LoginPage({ onLogin, onForgotPassword }: LoginPageProps) {
 
         <div className="hero-copy">
           <h1>Kelola transaksi toko dengan lebih rapi.</h1>
-          <p>Login untuk masuk ke dashboard kasir, product, stok, dan laporan penjualan.</p>
+          <p>Login untuk masuk ke dashboard kasir, product, transaksi, dan laporan penjualan.</p>
         </div>
       </section>
 

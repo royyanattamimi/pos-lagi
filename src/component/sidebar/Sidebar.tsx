@@ -18,11 +18,10 @@ export function Sidebar({
   onDashboard,
   onProduct,
   onTransaction,
-  onShift,
   onProfile,
   profileName,
 }: SidebarProps) {
-  const displayName = profileName || 'Profile'
+  const displayName = profileName || 'Administrator'
   const initials = displayName
     .split(' ')
     .map((word) => word[0])
@@ -62,20 +61,6 @@ export function Sidebar({
         >
           Transaksi
         </Button>
-        <Button
-          className={activePage === 'shift' ? 'active' : ''}
-          type="button"
-          onClick={onShift}
-        >
-          Shift
-        </Button>
-        <Button
-          className={activePage === 'profile' ? 'active' : ''}
-          type="button"
-          onClick={onProfile}
-        >
-          Profile
-        </Button>
       </nav>
 
       <section className="sidebar-profile">
@@ -87,7 +72,7 @@ export function Sidebar({
           <span className="profile-avatar">{initials}</span>
           <span>
             <strong>{displayName}</strong>
-            <small>Atur profile</small>
+            <small>Administrator</small>
           </span>
         </Button>
       </section>

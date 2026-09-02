@@ -23,7 +23,15 @@ export function loadPosData(): PosStoredData {
 
     const parsedData = JSON.parse(storedValue) as Partial<PosStoredData>
     return {
-      products: Array.isArray(parsedData.products) ? parsedData.products : [],
+      products: Array.isArray(parsedData.products)
+        ? parsedData.products.map((product) => ({
+            id: product.id,
+            name: product.name,
+            category: product.category,
+            price: product.price,
+            image: product.image,
+          }))
+        : [],
       transactions: Array.isArray(parsedData.transactions) ? parsedData.transactions : [],
       currentShift: parsedData.currentShift ?? null,
       shiftHistory: Array.isArray(parsedData.shiftHistory) ? parsedData.shiftHistory : [],
