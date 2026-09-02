@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
+import { Button } from '../../component/button/Button'
+import { Input } from '../../component/input/Input'
 import './LoginPage.css'
 
 type ForgotPasswordPageProps = {
@@ -41,7 +43,7 @@ export function ForgotPasswordPage({ onBackToLogin }: ForgotPasswordPageProps) {
         <form className="login-form" onSubmit={handleSubmit}>
           <label>
             Email akun
-            <input
+            <Input
               type="email"
               value={email}
               onChange={(event) => {
@@ -63,10 +65,10 @@ export function ForgotPasswordPage({ onBackToLogin }: ForgotPasswordPageProps) {
             </div>
           )}
 
-          <button className="submit-button" type="submit">Kirim Instruksi Reset</button>
-          <button className="secondary-login-button" type="button" onClick={onBackToLogin}>
+          <Button className="submit-button" variant="primary" size="large" type="submit">Kirim Instruksi Reset</Button>
+          <Button className="secondary-login-button" type="button" onClick={onBackToLogin}>
             Kembali ke Login
-          </button>
+          </Button>
         </form>
       </section>
     </main>

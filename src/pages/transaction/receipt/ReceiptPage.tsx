@@ -1,4 +1,6 @@
 import { Sidebar } from '../../../component/sidebar/Sidebar'
+import { PageHeader } from '../../../component/header/PageHeader'
+import { Button } from '../../../component/button/Button'
 import type { TransactionRecord } from '../../../types'
 import './ReceiptPage.css'
 
@@ -49,17 +51,17 @@ export function ReceiptPage({
       />
 
       <section className="receipt-content">
-        <header className="receipt-header">
-          <div>
-            <p>Receipt</p>
-            <h1>Transaksi selesai</h1>
-            <span>Struk pembayaran berhasil dibuat dan siap diperiksa.</span>
-          </div>
-          <div className="receipt-header-actions">
-            <button type="button" onClick={handlePrint}>Print Receipt</button>
-            <button type="button" onClick={onNewTransaction}>Transaksi Baru</button>
-          </div>
-        </header>
+        <PageHeader
+          eyebrow="Receipt"
+          title="Transaksi selesai"
+          description="Struk pembayaran berhasil dibuat dan siap diperiksa."
+          actions={(
+            <div className="receipt-header-actions">
+            <Button type="button" onClick={handlePrint}>Print Receipt</Button>
+              <Button variant="primary" type="button" onClick={onNewTransaction}>Transaksi Baru</Button>
+            </div>
+          )}
+        />
 
         <section className="receipt-layout">
           <article className="receipt-card">
@@ -116,7 +118,7 @@ export function ReceiptPage({
               <span>Status</span>
               <strong>Lunas</strong>
             </article>
-            <button type="button" onClick={onDashboard}>Kembali ke Dashboard</button>
+            <Button variant="primary" type="button" onClick={onDashboard}>Kembali ke Dashboard</Button>
           </aside>
         </section>
       </section>

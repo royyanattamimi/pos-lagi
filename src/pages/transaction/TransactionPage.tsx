@@ -1,5 +1,8 @@
 import { useMemo, useState } from 'react'
 import { Sidebar } from '../../component/sidebar/Sidebar'
+import { PageHeader } from '../../component/header/PageHeader'
+import { Button } from '../../component/button/Button'
+import { Input } from '../../component/input/Input'
 import { ReceiptPage } from './receipt/ReceiptPage'
 import type { Product, ShiftSession, TransactionItem, TransactionRecord } from '../../types'
 import './TransactionPage.css'
@@ -176,14 +179,12 @@ export function TransactionPage({
       />
 
       <section className="transaction-content">
-        <header className="transaction-header">
-          <div>
-            <p>Transaksi</p>
-            <h1>Buat transaksi baru</h1>
-            <span>Pilih product, review pesanan, proses pembayaran, lalu selesaikan transaksi.</span>
-          </div>
-          <button type="button" onClick={resetTransaction}>Reset</button>
-        </header>
+        <PageHeader
+          eyebrow="Transaksi"
+          title="Buat transaksi baru"
+          description="Pilih product, review pesanan, proses pembayaran, lalu selesaikan transaksi."
+          actions={<Button type="button" onClick={resetTransaction}>Reset</Button>}
+        />
 
         <section className="transaction-stepper" aria-label="Flow transaksi">
           {steps.map((currentStep, index) => (
@@ -205,14 +206,14 @@ export function TransactionPage({
 
               <div className="category-list">
                 {categories.map((category) => (
-                  <button
+                  <Button
                     className={selectedCategory === category ? 'selected' : ''}
                     type="button"
                     key={category}
                     onClick={() => setSelectedCategory(category)}
                   >
                     {category}
-                  </button>
+                  </Button>
                 ))}
               </div>
 
@@ -220,7 +221,7 @@ export function TransactionPage({
                 {products.length === 0 ? (
                   <div className="empty-order">Belum ada product. Input product manual dulu di halaman Product.</div>
                 ) : filteredProducts.map((product) => (
-                  <button
+                  <Button
                     className="catalog-item"
                     type="button"
                     key={product.id}
@@ -231,7 +232,7 @@ export function TransactionPage({
                     <span>{product.category}</span>
                     <b>{formatCurrency(product.price)}</b>
                     <small>{product.stock} stok</small>
-                  </button>
+                  </Button>
                 ))}
               </div>
             </article>
@@ -256,10 +257,10 @@ export function TransactionPage({
                         <small>Stok tersedia: {item.product.stock}</small>
                       </div>
                       <div className="mini-cart-control">
-                        <button type="button" onClick={() => updateQuantity(item.productId, item.quantity - 1)}>
+                        <Button type="button" onClick={() => updateQuantity(item.productId, item.quantity - 1)}>
                           -
-                        </button>
-                        <input
+                        </Button>
+                        <Input
                           min="1"
                           max={item.product.stock}
                           type="number"
@@ -267,9 +268,9 @@ export function TransactionPage({
                           onChange={(event) => updateQuantity(item.productId, Number(event.target.value))}
                           aria-label={`Jumlah ${item.product.name}`}
                         />
-                        <button type="button" onClick={() => updateQuantity(item.productId, item.quantity + 1)}>
+                        <Button type="button" onClick={() => updateQuantity(item.productId, item.quantity + 1)}>
                           +
-                        </button>
+                        </Button>
                       </div>
                       <b>{formatCurrency(item.total)}</b>
                     </div>
@@ -281,14 +282,15 @@ export function TransactionPage({
                 <span>Subtotal <strong>{formatCurrency(subtotal)}</strong></span>
               </div>
 
-              <button
+              <Button
                 className="primary-action"
+                variant="primary"
                 type="button"
                 disabled={cartItems.length === 0}
                 onClick={() => setStep('review')}
               >
                 Review Pesanan
-              </button>
+              </Button>
             </aside>
           </section>
         )}
@@ -316,13 +318,13 @@ export function TransactionPage({
                       </div>
                     </div>
                     <div className="quantity-control">
-                      <button type="button" onClick={() => updateQuantity(item.productId, item.quantity - 1)}>
+                      <Button type="button" onClick={() => updateQuantity(item.productId, item.quantity - 1)}>
                         -
-                      </button>
+                      </Button>
                       <strong>{item.quantity}</strong>
-                      <button type="button" onClick={() => updateQuantity(item.productId, item.quantity + 1)}>
+                      <Button type="button" onClick={() => updateQuantity(item.productId, item.quantity + 1)}>
                         +
-                      </button>
+                      </Button>
                     </div>
                     <b>{formatCurrency(item.total)}</b>
                   </div>
@@ -345,10 +347,10 @@ export function TransactionPage({
               </div>
 
               <div className="transaction-actions review-actions">
-                <button type="button" onClick={() => setStep('select')}>Kembali</button>
-                <button className="primary-action" type="button" onClick={() => setStep('payment')}>
+                <Button type="button" onClick={() => setStep('select')}>Kembali</Button>
+                <Button className="primary-action" variant="primary" type="button" onClick={() => setStep('payment')}>
                   Pembayaran
-                </button>
+                </Button>
               </div>
             </aside>
           </section>
@@ -365,20 +367,20 @@ export function TransactionPage({
 
             <div className="payment-methods">
               {['Cash', 'QRIS', 'Debit'].map((method) => (
-                <button
+                <Button
                   className={paymentMethod === method ? 'selected' : ''}
                   type="button"
                   key={method}
                   onClick={() => setPaymentMethod(method)}
                 >
                   {method}
-                </button>
+                </Button>
               ))}
             </div>
 
             <label className="paid-input">
               Nominal dibayar
-              <input
+              <Input
                 min="0"
                 type="number"
                 value={paidAmount}
@@ -394,15 +396,16 @@ export function TransactionPage({
             </div>
 
             <div className="transaction-actions">
-              <button type="button" onClick={() => setStep('review')}>Kembali</button>
-              <button
+              <Button type="button" onClick={() => setStep('review')}>Kembali</Button>
+              <Button
                 className="primary-action"
+                variant="primary"
                 type="button"
                 disabled={!canFinish}
                 onClick={finishPayment}
               >
                 Finish
-              </button>
+              </Button>
             </div>
           </section>
         )}

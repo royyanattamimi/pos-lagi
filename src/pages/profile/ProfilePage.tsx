@@ -1,5 +1,9 @@
 import { useState } from 'react'
 import { Sidebar } from '../../component/sidebar/Sidebar'
+import { PageHeader } from '../../component/header/PageHeader'
+import { Button } from '../../component/button/Button'
+import { Input } from '../../component/input/Input'
+import { Select } from '../../component/select/Select'
 import type { ShiftSession } from '../../types'
 import './ProfilePage.css'
 
@@ -65,14 +69,12 @@ export function ProfilePage({
       />
 
       <section className="profile-content">
-        <header className="profile-header">
-          <div>
-            <p>Profile</p>
-            <h1>Pengaturan profile kasir</h1>
-            <span>Atur identitas akun, cabang kerja, role, dan informasi shift pengguna.</span>
-          </div>
-          <button type="button" onClick={onDashboard}>Kembali</button>
-        </header>
+        <PageHeader
+          eyebrow="Profile"
+          title="Pengaturan profile kasir"
+          description="Atur identitas akun, cabang kerja, role, dan informasi shift pengguna."
+          actions={<Button type="button" onClick={onDashboard}>Kembali</Button>}
+        />
 
         <section className="profile-overview">
           <div className="profile-photo">{initials}</div>
@@ -97,14 +99,14 @@ export function ProfilePage({
             <form className="profile-form">
               <label>
                 Nama Lengkap
-                <input
+                <Input
                   value={profile.name}
                   onChange={(event) => setProfile({ ...profile, name: event.target.value })}
                 />
               </label>
               <label>
                 Email
-                <input
+                <Input
                   type="email"
                   value={profile.email}
                   onChange={(event) => setProfile({ ...profile, email: event.target.value })}
@@ -112,19 +114,19 @@ export function ProfilePage({
               </label>
               <label>
                 Nomor Telepon
-                <input
+                <Input
                   value={profile.phone}
                   onChange={(event) => setProfile({ ...profile, phone: event.target.value })}
                 />
               </label>
               <label>
                 ID Staff
-                <input
+                <Input
                   value={profile.staffId}
                   onChange={(event) => setProfile({ ...profile, staffId: event.target.value })}
                 />
               </label>
-              <button type="button">Simpan Profile</button>
+              <Button variant="primary" type="button">Simpan Profile</Button>
             </form>
           </article>
 
@@ -137,7 +139,7 @@ export function ProfilePage({
             <div className="profile-detail-list">
               <label>
                 Role
-                <select
+                <Select
                   value={profile.role}
                   onChange={(event) => setProfile({ ...profile, role: event.target.value })}
                 >
@@ -145,11 +147,11 @@ export function ProfilePage({
                   <option>Kasir Utama</option>
                   <option>Admin Toko</option>
                   <option>Supervisor</option>
-                </select>
+                </Select>
               </label>
               <label>
                 Cabang
-                <select
+                <Select
                   value={profile.branch}
                   onChange={(event) => setProfile({ ...profile, branch: event.target.value })}
                 >
@@ -157,11 +159,11 @@ export function ProfilePage({
                   <option>Cabang Utama</option>
                   <option>Cabang Barat</option>
                   <option>Cabang Timur</option>
-                </select>
+                </Select>
               </label>
               <label>
                 Shift
-                <select
+                <Select
                   value={profile.shift}
                   onChange={(event) => setProfile({ ...profile, shift: event.target.value })}
                 >
@@ -169,11 +171,11 @@ export function ProfilePage({
                   <option>08:00 - 16:00</option>
                   <option>16:00 - 22:00</option>
                   <option>22:00 - 06:00</option>
-                </select>
+                </Select>
               </label>
               <label>
                 Status Akun
-                <select
+                <Select
                   value={profile.accountStatus}
                   onChange={(event) => setProfile({ ...profile, accountStatus: event.target.value })}
                 >
@@ -181,7 +183,7 @@ export function ProfilePage({
                   <option>Aktif</option>
                   <option>Nonaktif</option>
                   <option>Ditahan sementara</option>
-                </select>
+                </Select>
               </label>
             </div>
           </article>
@@ -203,7 +205,7 @@ export function ProfilePage({
               </div>
             )}
             <div className="profile-session-actions">
-              <button
+              <Button
                 type="button"
                 onClick={() => {
                   if (isShiftOpen) {
@@ -215,9 +217,9 @@ export function ProfilePage({
                 }}
               >
                 Logout
-              </button>
+              </Button>
               {isShiftOpen && (
-                <button className="end-shift-button" type="button" onClick={onShift}>Ke End Shift</button>
+                <Button className="end-shift-button" type="button" onClick={onShift}>Ke End Shift</Button>
               )}
             </div>
           </article>

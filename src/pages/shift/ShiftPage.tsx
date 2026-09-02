@@ -1,5 +1,8 @@
 import { useState } from 'react'
 import { Sidebar } from '../../component/sidebar/Sidebar'
+import { PageHeader } from '../../component/header/PageHeader'
+import { Button } from '../../component/button/Button'
+import { Input } from '../../component/input/Input'
 import type { ShiftSession, TransactionRecord } from '../../types'
 import './ShiftPage.css'
 
@@ -144,16 +147,16 @@ export function ShiftPage({
       />
 
       <section className="shift-content">
-        <header className="shift-header">
-          <div>
-            <p>Shift</p>
-            <h1>Start dan end shift</h1>
-            <span>Pantau shift berjalan dan lihat rekap kasir per hari, bulan, dan tahun.</span>
-          </div>
-          <button type="button" onClick={onEndShift} disabled={!isShiftOpen}>
-            {isShiftOpen ? 'End Shift' : 'Shift Selesai'}
-          </button>
-        </header>
+        <PageHeader
+          eyebrow="Shift"
+          title="Start dan end shift"
+          description="Pantau shift berjalan dan lihat rekap kasir per hari, bulan, dan tahun."
+          actions={(
+            <Button variant="danger" type="button" onClick={onEndShift} disabled={!isShiftOpen}>
+              {isShiftOpen ? 'End Shift' : 'Shift Selesai'}
+            </Button>
+          )}
+        />
 
         <section className="shift-status-grid" aria-label="Status shift">
           <article>
@@ -181,7 +184,7 @@ export function ShiftPage({
           <div className="shift-date-control">
             <label>
               Cek Tanggal Transaksi
-              <input
+              <Input
                 type="date"
                 value={selectedDate}
                 onChange={(event) => setSelectedDate(event.target.value)}
@@ -228,27 +231,27 @@ export function ShiftPage({
               <h2>Rekap shift</h2>
             </div>
             <div className="recap-tabs">
-              <button
+              <Button
                 className={recapView === 'daily' ? 'active' : ''}
                 type="button"
                 onClick={() => setRecapView('daily')}
               >
                 Per Hari
-              </button>
-              <button
+              </Button>
+              <Button
                 className={recapView === 'monthly' ? 'active' : ''}
                 type="button"
                 onClick={() => setRecapView('monthly')}
               >
                 Per Bulan
-              </button>
-              <button
+              </Button>
+              <Button
                 className={recapView === 'yearly' ? 'active' : ''}
                 type="button"
                 onClick={() => setRecapView('yearly')}
               >
                 Per Tahun
-              </button>
+              </Button>
             </div>
           </div>
 

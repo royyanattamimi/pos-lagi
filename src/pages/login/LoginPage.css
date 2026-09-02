@@ -2,7 +2,7 @@
   min-height: 100vh;
   display: grid;
   grid-template-columns: minmax(320px, 0.92fr) minmax(380px, 1fr);
-  background: #f6f7fb;
+  background: #ffffff;
   color: #172033;
 }
 
@@ -12,8 +12,8 @@
   flex-direction: column;
   justify-content: space-between;
   padding: 42px;
-  background: linear-gradient(135deg, #0f766e, #111827);
-  color: #ffffff;
+  background: #f3f3f3;
+  color: #171717;
 }
 
 .login-brand {
@@ -40,7 +40,7 @@
 
 .login-brand div span {
   margin-top: 3px;
-  color: #cbd5e1;
+  color: #737373;
   font-size: 14px;
 }
 
@@ -56,7 +56,7 @@
 
 .hero-copy p {
   margin: 18px 0 0;
-  color: #dbeafe;
+  color: #626262;
   font-size: 17px;
   line-height: 1.6;
 }
@@ -102,7 +102,7 @@
   border: 1px solid #e1e7ef;
   border-radius: 8px;
   background: #ffffff;
-  box-shadow: 0 18px 44px rgba(15, 23, 42, 0.08);
+  box-shadow: 0 4px 18px rgba(15, 23, 42, 0.06);
 }
 
 .login-form label {

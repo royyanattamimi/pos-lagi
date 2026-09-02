@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { Product, TransactionRecord } from '../../types'
+import { Button } from '../button/Button'
+import { Input } from '../input/Input'
 import './DashboardHeader.css'
 
 type DashboardHeaderProps = {
@@ -56,14 +58,14 @@ export function DashboardHeader({
       <div className="dashboard-header-actions">
         <div className="dashboard-search-area">
           <div className="dashboard-search-buttons" aria-label="Pencarian cepat">
-            <button type="button" onClick={() => setIsSearchOpen((currentValue) => !currentValue)}>
+            <Button type="button" onClick={() => setIsSearchOpen((currentValue) => !currentValue)}>
               Search Product & Transaksi
-            </button>
+            </Button>
           </div>
 
           {isSearchOpen && (
             <div className="dashboard-search-panel">
-              <input
+              <Input
                 autoFocus
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
@@ -75,17 +77,17 @@ export function DashboardHeader({
                 {normalizedQuery && !hasResults && <span>Data tidak ditemukan.</span>}
 
                 {productResults.map((product) => (
-                  <button type="button" key={product.id} onClick={onOpenProduct}>
+                  <Button type="button" key={product.id} onClick={onOpenProduct}>
                     <strong>{product.name}</strong>
                     <small>Product - {product.category}</small>
-                  </button>
+                  </Button>
                 ))}
 
                 {transactionResults.map((transaction) => (
-                  <button type="button" key={transaction.id} onClick={onOpenTransaction}>
+                  <Button type="button" key={transaction.id} onClick={onOpenTransaction}>
                     <strong>{transaction.id}</strong>
                     <small>Transaksi - {transaction.cashier}</small>
-                  </button>
+                  </Button>
                 ))}
               </div>
             </div>

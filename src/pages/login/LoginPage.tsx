@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
+import { Button } from '../../component/button/Button'
+import { Input } from '../../component/input/Input'
 import './LoginPage.css'
 
 type LoginPageProps = {
@@ -43,7 +45,7 @@ export function LoginPage({ onLogin, onForgotPassword }: LoginPageProps) {
         <form className="login-form" onSubmit={handleSubmit}>
           <label>
             Email
-            <input
+            <Input
               type="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
@@ -55,14 +57,14 @@ export function LoginPage({ onLogin, onForgotPassword }: LoginPageProps) {
           <label>
             Password
             <div className="password-field">
-              <input
+              <Input
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
                 placeholder="Masukkan password"
                 autoComplete="current-password"
               />
-              <button
+              <Button
                 type="button"
                 onClick={() => setShowPassword((currentValue) => !currentValue)}
                 aria-label={showPassword ? 'Sembunyikan password' : 'Tampilkan password'}
@@ -80,21 +82,21 @@ export function LoginPage({ onLogin, onForgotPassword }: LoginPageProps) {
                     <circle cx="12" cy="12" r="3" />
                   </svg>
                 )}
-              </button>
+              </Button>
             </div>
           </label>
 
           <div className="login-options">
             <label className="remember-field">
-              <input type="checkbox" defaultChecked />
+              <Input type="checkbox" defaultChecked />
               Ingat saya
             </label>
-            <button className="forgot-password-link" type="button" onClick={onForgotPassword}>
+            <Button className="forgot-password-link" type="button" onClick={onForgotPassword}>
               Lupa password?
-            </button>
+            </Button>
           </div>
 
-          <button className="submit-button" type="submit">Masuk</button>
+          <Button className="submit-button" variant="primary" size="large" type="submit">Masuk</Button>
         </form>
       </section>
     </main>

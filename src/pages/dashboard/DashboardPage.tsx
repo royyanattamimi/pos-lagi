@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import './DashboardPage.css'
 import { DashboardHeader } from '../../component/header/DashboardHeader'
+import { PageHeader } from '../../component/header/PageHeader'
 import { Sidebar } from '../../component/sidebar/Sidebar'
+import { Button } from '../../component/button/Button'
 import { ProductPage } from '../product/ProductPage'
 import { ProfilePage } from '../profile/ProfilePage'
 import { ShiftPage } from '../shift/ShiftPage'
@@ -139,14 +141,15 @@ export function DashboardPage({
           onOpenTransaction={() => setActivePage('transaction')}
         />
 
-        <section className="dashboard-page-title">
-          <p>Dashboard</p>
-          <h1>Ringkasan operasional toko</h1>
-        </section>
+        <PageHeader
+          eyebrow="Dashboard"
+          title="Ringkasan operasional toko"
+          description="Pantau penjualan, transaksi, dan ketersediaan product dari satu tempat."
+        />
 
         <section className="stats-grid" aria-label="Ringkasan data">
           {stats.map((stat) => (
-            <button
+            <Button
               className="stat-card"
               type="button"
               key={stat.label}
@@ -155,7 +158,7 @@ export function DashboardPage({
               <span>{stat.label}</span>
               <strong>{stat.value}</strong>
               <small>Lihat rincian</small>
-            </button>
+            </Button>
           ))}
         </section>
 
@@ -170,7 +173,7 @@ export function DashboardPage({
                   {activeDetail === 'active-products' && 'Product Aktif'}
                 </h2>
               </div>
-              <button type="button" onClick={() => setActiveDetail(null)}>Kembali</button>
+              <Button type="button" onClick={() => setActiveDetail(null)}>Kembali</Button>
             </div>
 
             {activeDetail === 'sales-today' && (
@@ -236,7 +239,7 @@ export function DashboardPage({
                 <p>Product</p>
                 <h2>Daftar product</h2>
               </div>
-              <button type="button" onClick={() => setActivePage('product')}>Add Product</button>
+              <Button type="button" onClick={() => setActivePage('product')}>Add Product</Button>
             </div>
 
             <div className="product-list">
@@ -264,7 +267,7 @@ export function DashboardPage({
                 <p>Transaksi</p>
                 <h2>Transaksi terbaru</h2>
               </div>
-              <button type="button" onClick={() => setActivePage('transaction')}>Lihat Semua</button>
+              <Button type="button" onClick={() => setActivePage('transaction')}>Lihat Semua</Button>
             </div>
 
             <div className="transaction-list">

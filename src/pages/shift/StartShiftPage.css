@@ -3,9 +3,7 @@
   display: grid;
   place-items: center;
   padding: 28px;
-  background:
-    linear-gradient(135deg, rgba(15, 118, 110, 0.12), rgba(17, 24, 39, 0.08)),
-    #f6f7fb;
+  background: #fafafa;
   color: #172033;
 }
 
@@ -17,7 +15,7 @@
   border: 1px solid #e1e7ef;
   border-radius: 8px;
   background: #ffffff;
-  box-shadow: 0 18px 44px rgba(15, 23, 42, 0.08);
+  box-shadow: 0 4px 18px rgba(15, 23, 42, 0.06);
 }
 
 .shift-brand {

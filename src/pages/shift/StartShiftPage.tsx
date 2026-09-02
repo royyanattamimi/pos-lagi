@@ -1,5 +1,8 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
+import { Button } from '../../component/button/Button'
+import { Input } from '../../component/input/Input'
+import { Select } from '../../component/select/Select'
 import type { ShiftInput } from '../../types'
 import './StartShiftPage.css'
 
@@ -57,7 +60,7 @@ export function StartShiftPage({ onStartShift, onBackToLogin }: StartShiftPagePr
         <form className="shift-form" onSubmit={handleSubmit}>
           <label>
             Nama Kasir
-            <input
+            <Input
               value={cashierName}
               onChange={(event) => setCashierName(event.target.value)}
               placeholder="Nama kasir"
@@ -66,17 +69,17 @@ export function StartShiftPage({ onStartShift, onBackToLogin }: StartShiftPagePr
 
           <label>
             Pilih Shift
-            <select value={shiftTime} onChange={(event) => setShiftTime(event.target.value)}>
+            <Select value={shiftTime} onChange={(event) => setShiftTime(event.target.value)}>
               <option value="">Pilih jam shift</option>
               <option>08:00 - 16:00</option>
               <option>16:00 - 22:00</option>
               <option>22:00 - 06:00</option>
-            </select>
+            </Select>
           </label>
 
           <label>
             Kas Awal
-            <input
+            <Input
               inputMode="numeric"
               value={formatRupiah(openingCash)}
               onChange={(event) => handleOpeningCashChange(event.target.value)}
@@ -94,12 +97,12 @@ export function StartShiftPage({ onStartShift, onBackToLogin }: StartShiftPagePr
           </label>
 
           <div className="shift-actions">
-            <button className="secondary-shift-button" type="button" onClick={onBackToLogin}>
+            <Button className="secondary-shift-button" type="button" onClick={onBackToLogin}>
               Kembali
-            </button>
-            <button className="primary-shift-button" type="submit">
+            </Button>
+            <Button className="primary-shift-button" variant="primary" size="large" type="submit">
               Start Shift
-            </button>
+            </Button>
           </div>
         </form>
       </section>

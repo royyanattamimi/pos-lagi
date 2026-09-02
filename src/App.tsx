@@ -1,18 +1,24 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { DashboardPage } from './pages/dashboard/DashboardPage'
 import { ForgotPasswordPage } from './pages/login/ForgotPasswordPage'
 import { LoginPage } from './pages/login/LoginPage'
 import { StartShiftPage } from './pages/shift/StartShiftPage'
+import { loadPosData, savePosData } from './storage/posStorage'
 import type { Product, ProductInput, ShiftInput, ShiftSession, TransactionRecord } from './types'
 
 function App() {
+  const [storedData] = useState(loadPosData)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false)
-  const [isShiftStarted, setIsShiftStarted] = useState(false)
-  const [products, setProducts] = useState<Product[]>([])
-  const [transactions, setTransactions] = useState<TransactionRecord[]>([])
-  const [currentShift, setCurrentShift] = useState<ShiftSession | null>(null)
-  const [shiftHistory, setShiftHistory] = useState<ShiftSession[]>([])
+  const [isShiftStarted, setIsShiftStarted] = useState(storedData.currentShift?.status === 'Berjalan')
+  const [products, setProducts] = useState<Product[]>(storedData.products)
+  const [transactions, setTransactions] = useState<TransactionRecord[]>(storedData.transactions)
+  const [currentShift, setCurrentShift] = useState<ShiftSession | null>(storedData.currentShift)
+  const [shiftHistory, setShiftHistory] = useState<ShiftSession[]>(storedData.shiftHistory)
+
+  useEffect(() => {
+    savePosData({ products, transactions, currentShift, shiftHistory })
+  }, [products, transactions, currentShift, shiftHistory])
 
   function handleLogout() {
     setIsLoggedIn(false)
@@ -47,6 +53,7 @@ function App() {
     setShiftHistory((currentHistory) =>
       currentHistory.map((shift) => (shift.id === endedShift.id ? endedShift : shift)),
     )
+    setIsShiftStarted(false)
   }
 
   function handleAddProduct(data: ProductInput) {

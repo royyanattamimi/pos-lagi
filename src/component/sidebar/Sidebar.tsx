@@ -1,3 +1,4 @@
+import { Button } from '../button/Button'
 import './Sidebar.css'
 
 type SidebarPage = 'dashboard' | 'product' | 'transaction' | 'shift' | 'profile'
@@ -40,45 +41,45 @@ export function Sidebar({
       </div>
 
       <nav className="sidebar-nav" aria-label="Navigasi aplikasi">
-        <button
+        <Button
           className={activePage === 'dashboard' ? 'active' : ''}
           type="button"
           onClick={onDashboard}
         >
           Dashboard
-        </button>
-        <button
+        </Button>
+        <Button
           className={activePage === 'product' ? 'active' : ''}
           type="button"
           onClick={onProduct}
         >
           Product
-        </button>
-        <button
+        </Button>
+        <Button
           className={activePage === 'transaction' ? 'active' : ''}
           type="button"
           onClick={onTransaction}
         >
           Transaksi
-        </button>
-        <button
+        </Button>
+        <Button
           className={activePage === 'shift' ? 'active' : ''}
           type="button"
           onClick={onShift}
         >
           Shift
-        </button>
-        <button
+        </Button>
+        <Button
           className={activePage === 'profile' ? 'active' : ''}
           type="button"
           onClick={onProfile}
         >
           Profile
-        </button>
+        </Button>
       </nav>
 
       <section className="sidebar-profile">
-        <button
+        <Button
           className={activePage === 'profile' ? 'profile-button active' : 'profile-button'}
           type="button"
           onClick={onProfile}
@@ -88,7 +89,7 @@ export function Sidebar({
             <strong>{displayName}</strong>
             <small>Atur profile</small>
           </span>
-        </button>
+        </Button>
       </section>
     </aside>
   )

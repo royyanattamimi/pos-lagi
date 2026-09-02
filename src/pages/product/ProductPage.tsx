@@ -1,6 +1,10 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { Sidebar } from '../../component/sidebar/Sidebar'
+import { PageHeader } from '../../component/header/PageHeader'
+import { Button } from '../../component/button/Button'
+import { Input } from '../../component/input/Input'
+import { Select } from '../../component/select/Select'
 import type { Product, ProductInput } from '../../types'
 import './ProductPage.css'
 
@@ -136,40 +140,38 @@ export function ProductPage({
       />
 
       <section className="product-content">
-        <header className="product-header">
-          <div>
-            <p>Product</p>
-            <h1>Kelola data product</h1>
-            <span>Tambah product baru, lihat stok, harga jual, dan status ketersediaan barang.</span>
-          </div>
-          <button type="button" onClick={onDashboard}>Kembali</button>
-        </header>
+        <PageHeader
+          eyebrow="Product"
+          title="Kelola data product"
+          description="Tambah product baru, lihat stok, harga jual, dan status ketersediaan barang."
+          actions={<Button type="button" onClick={onDashboard}>Kembali</Button>}
+        />
 
         <section className="product-stats" aria-label="Ringkasan product">
-          <button type="button" onClick={() => setSelectedDetail('total-product')}>
+          <Button type="button" onClick={() => setSelectedDetail('total-product')}>
             <span>Total Product</span>
             <strong>{products.length}</strong>
             <div className="stat-detail">
               <small>{activeProducts} product aktif</small>
               <small>{totalCategories} kategori tersedia</small>
             </div>
-          </button>
-          <button type="button" onClick={() => setSelectedDetail('total-stock')}>
+          </Button>
+          <Button type="button" onClick={() => setSelectedDetail('total-stock')}>
             <span>Total Stok</span>
             <strong>{totalStock}</strong>
             <div className="stat-detail">
               <small>{safeStock} product stok aman</small>
               <small>{lowStockItems} item masuk stok rendah</small>
             </div>
-          </button>
-          <button type="button" onClick={() => setSelectedDetail('low-stock')}>
+          </Button>
+          <Button type="button" onClick={() => setSelectedDetail('low-stock')}>
             <span>Stok Rendah</span>
             <strong>{lowStock}</strong>
             <div className="stat-detail">
               <small>Batas stok rendah: 20 item</small>
               <small>{products.length - lowStock} product masih aman</small>
             </div>
-          </button>
+          </Button>
         </section>
 
         {selectedDetail ? (
@@ -183,7 +185,7 @@ export function ProductPage({
                   {selectedDetail === 'low-stock' && 'Rincian Stok Rendah'}
                 </h2>
               </div>
-              <button type="button" onClick={() => setSelectedDetail(null)}>Kembali ke Product</button>
+              <Button type="button" onClick={() => setSelectedDetail(null)}>Kembali ke Product</Button>
             </div>
 
             <div className="detail-summary-grid">
@@ -277,16 +279,16 @@ export function ProductPage({
                 <h2>{editingProductId ? 'Edit product' : 'Tambah product baru'}</h2>
               </div>
               {editingProductId && (
-                <button className="product-secondary" type="button" onClick={handleCancelEdit}>
+                <Button className="product-secondary" type="button" onClick={handleCancelEdit}>
                   Batal Edit
-                </button>
+                </Button>
               )}
             </div>
 
             <form className="product-form-page" onSubmit={handleSubmit}>
               <label>
                 Nama Product
-                <input
+                <Input
                   value={form.name}
                   onChange={(event) => setForm({ ...form, name: event.target.value })}
                   placeholder="Contoh: Gula 1kg"
@@ -295,7 +297,7 @@ export function ProductPage({
 
               <label>
                 Kategori
-                <select
+                <Select
                   value={form.category}
                   onChange={(event) => setForm({ ...form, category: event.target.value })}
                 >
@@ -303,13 +305,13 @@ export function ProductPage({
                   {categories.map((category) => (
                     <option key={category}>{category}</option>
                   ))}
-                </select>
+                </Select>
               </label>
 
               <div className="product-form-row">
                 <label>
                   Stok
-                  <input
+                  <Input
                     min="0"
                     type="number"
                     value={form.stock}
@@ -319,7 +321,7 @@ export function ProductPage({
                 </label>
                 <label>
                   Harga
-                  <input
+                  <Input
                     min="1"
                     type="number"
                     value={form.price}
@@ -331,7 +333,7 @@ export function ProductPage({
 
               <label>
                 Image Product
-                <input
+                <Input
                   accept="image/*"
                   type="file"
                   onChange={(event) => handleImageChange(event.target.files?.[0])}
@@ -343,9 +345,9 @@ export function ProductPage({
                 <span>{form.image ? 'Image siap digunakan' : 'Upload image agar product tampil lebih jelas'}</span>
               </div>
 
-              <button className="product-primary" type="submit">
+              <Button className="product-primary" variant="primary" type="submit">
                 {editingProductId ? 'Update Product' : 'Simpan Product'}
-              </button>
+              </Button>
             </form>
           </article>
 
@@ -372,9 +374,9 @@ export function ProductPage({
                   <span>{product.stock} stok</span>
                   <strong>{formatCurrency(product.price)}</strong>
                   <em className={product.status === 'Stok Rendah' ? 'low' : ''}>{product.status}</em>
-                  <button className="product-edit-button" type="button" onClick={() => handleEditProduct(product)}>
+                  <Button className="product-edit-button" type="button" onClick={() => handleEditProduct(product)}>
                     Edit
-                  </button>
+                  </Button>
                 </div>
               ))}
             </div>
