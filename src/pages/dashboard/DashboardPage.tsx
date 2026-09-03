@@ -19,6 +19,7 @@ type DashboardPageProps = {
   shiftHistory: ShiftSession[]
   onAddProduct: (product: ProductInput) => void
   onUpdateProduct: (productId: number, product: ProductInput) => void
+  onDeleteProduct: (productId: number) => void
   onCompleteTransaction: (transaction: TransactionRecord) => void
   onEndShift: () => void
   onLogout: () => void
@@ -44,6 +45,7 @@ export function DashboardPage({
   shiftHistory,
   onAddProduct,
   onUpdateProduct,
+  onDeleteProduct,
   onCompleteTransaction,
   onEndShift,
   onLogout,
@@ -130,6 +132,7 @@ export function DashboardPage({
         products={products}
         onAddProduct={onAddProduct}
         onUpdateProduct={onUpdateProduct}
+        onDeleteProduct={onDeleteProduct}
       />
     )
   }

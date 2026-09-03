@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
+import { Search, Trash2 } from 'lucide-react'
 import { Sidebar } from '../../component/sidebar/Sidebar'
 import { PageHeader } from '../../component/header/PageHeader'
 import { Button } from '../../component/button/Button'
@@ -17,6 +18,7 @@ type ProductPageProps = {
   products: Product[]
   onAddProduct: (product: ProductInput) => void
   onUpdateProduct: (productId: number, product: ProductInput) => void
+  onDeleteProduct: (productId: number) => void
 }
 
 type ProductDetail = 'total-product' | null
@@ -42,9 +44,13 @@ export function ProductPage({
   products,
   onAddProduct,
   onUpdateProduct,
+  onDeleteProduct,
 }: ProductPageProps) {
   const [selectedDetail, setSelectedDetail] = useState<ProductDetail>(null)
   const [editingProductId, setEditingProductId] = useState<number | null>(null)
+  const [productSearch, setProductSearch] = useState('')
+  const [appliedSearch, setAppliedSearch] = useState('')
+  const [categoryFilter, setCategoryFilter] = useState('Semua')
   const [form, setForm] = useState({
     name: '',
     category: '',
@@ -58,6 +64,12 @@ export function ProductPage({
     category,
     total: products.filter((product) => product.category === category).length,
   }))
+  const filteredProducts = products.filter((product) => {
+    const matchesSearch = product.name.toLowerCase().includes(appliedSearch.toLowerCase())
+    const matchesCategory = categoryFilter === 'Semua' || product.category === categoryFilter
+
+    return matchesSearch && matchesCategory
+  })
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -96,6 +108,14 @@ export function ProductPage({
   function handleCancelEdit() {
     setEditingProductId(null)
     setForm({ name: '', category: '', price: '', image: '' })
+  }
+
+  function handleDeleteProduct(product: Product) {
+    const shouldDelete = window.confirm(`Hapus product "${product.name}"?`)
+    if (!shouldDelete) return
+
+    onDeleteProduct(product.id)
+    if (editingProductId === product.id) handleCancelEdit()
   }
 
   function handleImageChange(file: File | undefined) {
@@ -276,22 +296,77 @@ export function ProductPage({
               </div>
             </div>
 
+            <form
+              className="product-list-toolbar"
+              onSubmit={(event) => {
+                event.preventDefault()
+                setAppliedSearch(productSearch.trim())
+              }}
+            >
+              <Input
+                type="search"
+                value={productSearch}
+                onChange={(event) => setProductSearch(event.target.value)}
+                placeholder="Cari nama product"
+                aria-label="Cari nama product"
+              />
+              <Select
+                value={categoryFilter}
+                onChange={(event) => setCategoryFilter(event.target.value)}
+                aria-label="Filter kategori product"
+              >
+                <option value="Semua">Semua kategori</option>
+                {categories.map((category) => (
+                  <option value={category} key={category}>{category}</option>
+                ))}
+              </Select>
+              <Button variant="primary" type="submit">
+                <Search aria-hidden="true" />
+                Search
+              </Button>
+            </form>
+
             <div className="product-table">
-              {products.length === 0 ? (
-                <div className="empty-product-state">Belum ada product. Tambahkan product manual dari form.</div>
-              ) : products.map((product) => (
+              {filteredProducts.length > 0 && (
+                <div className="product-table-head" aria-hidden="true">
+                  <span>Product</span>
+                  <span>Kategori</span>
+                  <span>Harga</span>
+                  <span>Aksi</span>
+                </div>
+              )}
+              {filteredProducts.length === 0 ? (
+                <div className="empty-product-state">
+                  {products.length === 0
+                    ? 'Belum ada product. Tambahkan product manual dari form.'
+                    : 'Product tidak ditemukan pada pencarian atau kategori ini.'}
+                </div>
+              ) : filteredProducts.map((product) => (
                 <div className="product-table-row" key={product.id}>
                   <div className="product-name-cell">
                     <img src={product.image} alt={product.name} />
                     <div>
                       <strong>{product.name}</strong>
-                      <span>{product.category}</span>
                     </div>
                   </div>
+                  <span className="product-category">{product.category}</span>
                   <strong>{formatCurrency(product.price)}</strong>
-                  <Button className="product-edit-button" type="button" onClick={() => handleEditProduct(product)}>
-                    Edit
-                  </Button>
+                  <div className="product-row-actions">
+                    <Button className="product-edit-button" type="button" onClick={() => handleEditProduct(product)}>
+                      Edit
+                    </Button>
+                    <Button
+                      className="product-delete-button"
+                      variant="ghost"
+                      size="small"
+                      type="button"
+                      aria-label={`Hapus ${product.name}`}
+                      title={`Hapus ${product.name}`}
+                      onClick={() => handleDeleteProduct(product)}
+                    >
+                      <Trash2 aria-hidden="true" />
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>

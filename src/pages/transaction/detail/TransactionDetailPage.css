@@ -194,3 +194,36 @@
     text-align: left;
   }
 }
+
+@media print {
+  @page {
+    margin: 14mm;
+  }
+
+  .transaction-detail-page {
+    display: block;
+    min-height: auto;
+    background: #ffffff;
+  }
+
+  .transaction-detail-page .app-sidebar,
+  .transaction-detail-page .page-header-actions {
+    display: none;
+  }
+
+  .transaction-detail-content {
+    max-width: none;
+    padding: 0;
+  }
+
+  .transaction-detail-layout {
+    grid-template-columns: minmax(0, 1fr) 280px;
+  }
+
+  .transaction-detail-summary article,
+  .transaction-detail-panel,
+  .transaction-payment-panel {
+    box-shadow: none;
+    break-inside: avoid;
+  }
+}

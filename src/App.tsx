@@ -78,6 +78,12 @@ function App() {
     )
   }
 
+  function handleDeleteProduct(productId: number) {
+    setProducts((currentProducts) =>
+      currentProducts.filter((product) => product.id !== productId),
+    )
+  }
+
   function handleCompleteTransaction(transaction: TransactionRecord) {
     setTransactions((currentTransactions) => [transaction, ...currentTransactions])
   }
@@ -91,6 +97,7 @@ function App() {
         shiftHistory={shiftHistory}
         onAddProduct={handleAddProduct}
         onUpdateProduct={handleUpdateProduct}
+        onDeleteProduct={handleDeleteProduct}
         onCompleteTransaction={handleCompleteTransaction}
         onEndShift={handleEndShift}
         onLogout={handleLogout}

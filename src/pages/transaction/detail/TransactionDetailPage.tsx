@@ -35,6 +35,10 @@ export function TransactionDetailPage({
 }: TransactionDetailPageProps) {
   const transactionDate = new Date(transaction.createdAt)
 
+  function handlePrint() {
+    window.print()
+  }
+
   return (
     <main className="transaction-detail-page">
       <Sidebar
@@ -52,7 +56,12 @@ export function TransactionDetailPage({
           eyebrow="Rincian Transaksi"
           title={transaction.id}
           description="Informasi lengkap transaksi dan product yang dibeli."
-          actions={<Button type="button" onClick={onBack}>Kembali</Button>}
+          actions={(
+            <>
+              <Button type="button" onClick={onBack}>Kembali</Button>
+              <Button variant="primary" type="button" onClick={handlePrint}>Print Transaksi</Button>
+            </>
+          )}
         />
 
         <section className="transaction-detail-summary" aria-label="Informasi transaksi">

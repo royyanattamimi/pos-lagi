@@ -296,13 +296,59 @@
   gap: 10px;
 }
 
+.product-list-toolbar {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) 170px auto;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.product-list-toolbar .ui-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 44px;
+}
+
+.product-list-toolbar .ui-button svg {
+  width: 17px;
+  height: 17px;
+}
+
 .product-table-row {
   display: grid;
-  grid-template-columns: minmax(220px, 1fr) 120px 70px;
+  grid-template-columns: minmax(200px, 1fr) 110px 120px 114px;
   gap: 12px;
   align-items: center;
   padding: 13px 0;
   border-bottom: 1px solid #edf1f6;
+}
+
+.product-table-head {
+  display: grid;
+  grid-template-columns: minmax(200px, 1fr) 110px 120px 114px;
+  gap: 12px;
+  padding: 0 0 9px;
+  border-bottom: 1px solid #e5e7ea;
+  color: #7b8490;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.product-table-head span:last-child {
+  text-align: right;
+}
+
+.product-category {
+  width: fit-content;
+  border-radius: 8px;
+  padding: 4px 7px;
+  color: #444444 !important;
+  background: #eeeeee;
+  font-size: 12px !important;
+  font-weight: 750;
 }
 
 .detail-table .product-table-row {
@@ -331,6 +377,35 @@
 .product-name-cell div {
   display: grid;
   gap: 3px;
+}
+
+.product-row-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.product-delete-button.ui-button {
+  width: 34px;
+  min-width: 34px;
+  min-height: 34px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #e3e3e3;
+  padding: 0;
+  color: #b4232d;
+  background: #ffffff;
+}
+
+.product-delete-button.ui-button:hover {
+  border-color: #efc2c6;
+  color: #981b24;
+  background: #fff5f5;
+}
+
+.product-delete-button svg {
+  width: 17px;
+  height: 17px;
 }
 
 @media (max-width: 1040px) {
@@ -372,7 +447,19 @@
     grid-template-columns: 1fr;
   }
 
+  .product-list-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .product-table-head {
+    display: none;
+  }
+
   .product-edit-button {
     justify-self: start;
+  }
+
+  .product-row-actions {
+    justify-content: flex-start;
   }
 }
