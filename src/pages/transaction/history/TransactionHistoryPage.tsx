@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { Plus } from 'lucide-react'
 import { Button } from '../../../component/button/Button'
 import { PageHeader } from '../../../component/header/PageHeader'
 import { Input } from '../../../component/input/Input'
@@ -90,8 +91,15 @@ export function TransactionHistoryPage({
           title="Riwayat transaksi"
           description="Pantau seluruh transaksi yang tersimpan dan buka rincian setiap pembayaran."
           actions={(
-            <Button variant="primary" type="button" onClick={onNewTransaction}>
-              Transaksi Baru
+            <Button
+              className="new-transaction-button"
+              variant="primary"
+              size="large"
+              type="button"
+              onClick={onNewTransaction}
+            >
+              <Plus aria-hidden="true" />
+              Buat Transaksi Baru
             </Button>
           )}
         />
@@ -151,9 +159,20 @@ export function TransactionHistoryPage({
 
             {filteredTransactions.length === 0 ? (
               <div className="transaction-history-empty">
-                {transactions.length === 0
-                  ? 'Belum ada transaksi yang tersimpan.'
-                  : 'Tidak ada transaksi yang sesuai dengan filter.'}
+                {transactions.length === 0 ? (
+                  <>
+                    <div>
+                      <strong>Belum ada transaksi</strong>
+                      <span>Mulai transaksi pertama untuk mencatat pesanan dan pembayaran.</span>
+                    </div>
+                    <Button variant="primary" type="button" onClick={onNewTransaction}>
+                      <Plus aria-hidden="true" />
+                      Buat Transaksi Baru
+                    </Button>
+                  </>
+                ) : (
+                  <span>Tidak ada transaksi yang sesuai dengan filter.</span>
+                )}
               </div>
             ) : filteredTransactions.map((transaction) => (
               <Button

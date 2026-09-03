@@ -80,7 +80,7 @@ export function DashboardPage({
         }}
         onTransaction={() => {
           setSelectedTransaction(null)
-          setActivePage('transaction')
+          setActivePage('checkout')
         }}
         onProfile={() => {
           setSelectedTransaction(null)
@@ -96,7 +96,8 @@ export function DashboardPage({
       <TransactionPage
         onDashboard={() => setActivePage('dashboard')}
         onProduct={() => setActivePage('product')}
-        onTransaction={() => setActivePage('transaction')}
+        onTransaction={() => setActivePage('checkout')}
+        onHistory={() => setActivePage('transaction')}
         onShift={() => setActivePage('shift')}
         onProfile={() => setActivePage('profile')}
         products={products}
@@ -112,7 +113,7 @@ export function DashboardPage({
         transactions={transactions}
         onDashboard={() => setActivePage('dashboard')}
         onProduct={() => setActivePage('product')}
-        onTransaction={() => setActivePage('transaction')}
+        onTransaction={() => setActivePage('checkout')}
         onProfile={() => setActivePage('profile')}
         onNewTransaction={() => setActivePage('checkout')}
         onSelectTransaction={setSelectedTransaction}
@@ -126,7 +127,7 @@ export function DashboardPage({
       <ProductPage
         onDashboard={() => setActivePage('dashboard')}
         onProduct={() => setActivePage('product')}
-        onTransaction={() => setActivePage('transaction')}
+        onTransaction={() => setActivePage('checkout')}
         onShift={() => setActivePage('shift')}
         onProfile={() => setActivePage('profile')}
         products={products}
@@ -142,7 +143,7 @@ export function DashboardPage({
       <ProfilePage
         onDashboard={() => setActivePage('dashboard')}
         onProduct={() => setActivePage('product')}
-        onTransaction={() => setActivePage('transaction')}
+        onTransaction={() => setActivePage('checkout')}
         onShift={() => setActivePage('shift')}
         onProfile={() => setActivePage('profile')}
         onLogout={onLogout}
@@ -157,7 +158,7 @@ export function DashboardPage({
       <ShiftPage
         onDashboard={() => setActivePage('dashboard')}
         onProduct={() => setActivePage('product')}
-        onTransaction={() => setActivePage('transaction')}
+        onTransaction={() => setActivePage('checkout')}
         onShift={() => setActivePage('shift')}
         onProfile={() => setActivePage('profile')}
         currentShift={currentShift}
@@ -174,7 +175,7 @@ export function DashboardPage({
         activePage="dashboard"
         onDashboard={() => setActivePage('dashboard')}
         onProduct={() => setActivePage('product')}
-        onTransaction={() => setActivePage('transaction')}
+        onTransaction={() => setActivePage('checkout')}
         onShift={() => setActivePage('shift')}
         onProfile={() => setActivePage('profile')}
         profileName={currentShift?.cashierName}
@@ -200,11 +201,19 @@ export function DashboardPage({
               className="stat-card"
               type="button"
               key={stat.label}
-              onClick={() => setActiveDetail(stat.key as DashboardDetail)}
+              onClick={() => {
+                if (stat.key === 'transactions') {
+                  setActiveDetail(null)
+                  setActivePage('checkout')
+                  return
+                }
+
+                setActiveDetail(stat.key as DashboardDetail)
+              }}
             >
               <span>{stat.label}</span>
               <strong>{stat.value}</strong>
-              <small>Lihat rincian</small>
+              <small>{stat.key === 'transactions' ? 'Buat transaksi baru' : 'Lihat rincian'}</small>
             </Button>
           ))}
         </section>

@@ -14,6 +14,20 @@
   padding: 26px 32px 40px;
 }
 
+.new-transaction-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 210px;
+}
+
+.new-transaction-button svg,
+.transaction-history-empty .ui-button svg {
+  width: 18px;
+  height: 18px;
+}
+
 .transaction-history-stats {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -135,11 +149,36 @@
 
 .transaction-history-empty {
   min-height: 220px;
-  display: grid;
-  place-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
   padding: 24px;
   color: #737d88;
   text-align: center;
+}
+
+.transaction-history-empty > div {
+  display: grid;
+  gap: 6px;
+}
+
+.transaction-history-empty strong {
+  color: #242424;
+  font-size: 17px;
+}
+
+.transaction-history-empty span {
+  color: #737d88;
+  font-size: 14px;
+}
+
+.transaction-history-empty .ui-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 @media (max-width: 1100px) {

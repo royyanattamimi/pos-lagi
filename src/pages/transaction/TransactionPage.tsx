@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { History } from 'lucide-react'
 import { Sidebar } from '../../component/sidebar/Sidebar'
 import { PageHeader } from '../../component/header/PageHeader'
 import { Button } from '../../component/button/Button'
@@ -11,6 +12,7 @@ type TransactionPageProps = {
   onDashboard: () => void
   onProduct: () => void
   onTransaction: () => void
+  onHistory: () => void
   onShift: () => void
   onProfile: () => void
   products: Product[]
@@ -48,6 +50,7 @@ export function TransactionPage({
   onDashboard,
   onProduct,
   onTransaction,
+  onHistory,
   onShift,
   onProfile,
   products,
@@ -157,7 +160,7 @@ export function TransactionPage({
         onNewTransaction={resetTransaction}
         onDashboard={onDashboard}
         onProduct={onProduct}
-        onTransaction={onTransaction}
+        onTransaction={resetTransaction}
         onShift={onShift}
         onProfile={onProfile}
       />
@@ -180,7 +183,15 @@ export function TransactionPage({
           eyebrow="Transaksi"
           title="Buat transaksi baru"
           description="Pilih product, review pesanan, proses pembayaran, lalu selesaikan transaksi."
-          actions={<Button type="button" onClick={resetTransaction}>Reset</Button>}
+          actions={(
+            <>
+              <Button className="transaction-history-button" type="button" onClick={onHistory}>
+                <History aria-hidden="true" />
+                Riwayat Transaksi
+              </Button>
+              <Button type="button" onClick={resetTransaction}>Reset</Button>
+            </>
+          )}
         />
 
         <section className="transaction-stepper" aria-label="Flow transaksi">

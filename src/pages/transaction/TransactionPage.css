@@ -11,6 +11,18 @@
   padding: 30px;
 }
 
+.transaction-history-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+
+.transaction-history-button svg {
+  width: 17px;
+  height: 17px;
+}
+
 .transaction-header {
   display: flex;
   align-items: center;
