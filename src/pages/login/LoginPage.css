@@ -245,6 +245,23 @@
   line-height: 1.45;
 }
 
+.login-error-state {
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 12px;
+  color: #991b1b;
+  background: #fef2f2;
+  font-size: 14px;
+  font-weight: 750;
+  line-height: 1.45;
+}
+
+.submit-button:disabled,
+.secondary-login-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
 @media (max-width: 860px) {
   .login-page {
     grid-template-columns: 1fr;

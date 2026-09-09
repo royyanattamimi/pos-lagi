@@ -5,7 +5,7 @@ import { Input } from '../../component/input/Input'
 import './LoginPage.css'
 
 type LoginPageProps = {
-  onLogin: () => void
+  onLogin: (email: string, password: string) => Promise<void>
   onForgotPassword: () => void
 }
 
@@ -13,10 +13,21 @@ export function LoginPage({ onLogin, onForgotPassword }: LoginPageProps) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    onLogin()
+    setErrorMessage('')
+    setIsSubmitting(true)
+
+    try {
+      await onLogin(email.trim(), password)
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : 'Login gagal. Coba lagi.')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -51,6 +62,7 @@ export function LoginPage({ onLogin, onForgotPassword }: LoginPageProps) {
               onChange={(event) => setEmail(event.target.value)}
               placeholder="admin@poslagi.com"
               autoComplete="email"
+              required
             />
           </label>
 
@@ -63,6 +75,7 @@ export function LoginPage({ onLogin, onForgotPassword }: LoginPageProps) {
                 onChange={(event) => setPassword(event.target.value)}
                 placeholder="Masukkan password"
                 autoComplete="current-password"
+                required
               />
               <Button
                 type="button"
@@ -96,7 +109,15 @@ export function LoginPage({ onLogin, onForgotPassword }: LoginPageProps) {
             </Button>
           </div>
 
-          <Button className="submit-button" variant="primary" size="large" type="submit">Masuk</Button>
+          {errorMessage && (
+            <div className="login-error-state">
+              {errorMessage}
+            </div>
+          )}
+
+          <Button className="submit-button" variant="primary" size="large" type="submit" disabled={isSubmitting}>
+            {isSubmitting ? 'Memproses...' : 'Masuk'}
+          </Button>
         </form>
       </section>
     </main>

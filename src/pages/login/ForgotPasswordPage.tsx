@@ -6,15 +6,28 @@ import './LoginPage.css'
 
 type ForgotPasswordPageProps = {
   onBackToLogin: () => void
+  onResetPassword: (email: string) => Promise<void>
 }
 
-export function ForgotPasswordPage({ onBackToLogin }: ForgotPasswordPageProps) {
+export function ForgotPasswordPage({ onBackToLogin, onResetPassword }: ForgotPasswordPageProps) {
   const [email, setEmail] = useState('')
   const [isSubmitted, setIsSubmitted] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    setIsSubmitted(true)
+    setErrorMessage('')
+    setIsSubmitting(true)
+
+    try {
+      await onResetPassword(email.trim())
+      setIsSubmitted(true)
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : 'Reset password gagal. Coba lagi.')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -49,6 +62,7 @@ export function ForgotPasswordPage({ onBackToLogin }: ForgotPasswordPageProps) {
               onChange={(event) => {
                 setEmail(event.target.value)
                 setIsSubmitted(false)
+                setErrorMessage('')
               }}
               placeholder="Masukkan email akun"
               autoComplete="email"
@@ -65,7 +79,15 @@ export function ForgotPasswordPage({ onBackToLogin }: ForgotPasswordPageProps) {
             </div>
           )}
 
-          <Button className="submit-button" variant="primary" size="large" type="submit">Kirim Instruksi Reset</Button>
+          {errorMessage && (
+            <div className="login-error-state">
+              {errorMessage}
+            </div>
+          )}
+
+          <Button className="submit-button" variant="primary" size="large" type="submit" disabled={isSubmitting}>
+            {isSubmitting ? 'Mengirim...' : 'Kirim Instruksi Reset'}
+          </Button>
           <Button className="secondary-login-button" type="button" onClick={onBackToLogin}>
             Kembali ke Login
           </Button>

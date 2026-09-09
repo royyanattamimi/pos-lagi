@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { ImagePlus, Package, Search, Tags, Trash2, WalletCards } from 'lucide-react'
+import { Boxes, ImagePlus, Package, Search, Tags, Trash2, WalletCards } from 'lucide-react'
 import { Sidebar } from '../../component/sidebar/Sidebar'
 import { PageHeader } from '../../component/header/PageHeader'
 import { Button } from '../../component/button/Button'
@@ -21,7 +21,7 @@ type ProductPageProps = {
   onDeleteProduct: (productId: number) => void
 }
 
-type ProductDetail = 'total-product' | null
+type ProductDetail = 'total-product' | 'category' | null
 
 const categories = ['Makanan', 'Minuman', 'Sembako', 'Promo']
 
@@ -59,20 +59,44 @@ export function ProductPage({
   })
 
   const activeProducts = products.length
-  const totalCategories = new Set(products.map((product) => product.category)).size
-  const averagePrice = products.length
-    ? Math.round(products.reduce((total, product) => total + product.price, 0) / products.length)
-    : 0
-  const categoryBreakdown = categories.map((category) => ({
-    category,
-    total: products.filter((product) => product.category === category).length,
-  }))
+  const productCategories = Array.from(new Set(products.map((product) => product.category))).filter(Boolean)
+  const totalCategories = productCategories.length
+  const totalCatalogValue = products.reduce((total, product) => total + product.price, 0)
+  const highestProduct = products.reduce<Product | null>(
+    (currentHighest, product) =>
+      !currentHighest || product.price > currentHighest.price ? product : currentHighest,
+    null,
+  )
+  const lowestProduct = products.reduce<Product | null>(
+    (currentLowest, product) =>
+      !currentLowest || product.price < currentLowest.price ? product : currentLowest,
+    null,
+  )
+  const availableCategories = Array.from(new Set([...categories, ...productCategories]))
+  const categoryBreakdown = availableCategories.map((category) => {
+    const categoryProducts = products.filter((product) => product.category === category)
+    const categoryValue = categoryProducts.reduce((total, product) => total + product.price, 0)
+    const categoryAverage = categoryProducts.length ? Math.round(categoryValue / categoryProducts.length) : 0
+    const percentage = products.length ? Math.round((categoryProducts.length / products.length) * 100) : 0
+
+    return {
+      category,
+      products: categoryProducts,
+      total: categoryProducts.length,
+      value: categoryValue,
+      average: categoryAverage,
+      percentage,
+    }
+  })
   const filteredProducts = products.filter((product) => {
     const matchesSearch = product.name.toLowerCase().includes(appliedSearch.toLowerCase())
     const matchesCategory = categoryFilter === 'Semua' || product.category === categoryFilter
 
     return matchesSearch && matchesCategory
   })
+  const detailTitle = selectedDetail === 'category'
+    ? 'Rincian Kategori'
+    : 'Rincian Total Product'
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -121,6 +145,15 @@ export function ProductPage({
     if (editingProductId === product.id) handleCancelEdit()
   }
 
+  function openCategoryDetail() {
+    setSelectedDetail('category')
+  }
+
+  function applyCategoryFilter(category: string) {
+    setCategoryFilter(category)
+    setSelectedDetail(null)
+  }
+
   function handleImageChange(file: File | undefined) {
     if (!file) return
 
@@ -165,7 +198,7 @@ export function ProductPage({
             <small>{activeProducts} product aktif</small>
           </Button>
 
-          <div className="product-stat-card">
+          <Button type="button" onClick={openCategoryDetail}>
             <span className="product-stat-icon">
               <Tags aria-hidden="true" />
             </span>
@@ -174,18 +207,8 @@ export function ProductPage({
               <strong>{totalCategories}</strong>
             </div>
             <small>{categoryFilter === 'Semua' ? 'Semua kategori' : categoryFilter}</small>
-          </div>
+          </Button>
 
-          <div className="product-stat-card">
-            <span className="product-stat-icon">
-              <WalletCards aria-hidden="true" />
-            </span>
-            <div>
-              <span>Rata-rata Harga</span>
-              <strong>{formatCurrency(averagePrice)}</strong>
-            </div>
-            <small>{filteredProducts.length} product tampil</small>
-          </div>
         </section>
 
         {selectedDetail ? (
@@ -194,55 +217,136 @@ export function ProductPage({
               <div>
                 <p>Rincian Product</p>
                 <h2>
-                  Rincian Total Product
+                  {detailTitle}
                 </h2>
               </div>
               <Button type="button" onClick={() => setSelectedDetail(null)}>Kembali ke Product</Button>
             </div>
 
-            <div className="detail-summary-grid">
-              {selectedDetail === 'total-product' && (
-                <>
+            {selectedDetail === 'total-product' && (
+              <>
+                <div className="detail-summary-grid inventory-summary-grid">
                   <article>
                     <span>Product Aktif</span>
                     <strong>{activeProducts}</strong>
+                    <small>Total item yang siap dipakai transaksi</small>
                   </article>
                   <article>
-                    <span>Kategori</span>
-                    <strong>{totalCategories}</strong>
+                    <span>Nilai Katalog</span>
+                    <strong>{formatCurrency(totalCatalogValue)}</strong>
+                    <small>Akumulasi harga jual semua product</small>
                   </article>
                   <article>
-                    <span>Total Data</span>
-                    <strong>{products.length}</strong>
+                    <span>Harga Tertinggi</span>
+                    <strong>{highestProduct ? formatCurrency(highestProduct.price) : '-'}</strong>
+                    <small>{highestProduct?.name ?? 'Belum ada product'}</small>
                   </article>
-                </>
-              )}
-
-            </div>
-
-            <div className="category-breakdown">
-              {categoryBreakdown.map((item) => (
-                <article key={item.category}>
-                  <span>{item.category}</span>
-                  <strong>{item.total} product</strong>
-                </article>
-              ))}
-            </div>
-
-            <div className="product-table detail-table">
-              {products.map((product) => (
-                <div className="product-table-row" key={product.id}>
-                  <div className="product-name-cell">
-                    <img src={product.image} alt={product.name} />
-                    <div>
-                      <strong>{product.name}</strong>
-                      <span>{product.category}</span>
-                    </div>
-                  </div>
-                  <strong>{formatCurrency(product.price)}</strong>
+                  <article>
+                    <span>Harga Terendah</span>
+                    <strong>{lowestProduct ? formatCurrency(lowestProduct.price) : '-'}</strong>
+                    <small>{lowestProduct?.name ?? 'Belum ada product'}</small>
+                  </article>
                 </div>
-              ))}
-            </div>
+
+                <div className="inventory-board">
+                  <section className="inventory-card">
+                    <div className="inventory-card-icon">
+                      <Boxes aria-hidden="true" />
+                    </div>
+                    <div>
+                      <span>Status Inventori</span>
+                      <strong>{products.length > 0 ? 'Data product tersedia' : 'Belum ada data'}</strong>
+                      <p>{products.length > 0 ? `${products.length} product sudah masuk katalog kasir.` : 'Tambahkan product dari form agar katalog bisa dipakai transaksi.'}</p>
+                    </div>
+                  </section>
+                  <section className="inventory-card">
+                    <div className="inventory-card-icon">
+                      <WalletCards aria-hidden="true" />
+                    </div>
+                    <div>
+                      <span>Rentang Harga</span>
+                      <strong>
+                        {lowestProduct && highestProduct
+                          ? `${formatCurrency(lowestProduct.price)} - ${formatCurrency(highestProduct.price)}`
+                          : '-'}
+                      </strong>
+                      <p>Gunakan data ini untuk memeriksa product yang terlalu murah atau terlalu mahal.</p>
+                    </div>
+                  </section>
+                </div>
+
+                <div className="product-table detail-table inventory-table">
+                  {products.length === 0 ? (
+                    <div className="empty-product-state">Belum ada product. Tambahkan product manual dari form.</div>
+                  ) : products.map((product) => (
+                    <div className="product-table-row" key={product.id}>
+                      <div className="product-name-cell">
+                        <img src={product.image} alt={product.name} />
+                        <div>
+                          <strong>{product.name}</strong>
+                          <span>{product.category}</span>
+                        </div>
+                      </div>
+                      <strong>{formatCurrency(product.price)}</strong>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+
+            {selectedDetail === 'category' && (
+              <>
+                <div className="detail-summary-grid">
+                  <article>
+                    <span>Total Kategori</span>
+                    <strong>{totalCategories}</strong>
+                    <small>Kategori yang punya product</small>
+                  </article>
+                  <article>
+                    <span>Product Tampil</span>
+                    <strong>{filteredProducts.length}</strong>
+                    <small>{categoryFilter === 'Semua' ? 'Belum ada filter kategori' : `Filter ${categoryFilter} aktif`}</small>
+                  </article>
+                </div>
+
+                <div className="category-breakdown category-dashboard">
+                  {categoryBreakdown.map((item) => (
+                    <Button type="button" key={item.category} onClick={() => applyCategoryFilter(item.category)}>
+                      <span>{item.category}</span>
+                      <strong>{item.total} product</strong>
+                      <small>{item.percentage}% dari katalog</small>
+                      <div className="category-progress" aria-hidden="true">
+                        <i style={{ width: `${item.percentage}%` }}></i>
+                      </div>
+                    </Button>
+                  ))}
+                </div>
+
+                <div className="category-list-detail">
+                  {categoryBreakdown.map((item) => (
+                    <section className="category-detail-card" key={item.category}>
+                      <div className="category-detail-header">
+                        <div>
+                          <span>{item.category}</span>
+                          <strong>{item.total} product</strong>
+                        </div>
+                        <b>{formatCurrency(item.average)}</b>
+                      </div>
+                      <div className="category-mini-list">
+                        {item.products.length === 0 ? (
+                          <small>Belum ada product di kategori ini.</small>
+                        ) : item.products.slice(0, 3).map((product) => (
+                          <div key={product.id}>
+                            <span>{product.name}</span>
+                            <strong>{formatCurrency(product.price)}</strong>
+                          </div>
+                        ))}
+                      </div>
+                    </section>
+                  ))}
+                </div>
+              </>
+            )}
           </section>
         ) : (
         <section className="product-grid-page">
