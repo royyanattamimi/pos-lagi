@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { Search, Trash2 } from 'lucide-react'
+import { ImagePlus, Package, Search, Tags, Trash2, WalletCards } from 'lucide-react'
 import { Sidebar } from '../../component/sidebar/Sidebar'
 import { PageHeader } from '../../component/header/PageHeader'
 import { Button } from '../../component/button/Button'
@@ -60,6 +60,9 @@ export function ProductPage({
 
   const activeProducts = products.length
   const totalCategories = new Set(products.map((product) => product.category)).size
+  const averagePrice = products.length
+    ? Math.round(products.reduce((total, product) => total + product.price, 0) / products.length)
+    : 0
   const categoryBreakdown = categories.map((category) => ({
     category,
     total: products.filter((product) => product.category === category).length,
@@ -152,13 +155,37 @@ export function ProductPage({
 
         <section className="product-stats" aria-label="Ringkasan product">
           <Button type="button" onClick={() => setSelectedDetail('total-product')}>
-            <span>Total Product</span>
-            <strong>{products.length}</strong>
-            <div className="stat-detail">
-              <small>{activeProducts} product aktif</small>
-              <small>{totalCategories} kategori tersedia</small>
+            <span className="product-stat-icon">
+              <Package aria-hidden="true" />
+            </span>
+            <div>
+              <span>Total Product</span>
+              <strong>{products.length}</strong>
             </div>
+            <small>{activeProducts} product aktif</small>
           </Button>
+
+          <div className="product-stat-card">
+            <span className="product-stat-icon">
+              <Tags aria-hidden="true" />
+            </span>
+            <div>
+              <span>Kategori</span>
+              <strong>{totalCategories}</strong>
+            </div>
+            <small>{categoryFilter === 'Semua' ? 'Semua kategori' : categoryFilter}</small>
+          </div>
+
+          <div className="product-stat-card">
+            <span className="product-stat-icon">
+              <WalletCards aria-hidden="true" />
+            </span>
+            <div>
+              <span>Rata-rata Harga</span>
+              <strong>{formatCurrency(averagePrice)}</strong>
+            </div>
+            <small>{filteredProducts.length} product tampil</small>
+          </div>
         </section>
 
         {selectedDetail ? (
@@ -279,7 +306,10 @@ export function ProductPage({
 
               <div className="image-preview">
                 <img src={form.image || '/product-images/snack-real.png'} alt="Preview product" />
-                <span>{form.image ? 'Image siap digunakan' : 'Upload image agar product tampil lebih jelas'}</span>
+                <div>
+                  <ImagePlus aria-hidden="true" />
+                  <span>{form.image ? 'Image siap digunakan' : 'Upload image agar product tampil lebih jelas'}</span>
+                </div>
               </div>
 
               <Button className="product-primary" variant="primary" type="submit">
