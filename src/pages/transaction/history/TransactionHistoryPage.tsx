@@ -6,7 +6,6 @@ import { Input } from '../../../component/input/Input'
 import { Select } from '../../../component/select/Select'
 import { Sidebar } from '../../../component/sidebar/Sidebar'
 import type { TransactionRecord } from '../../../types'
-import './TransactionHistoryPage.css'
 
 type TransactionHistoryPageProps = {
   transactions: TransactionRecord[]
@@ -74,7 +73,7 @@ export function TransactionHistoryPage({
     : 0
 
   return (
-    <main className="transaction-history-page">
+    <main className="transaction-history-page min-h-screen grid grid-cols-1 bg-slate-100 text-slate-900 md:grid-cols-[280px_minmax(0,1fr)]">
       <Sidebar
         activePage="transaction"
         onDashboard={onDashboard}
@@ -85,7 +84,7 @@ export function TransactionHistoryPage({
         profileName={profileName}
       />
 
-      <section className="transaction-history-content">
+      <section className="transaction-history-content min-w-0 p-5 md:p-8">
         <PageHeader
           eyebrow="Transaksi"
           title="Riwayat transaksi"
@@ -104,7 +103,7 @@ export function TransactionHistoryPage({
           )}
         />
 
-        <section className="transaction-history-stats" aria-label="Ringkasan transaksi">
+        <section className="transaction-history-stats mb-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4 [&_article]:rounded-lg [&_article]:border [&_article]:border-slate-200 [&_article]:bg-white [&_article]:p-4 [&_article]:shadow-lg [&_article]:shadow-slate-900/5 [&_span]:text-sm [&_span]:font-bold [&_span]:text-slate-500 [&_strong]:mt-1 [&_strong]:block [&_strong]:text-xl [&_strong]:font-black" aria-label="Ringkasan transaksi">
           <article>
             <span>Total Transaksi</span>
             <strong>{filteredTransactions.length}</strong>
@@ -123,8 +122,8 @@ export function TransactionHistoryPage({
           </article>
         </section>
 
-        <section className="transaction-history-panel">
-          <div className="transaction-history-toolbar">
+        <section className="transaction-history-panel rounded-lg border border-slate-200 bg-white p-5 shadow-lg shadow-slate-900/5">
+          <div className="transaction-history-toolbar mb-4 grid gap-3 lg:grid-cols-[1fr_180px_180px]">
             <Input
               type="search"
               value={query}
@@ -147,8 +146,8 @@ export function TransactionHistoryPage({
             />
           </div>
 
-          <div className="transaction-history-table">
-            <div className="transaction-history-head" aria-hidden="true">
+          <div className="transaction-history-table grid gap-3">
+            <div className="transaction-history-head hidden grid-cols-[1fr_150px_70px_120px_130px_90px] gap-3 px-3 text-xs font-black uppercase text-slate-400 lg:grid" aria-hidden="true">
               <span>Transaksi</span>
               <span>Waktu</span>
               <span>Item</span>
@@ -158,7 +157,7 @@ export function TransactionHistoryPage({
             </div>
 
             {filteredTransactions.length === 0 ? (
-              <div className="transaction-history-empty">
+              <div className="transaction-history-empty flex items-center justify-between gap-3 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-5 text-sm font-bold text-slate-500">
                 {transactions.length === 0 ? (
                   <>
                     <div>
@@ -176,7 +175,7 @@ export function TransactionHistoryPage({
               </div>
             ) : filteredTransactions.map((transaction) => (
               <Button
-                className="transaction-history-row"
+                className="transaction-history-row grid w-full gap-3 rounded-lg border border-slate-100 bg-white p-3 text-left hover:border-slate-300 lg:grid-cols-[1fr_150px_70px_120px_130px_90px] lg:items-center [&_small]:block [&_small]:text-xs [&_small]:text-slate-500 [&_em]:w-fit [&_em]:rounded-full [&_em]:bg-teal-50 [&_em]:px-2 [&_em]:py-1 [&_em]:text-xs [&_em]:font-black [&_em]:not-italic [&_em]:text-teal-700"
                 type="button"
                 key={transaction.id}
                 onClick={() => onSelectTransaction(transaction)}

@@ -7,7 +7,6 @@ import { Button } from '../../component/button/Button'
 import { Input } from '../../component/input/Input'
 import { Select } from '../../component/select/Select'
 import type { Product, ProductInput } from '../../types'
-import './ProductPage.css'
 
 type ProductPageProps = {
   onDashboard: () => void
@@ -168,7 +167,7 @@ export function ProductPage({
   }
 
   return (
-    <main className="product-page">
+    <main className="product-page min-h-screen grid grid-cols-1 bg-slate-100 text-slate-900 md:grid-cols-[280px_minmax(0,1fr)]">
       <Sidebar
         activePage="product"
         onDashboard={onDashboard}
@@ -178,7 +177,7 @@ export function ProductPage({
         onProfile={onProfile}
       />
 
-      <section className="product-content">
+      <section className="product-content min-w-0 p-5 md:p-8">
         <PageHeader
           eyebrow="Product"
           title="Kelola data product"
@@ -186,9 +185,9 @@ export function ProductPage({
           actions={<Button type="button" onClick={onDashboard}>Kembali</Button>}
         />
 
-        <section className="product-stats" aria-label="Ringkasan product">
+        <section className="product-stats mb-5 grid gap-3 md:grid-cols-2" aria-label="Ringkasan product">
           <Button type="button" onClick={() => setSelectedDetail('total-product')}>
-            <span className="product-stat-icon">
+            <span className="product-stat-icon grid h-11 w-11 place-items-center rounded-lg border border-slate-200 bg-slate-50 text-slate-950 [&_svg]:h-5 [&_svg]:w-5">
               <Package aria-hidden="true" />
             </span>
             <div>
@@ -199,7 +198,7 @@ export function ProductPage({
           </Button>
 
           <Button type="button" onClick={openCategoryDetail}>
-            <span className="product-stat-icon">
+            <span className="product-stat-icon grid h-11 w-11 place-items-center rounded-lg border border-slate-200 bg-slate-50 text-slate-950 [&_svg]:h-5 [&_svg]:w-5">
               <Tags aria-hidden="true" />
             </span>
             <div>
@@ -212,8 +211,8 @@ export function ProductPage({
         </section>
 
         {selectedDetail ? (
-          <section className="product-detail-page">
-            <div className="product-panel-header">
+          <section className="product-detail-page rounded-lg border border-slate-200 bg-white p-5 shadow-lg shadow-slate-900/5">
+            <div className="product-panel-header mb-5 flex items-start justify-between gap-4 border-b border-slate-100 pb-4 [&_p]:mb-1 [&_p]:text-xs [&_p]:font-black [&_p]:uppercase [&_p]:text-teal-700 [&_h2]:m-0 [&_h2]:text-xl [&_h2]:font-black">
               <div>
                 <p>Rincian Product</p>
                 <h2>
@@ -225,7 +224,7 @@ export function ProductPage({
 
             {selectedDetail === 'total-product' && (
               <>
-                <div className="detail-summary-grid inventory-summary-grid">
+                <div className="detail-summary-grid inventory-summary-grid mb-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4 [&_article]:grid [&_article]:gap-1 [&_article]:rounded-lg [&_article]:border [&_article]:border-slate-200 [&_article]:bg-slate-50 [&_article]:p-4 [&_span]:text-xs [&_span]:font-extrabold [&_span]:text-slate-500 [&_strong]:text-xl [&_strong]:font-black [&_small]:text-xs [&_small]:font-bold [&_small]:text-slate-500">
                   <article>
                     <span>Product Aktif</span>
                     <strong>{activeProducts}</strong>
@@ -248,9 +247,9 @@ export function ProductPage({
                   </article>
                 </div>
 
-                <div className="inventory-board">
-                  <section className="inventory-card">
-                    <div className="inventory-card-icon">
+                <div className="inventory-board mb-4 grid gap-3 md:grid-cols-2">
+                  <section className="inventory-card grid grid-cols-[48px_minmax(0,1fr)] gap-3 rounded-lg border border-slate-200 bg-white p-4">
+                    <div className="inventory-card-icon grid h-12 w-12 place-items-center rounded-lg border border-teal-100 bg-teal-50 text-teal-700 [&_svg]:h-5 [&_svg]:w-5">
                       <Boxes aria-hidden="true" />
                     </div>
                     <div>
@@ -259,8 +258,8 @@ export function ProductPage({
                       <p>{products.length > 0 ? `${products.length} product sudah masuk katalog kasir.` : 'Tambahkan product dari form agar katalog bisa dipakai transaksi.'}</p>
                     </div>
                   </section>
-                  <section className="inventory-card">
-                    <div className="inventory-card-icon">
+                  <section className="inventory-card grid grid-cols-[48px_minmax(0,1fr)] gap-3 rounded-lg border border-slate-200 bg-white p-4">
+                    <div className="inventory-card-icon grid h-12 w-12 place-items-center rounded-lg border border-teal-100 bg-teal-50 text-teal-700 [&_svg]:h-5 [&_svg]:w-5">
                       <WalletCards aria-hidden="true" />
                     </div>
                     <div>
@@ -275,12 +274,12 @@ export function ProductPage({
                   </section>
                 </div>
 
-                <div className="product-table detail-table inventory-table">
+                <div className="product-table detail-table inventory-table grid gap-3">
                   {products.length === 0 ? (
-                    <div className="empty-product-state">Belum ada product. Tambahkan product manual dari form.</div>
+                    <div className="empty-product-state rounded-lg border border-dashed border-slate-300 bg-slate-50 p-5 text-sm font-bold text-slate-500">Belum ada product. Tambahkan product manual dari form.</div>
                   ) : products.map((product) => (
-                    <div className="product-table-row" key={product.id}>
-                      <div className="product-name-cell">
+                    <div className="product-table-row grid gap-3 rounded-lg border border-slate-100 bg-white p-3 hover:border-slate-300 md:grid-cols-[minmax(200px,1fr)_110px_120px_114px] md:items-center" key={product.id}>
+                      <div className="product-name-cell flex items-center gap-3 [&_img]:h-14 [&_img]:w-16 [&_img]:rounded-lg [&_img]:object-cover [&_span]:text-sm [&_span]:text-slate-500">
                         <img src={product.image} alt={product.name} />
                         <div>
                           <strong>{product.name}</strong>
@@ -296,7 +295,7 @@ export function ProductPage({
 
             {selectedDetail === 'category' && (
               <>
-                <div className="detail-summary-grid">
+                <div className="detail-summary-grid mb-4 grid gap-3 md:grid-cols-2 [&_article]:grid [&_article]:gap-1 [&_article]:rounded-lg [&_article]:border [&_article]:border-slate-200 [&_article]:bg-slate-50 [&_article]:p-4 [&_span]:text-xs [&_span]:font-extrabold [&_span]:text-slate-500 [&_strong]:text-xl [&_strong]:font-black [&_small]:text-xs [&_small]:font-bold [&_small]:text-slate-500">
                   <article>
                     <span>Total Kategori</span>
                     <strong>{totalCategories}</strong>
@@ -309,30 +308,30 @@ export function ProductPage({
                   </article>
                 </div>
 
-                <div className="category-breakdown category-dashboard">
+                <div className="category-breakdown category-dashboard mb-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
                   {categoryBreakdown.map((item) => (
                     <Button type="button" key={item.category} onClick={() => applyCategoryFilter(item.category)}>
                       <span>{item.category}</span>
                       <strong>{item.total} product</strong>
                       <small>{item.percentage}% dari katalog</small>
-                      <div className="category-progress" aria-hidden="true">
+                      <div className="category-progress h-2 overflow-hidden rounded-full bg-slate-200 [&_i]:block [&_i]:h-full [&_i]:rounded-full [&_i]:bg-teal-700" aria-hidden="true">
                         <i style={{ width: `${item.percentage}%` }}></i>
                       </div>
                     </Button>
                   ))}
                 </div>
 
-                <div className="category-list-detail">
+                <div className="category-list-detail grid gap-3 md:grid-cols-2">
                   {categoryBreakdown.map((item) => (
-                    <section className="category-detail-card" key={item.category}>
-                      <div className="category-detail-header">
+                    <section className="category-detail-card grid gap-3 rounded-lg border border-slate-200 bg-white p-4" key={item.category}>
+                      <div className="category-detail-header flex items-start justify-between gap-3 border-b border-slate-100 pb-3 [&_span]:text-xs [&_span]:font-extrabold [&_span]:text-slate-500 [&_strong]:block [&_strong]:font-black [&_b]:text-right">
                         <div>
                           <span>{item.category}</span>
                           <strong>{item.total} product</strong>
                         </div>
                         <b>{formatCurrency(item.average)}</b>
                       </div>
-                      <div className="category-mini-list">
+                      <div className="category-mini-list grid gap-2 [&_div]:flex [&_div]:items-center [&_div]:justify-between [&_div]:gap-3 [&_span]:text-sm [&_span]:text-slate-500 [&_strong]:text-sm [&_small]:text-sm [&_small]:font-bold [&_small]:text-slate-500">
                         {item.products.length === 0 ? (
                           <small>Belum ada product di kategori ini.</small>
                         ) : item.products.slice(0, 3).map((product) => (
@@ -349,9 +348,9 @@ export function ProductPage({
             )}
           </section>
         ) : (
-        <section className="product-grid-page">
-          <article className="product-panel product-form-panel">
-            <div className="product-panel-header">
+        <section className="product-grid-page grid items-start gap-5 xl:grid-cols-[minmax(340px,0.72fr)_minmax(520px,1.28fr)]">
+          <article className="product-panel product-form-panel rounded-lg border border-slate-200 bg-white p-5 shadow-lg shadow-slate-900/5 xl:sticky xl:top-5">
+            <div className="product-panel-header mb-5 flex items-start justify-between gap-4 border-b border-slate-100 pb-4 [&_p]:mb-1 [&_p]:text-xs [&_p]:font-black [&_p]:uppercase [&_p]:text-teal-700 [&_h2]:m-0 [&_h2]:text-xl [&_h2]:font-black">
               <div>
                 <p>Add Product</p>
                 <h2>{editingProductId ? 'Edit product' : 'Tambah product baru'}</h2>
@@ -363,7 +362,7 @@ export function ProductPage({
               )}
             </div>
 
-            <form className="product-form-page" onSubmit={handleSubmit}>
+            <form className="product-form-page grid gap-4 [&_label]:grid [&_label]:gap-2 [&_label]:text-sm [&_label]:font-bold [&_label]:text-slate-600" onSubmit={handleSubmit}>
               <label>
                 Nama Product
                 <Input
@@ -386,7 +385,7 @@ export function ProductPage({
                 </Select>
               </label>
 
-              <div className="product-form-row">
+              <div className="product-form-row grid gap-3">
                 <label>
                   Harga
                   <Input
@@ -408,7 +407,7 @@ export function ProductPage({
                 />
               </label>
 
-              <div className="image-preview">
+              <div className="image-preview grid min-h-24 grid-cols-[96px_minmax(0,1fr)] items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 [&_img]:h-20 [&_img]:w-24 [&_img]:rounded-lg [&_img]:object-cover [&_div]:grid [&_div]:grid-cols-[22px_minmax(0,1fr)] [&_div]:items-center [&_div]:gap-2 [&_svg]:h-5 [&_svg]:w-5 [&_span]:text-sm [&_span]:font-semibold [&_span]:text-slate-500">
                 <img src={form.image || '/product-images/snack-real.png'} alt="Preview product" />
                 <div>
                   <ImagePlus aria-hidden="true" />
@@ -422,8 +421,8 @@ export function ProductPage({
             </form>
           </article>
 
-          <article className="product-panel product-list-panel">
-            <div className="product-panel-header">
+          <article className="product-panel product-list-panel rounded-lg border border-slate-200 bg-white p-5 shadow-lg shadow-slate-900/5">
+            <div className="product-panel-header mb-5 flex items-start justify-between gap-4 border-b border-slate-100 pb-4 [&_p]:mb-1 [&_p]:text-xs [&_p]:font-black [&_p]:uppercase [&_p]:text-teal-700 [&_h2]:m-0 [&_h2]:text-xl [&_h2]:font-black">
               <div>
                 <p>Daftar Product</p>
                 <h2>Product tersedia</h2>
@@ -431,7 +430,7 @@ export function ProductPage({
             </div>
 
             <form
-              className="product-list-toolbar"
+              className="product-list-toolbar mb-4 grid gap-3 rounded-lg border border-slate-100 bg-slate-50 p-3 md:grid-cols-[minmax(220px,1fr)_180px_112px]"
               onSubmit={(event) => {
                 event.preventDefault()
                 setAppliedSearch(productSearch.trim())
@@ -460,9 +459,9 @@ export function ProductPage({
               </Button>
             </form>
 
-            <div className="product-table">
+            <div className="product-table grid gap-3">
               {filteredProducts.length > 0 && (
-                <div className="product-table-head" aria-hidden="true">
+                <div className="product-table-head hidden grid-cols-[minmax(200px,1fr)_110px_120px_114px] gap-3 px-3 text-xs font-black uppercase text-slate-400 md:grid" aria-hidden="true">
                   <span>Product</span>
                   <span>Kategori</span>
                   <span>Harga</span>
@@ -470,22 +469,22 @@ export function ProductPage({
                 </div>
               )}
               {filteredProducts.length === 0 ? (
-                <div className="empty-product-state">
+                <div className="empty-product-state rounded-lg border border-dashed border-slate-300 bg-slate-50 p-5 text-sm font-bold text-slate-500">
                   {products.length === 0
                     ? 'Belum ada product. Tambahkan product manual dari form.'
                     : 'Product tidak ditemukan pada pencarian atau kategori ini.'}
                 </div>
               ) : filteredProducts.map((product) => (
-                <div className="product-table-row" key={product.id}>
-                  <div className="product-name-cell">
+                <div className="product-table-row grid gap-3 rounded-lg border border-slate-100 bg-white p-3 hover:border-slate-300 md:grid-cols-[minmax(200px,1fr)_110px_120px_114px] md:items-center" key={product.id}>
+                  <div className="product-name-cell flex items-center gap-3 [&_img]:h-14 [&_img]:w-16 [&_img]:rounded-lg [&_img]:object-cover [&_span]:text-sm [&_span]:text-slate-500">
                     <img src={product.image} alt={product.name} />
                     <div>
                       <strong>{product.name}</strong>
                     </div>
                   </div>
-                  <span className="product-category">{product.category}</span>
+                  <span className="product-category w-fit rounded-lg bg-slate-100 px-2 py-1 text-xs font-bold text-slate-600">{product.category}</span>
                   <strong>{formatCurrency(product.price)}</strong>
-                  <div className="product-row-actions">
+                  <div className="product-row-actions flex justify-start gap-2 md:justify-end">
                     <Button className="product-edit-button" type="button" onClick={() => handleEditProduct(product)}>
                       Edit
                     </Button>

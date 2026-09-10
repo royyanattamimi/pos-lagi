@@ -2,7 +2,6 @@ import { Button } from '../../../component/button/Button'
 import { PageHeader } from '../../../component/header/PageHeader'
 import { Sidebar } from '../../../component/sidebar/Sidebar'
 import type { TransactionRecord } from '../../../types'
-import './TransactionDetailPage.css'
 
 type TransactionDetailPageProps = {
   transaction: TransactionRecord
@@ -40,7 +39,7 @@ export function TransactionDetailPage({
   }
 
   return (
-    <main className="transaction-detail-page">
+    <main className="transaction-detail-page min-h-screen grid grid-cols-1 bg-slate-100 text-slate-900 md:grid-cols-[280px_minmax(0,1fr)]">
       <Sidebar
         activePage="dashboard"
         onDashboard={onDashboard}
@@ -51,7 +50,7 @@ export function TransactionDetailPage({
         profileName={profileName}
       />
 
-      <section className="transaction-detail-content">
+      <section className="transaction-detail-content min-w-0 p-5 md:p-8">
         <PageHeader
           eyebrow="Rincian Transaksi"
           title={transaction.id}
@@ -64,7 +63,7 @@ export function TransactionDetailPage({
           )}
         />
 
-        <section className="transaction-detail-summary" aria-label="Informasi transaksi">
+        <section className="transaction-detail-summary mb-5 grid gap-3 md:grid-cols-3 [&_article]:rounded-lg [&_article]:border [&_article]:border-slate-200 [&_article]:bg-white [&_article]:p-4 [&_span]:text-sm [&_span]:font-bold [&_span]:text-slate-500 [&_strong]:block [&_strong]:text-lg [&_strong]:font-black [&_small]:text-sm [&_small]:text-slate-500" aria-label="Informasi transaksi">
           <article>
             <span>Tanggal dan Waktu</span>
             <strong>{transactionDate.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}</strong>
@@ -78,12 +77,12 @@ export function TransactionDetailPage({
           <article>
             <span>Pembayaran</span>
             <strong>{transaction.paymentMethod}</strong>
-            <small className="transaction-status">{transaction.status}</small>
+            <small className="transaction-status inline-flex w-fit rounded-full bg-teal-50 px-2 py-1 font-black text-teal-700">{transaction.status}</small>
           </article>
         </section>
 
-        <section className="transaction-detail-layout">
-          <article className="transaction-detail-panel">
+        <section className="transaction-detail-layout grid items-start gap-5 xl:grid-cols-[1fr_320px]">
+          <article className="transaction-detail-panel rounded-lg border border-slate-200 bg-white p-5 shadow-lg shadow-slate-900/5 [&_header]:mb-4 [&_header]:flex [&_header]:items-start [&_header]:justify-between [&_header]:border-b [&_header]:border-slate-100 [&_header]:pb-4 [&_p]:mb-1 [&_p]:text-xs [&_p]:font-black [&_p]:uppercase [&_p]:text-teal-700 [&_h2]:m-0 [&_h2]:text-xl [&_h2]:font-black">
             <header>
               <div>
                 <p>Item Transaksi</p>
@@ -92,9 +91,9 @@ export function TransactionDetailPage({
               <strong>{transaction.items.length} product</strong>
             </header>
 
-            <div className="transaction-item-list">
+            <div className="transaction-item-list grid gap-3">
               {transaction.items.map((item, index) => (
-                <div className="transaction-detail-item" key={item.productId}>
+                <div className="transaction-detail-item grid grid-cols-[32px_1fr_50px_120px] gap-3 rounded-lg border border-slate-100 p-3 text-sm" key={item.productId}>
                   <span>{index + 1}</span>
                   <div>
                     <strong>{item.name}</strong>
@@ -107,12 +106,12 @@ export function TransactionDetailPage({
             </div>
           </article>
 
-          <aside className="transaction-payment-panel">
+          <aside className="transaction-payment-panel grid gap-3 rounded-lg border border-slate-200 bg-white p-5 shadow-lg shadow-slate-900/5 [&_div]:flex [&_div]:justify-between [&_span]:text-slate-500 [&_strong]:text-slate-950">
             <div>
               <span>Subtotal</span>
               <strong>{formatCurrency(transaction.subtotal)}</strong>
             </div>
-            <div className="transaction-payment-total">
+            <div className="transaction-payment-total border-y border-slate-100 py-3 text-lg font-black">
               <span>Total</span>
               <strong>{formatCurrency(transaction.grandTotal)}</strong>
             </div>

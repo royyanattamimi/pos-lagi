@@ -6,7 +6,6 @@ import { Button } from '../../component/button/Button'
 import { Input } from '../../component/input/Input'
 import { ReceiptPage } from './receipt/ReceiptPage'
 import type { Product, ShiftSession, TransactionItem, TransactionRecord } from '../../types'
-import './TransactionPage.css'
 
 type TransactionPageProps = {
   onDashboard: () => void
@@ -168,7 +167,7 @@ export function TransactionPage({
   }
 
   return (
-    <main className="transaction-page">
+    <main className="transaction-page min-h-screen grid grid-cols-1 bg-slate-100 text-slate-900 md:grid-cols-[280px_minmax(0,1fr)]">
       <Sidebar
         activePage="transaction"
         onDashboard={onDashboard}
@@ -178,7 +177,7 @@ export function TransactionPage({
         onProfile={onProfile}
       />
 
-      <section className="transaction-content">
+      <section className="transaction-content min-w-0 p-5 md:p-8">
         <PageHeader
           eyebrow="Transaksi"
           title="Buat transaksi baru"
@@ -194,7 +193,7 @@ export function TransactionPage({
           )}
         />
 
-        <section className="transaction-stepper" aria-label="Flow transaksi">
+        <section className="transaction-stepper mb-5 grid gap-2 md:grid-cols-4 [&_span]:rounded-lg [&_span]:border [&_span]:border-slate-200 [&_span]:bg-white [&_span]:px-3 [&_span]:py-2 [&_span]:text-sm [&_span]:font-extrabold [&_span]:text-slate-500 [&_.done]:border-teal-200 [&_.done]:bg-teal-50 [&_.done]:text-teal-800" aria-label="Flow transaksi">
           {steps.map((currentStep, index) => (
             <span className={steps.indexOf(step) >= index ? 'done' : ''} key={currentStep}>
               {index + 1}. {stepLabel[currentStep]}
@@ -203,16 +202,16 @@ export function TransactionPage({
         </section>
 
         {step === 'select' && (
-          <section className="transaction-grid">
-            <article className="transaction-panel">
-              <div className="transaction-panel-header">
+          <section className="transaction-grid grid items-start gap-5 xl:grid-cols-[minmax(0,1.35fr)_minmax(340px,0.65fr)]">
+            <article className="transaction-panel rounded-lg border border-slate-200 bg-white p-5 shadow-lg shadow-slate-900/5">
+              <div className="transaction-panel-header mb-4 flex items-start justify-between gap-3 border-b border-slate-100 pb-4 [&_p]:mb-1 [&_p]:text-xs [&_p]:font-black [&_p]:uppercase [&_p]:text-teal-700 [&_h2]:m-0 [&_h2]:text-xl [&_h2]:font-black">
                 <div>
                   <p>Product</p>
                   <h2>Pilih product</h2>
                 </div>
               </div>
 
-              <div className="category-list">
+              <div className="category-list mb-4 flex flex-wrap gap-2 [&_.selected]:bg-slate-950 [&_.selected]:text-white">
                 {categories.map((category) => (
                   <Button
                     className={selectedCategory === category ? 'selected' : ''}
@@ -225,12 +224,12 @@ export function TransactionPage({
                 ))}
               </div>
 
-              <div className="product-catalog">
+              <div className="product-catalog grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                 {products.length === 0 ? (
-                  <div className="empty-order">Belum ada product. Input product manual dulu di halaman Product.</div>
+                  <div className="empty-order rounded-lg border border-dashed border-slate-300 bg-slate-50 p-5 text-sm font-bold text-slate-500">Belum ada product. Input product manual dulu di halaman Product.</div>
                 ) : filteredProducts.map((product) => (
                   <Button
-                    className="catalog-item"
+                    className="catalog-item grid min-h-52 content-start justify-items-start gap-2 rounded-lg border border-slate-200 bg-white p-3 text-left hover:border-teal-300 [&_img]:h-28 [&_img]:w-full [&_img]:rounded-lg [&_img]:object-cover [&_span]:text-sm [&_span]:text-slate-500 [&_b]:text-teal-700"
                     type="button"
                     key={product.id}
                     onClick={() => addProduct(product)}
@@ -244,8 +243,8 @@ export function TransactionPage({
               </div>
             </article>
 
-            <aside className="transaction-panel order-panel">
-              <div className="transaction-panel-header">
+            <aside className="transaction-panel order-panel rounded-lg border border-slate-200 bg-white p-5 shadow-lg shadow-slate-900/5 xl:sticky xl:top-5">
+              <div className="transaction-panel-header mb-4 flex items-start justify-between gap-3 border-b border-slate-100 pb-4 [&_p]:mb-1 [&_p]:text-xs [&_p]:font-black [&_p]:uppercase [&_p]:text-teal-700 [&_h2]:m-0 [&_h2]:text-xl [&_h2]:font-black">
                 <div>
                   <p>Keranjang</p>
                   <h2>Pesanan berjalan</h2>
@@ -253,16 +252,16 @@ export function TransactionPage({
               </div>
 
               {cartItems.length === 0 ? (
-                <div className="empty-order">Belum ada product dipilih.</div>
+                <div className="empty-order rounded-lg border border-dashed border-slate-300 bg-slate-50 p-5 text-sm font-bold text-slate-500">Belum ada product dipilih.</div>
               ) : (
-                <div className="mini-cart">
+                <div className="mini-cart grid gap-3">
                   {cartItems.map((item) => (
-                    <div className="mini-cart-row" key={item.productId}>
-                      <div className="mini-cart-info">
+                    <div className="mini-cart-row grid gap-2 rounded-lg border border-slate-100 p-3" key={item.productId}>
+                      <div className="mini-cart-info grid gap-1 [&_span]:text-sm [&_span]:text-slate-500">
                         <strong>{item.product.name}</strong>
                         <span>{formatCurrency(item.product.price)} per item</span>
                       </div>
-                      <div className="mini-cart-control">
+                      <div className="mini-cart-control grid grid-cols-[36px_1fr_36px] gap-2">
                         <Button type="button" onClick={() => updateQuantity(item.productId, item.quantity - 1)}>
                           -
                         </Button>
@@ -283,12 +282,12 @@ export function TransactionPage({
                 </div>
               )}
 
-              <div className="summary-box">
+              <div className="summary-box my-4 grid gap-2 rounded-lg bg-slate-50 p-4 [&_span]:flex [&_span]:items-center [&_span]:justify-between [&_strong]:text-slate-950">
                 <span>Subtotal <strong>{formatCurrency(subtotal)}</strong></span>
               </div>
 
               <Button
-                className="primary-action"
+                className="primary-action w-full"
                 variant="primary"
                 type="button"
                 disabled={cartItems.length === 0}
@@ -301,20 +300,20 @@ export function TransactionPage({
         )}
 
         {step === 'review' && (
-          <section className="review-layout">
-            <article className="transaction-panel review-items-panel">
-              <div className="transaction-panel-header">
+          <section className="review-layout grid items-start gap-5 xl:grid-cols-[minmax(0,1.35fr)_minmax(340px,0.65fr)]">
+            <article className="transaction-panel review-items-panel rounded-lg border border-slate-200 bg-white p-5 shadow-lg shadow-slate-900/5">
+              <div className="transaction-panel-header mb-4 flex items-start justify-between gap-3 border-b border-slate-100 pb-4 [&_p]:mb-1 [&_p]:text-xs [&_p]:font-black [&_p]:uppercase [&_p]:text-teal-700 [&_h2]:m-0 [&_h2]:text-xl [&_h2]:font-black">
                 <div>
                   <p>Review Pesanan</p>
                   <h2>Cek product sebelum pembayaran</h2>
                 </div>
-                <strong className="review-item-count">{cartItems.length} product</strong>
+                <strong className="review-item-count rounded-lg bg-teal-50 px-3 py-2 text-sm text-teal-800">{cartItems.length} product</strong>
               </div>
 
-              <div className="cart-table">
+              <div className="cart-table grid gap-3">
                 {cartItems.map((item) => (
-                  <div className="cart-table-row" key={item.productId}>
-                    <div className="review-product-cell">
+                  <div className="cart-table-row grid gap-3 rounded-lg border border-slate-100 p-3 md:grid-cols-[1fr_120px_120px] md:items-center" key={item.productId}>
+                    <div className="review-product-cell flex items-center gap-3 [&_img]:h-14 [&_img]:w-16 [&_img]:rounded-lg [&_img]:object-cover [&_span]:block [&_span]:text-sm [&_span]:text-slate-500 [&_small]:text-xs [&_small]:text-slate-500">
                       <img src={item.product.image} alt={item.product.name} />
                       <div>
                         <strong>{item.product.name}</strong>
@@ -322,7 +321,7 @@ export function TransactionPage({
                         <small>{formatCurrency(item.product.price)} per item</small>
                       </div>
                     </div>
-                    <div className="quantity-control">
+                    <div className="quantity-control grid grid-cols-[36px_1fr_36px] items-center gap-2 text-center">
                       <Button type="button" onClick={() => updateQuantity(item.productId, item.quantity - 1)}>
                         -
                       </Button>
@@ -337,23 +336,23 @@ export function TransactionPage({
               </div>
             </article>
 
-            <aside className="transaction-panel review-summary-panel">
-              <div className="transaction-panel-header">
+            <aside className="transaction-panel review-summary-panel rounded-lg border border-slate-200 bg-white p-5 shadow-lg shadow-slate-900/5">
+              <div className="transaction-panel-header mb-4 flex items-start justify-between gap-3 border-b border-slate-100 pb-4 [&_p]:mb-1 [&_p]:text-xs [&_p]:font-black [&_p]:uppercase [&_p]:text-teal-700 [&_h2]:m-0 [&_h2]:text-xl [&_h2]:font-black">
                 <div>
                   <p>Ringkasan</p>
                   <h2>Total pesanan</h2>
                 </div>
               </div>
 
-              <div className="review-summary-list">
+              <div className="review-summary-list grid gap-3 rounded-lg bg-slate-50 p-4 [&_span]:flex [&_span]:justify-between [&_strong]:text-slate-950">
                 <span>Jumlah Item <strong>{cartItems.reduce((total, item) => total + item.quantity, 0)}</strong></span>
                 <span>Subtotal <strong>{formatCurrency(subtotal)}</strong></span>
                 <span>Total <strong>{formatCurrency(grandTotal)}</strong></span>
               </div>
 
-              <div className="transaction-actions review-actions">
+              <div className="transaction-actions review-actions mt-4 flex gap-2">
                 <Button type="button" onClick={() => setStep('select')}>Kembali</Button>
-                <Button className="primary-action" variant="primary" type="button" onClick={() => setStep('payment')}>
+                <Button className="primary-action w-full" variant="primary" type="button" onClick={() => setStep('payment')}>
                   Pembayaran
                 </Button>
               </div>
@@ -362,15 +361,15 @@ export function TransactionPage({
         )}
 
         {step === 'payment' && (
-          <section className="transaction-panel payment-panel">
-            <div className="transaction-panel-header">
+          <section className="transaction-panel payment-panel rounded-lg border border-slate-200 bg-white p-5 shadow-lg shadow-slate-900/5">
+            <div className="transaction-panel-header mb-4 flex items-start justify-between gap-3 border-b border-slate-100 pb-4 [&_p]:mb-1 [&_p]:text-xs [&_p]:font-black [&_p]:uppercase [&_p]:text-teal-700 [&_h2]:m-0 [&_h2]:text-xl [&_h2]:font-black">
               <div>
                 <p>Pembayaran</p>
                 <h2>Pilih metode pembayaran</h2>
               </div>
             </div>
 
-            <div className="payment-methods">
+            <div className="payment-methods mb-4 flex flex-wrap gap-2 [&_.selected]:bg-slate-950 [&_.selected]:text-white">
               {['Cash', 'QRIS', 'Debit'].map((method) => (
                 <Button
                   className={paymentMethod === method ? 'selected' : ''}
@@ -383,7 +382,7 @@ export function TransactionPage({
               ))}
             </div>
 
-            <label className="paid-input">
+            <label className="paid-input grid gap-2 text-sm font-bold text-slate-600">
               Nominal dibayar
               <Input
                 min="0"
@@ -395,15 +394,15 @@ export function TransactionPage({
               />
             </label>
 
-            <div className="summary-box">
+            <div className="summary-box my-4 grid gap-2 rounded-lg bg-slate-50 p-4 [&_span]:flex [&_span]:items-center [&_span]:justify-between [&_strong]:text-slate-950">
               <span>Total Tagihan <strong>{formatCurrency(grandTotal)}</strong></span>
               <span>Kembalian <strong>{formatCurrency(change)}</strong></span>
             </div>
 
-            <div className="transaction-actions">
+            <div className="transaction-actions mt-4 flex gap-2">
               <Button type="button" onClick={() => setStep('review')}>Kembali</Button>
               <Button
-                className="primary-action"
+                className="primary-action w-full"
                 variant="primary"
                 type="button"
                 disabled={!canFinish}

@@ -2,7 +2,6 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { Button } from '../../component/button/Button'
 import { Input } from '../../component/input/Input'
-import './LoginPage.css'
 
 type LoginPageProps = {
   onLogin: (email: string, password: string) => Promise<void>
@@ -31,29 +30,29 @@ export function LoginPage({ onLogin, onForgotPassword }: LoginPageProps) {
   }
 
   return (
-    <main className="login-page">
-      <section className="login-hero" aria-label="Kasir">
-        <div className="login-brand">
-          <span className="brand-mark"></span>
+    <main className="login-page min-h-screen grid grid-cols-1 bg-white text-slate-900 lg:grid-cols-[minmax(320px,0.92fr)_minmax(380px,1fr)]">
+      <section className="login-hero min-h-screen flex flex-col justify-between gap-12 bg-neutral-100 p-10 text-neutral-950" aria-label="Kasir">
+        <div className="login-brand flex items-center gap-3">
+          <span className="brand-mark grid h-12 w-12 place-items-center rounded-lg bg-teal-300 font-black text-teal-950"></span>
           <div>
             <strong>Kasir</strong>
             <span>Point Of Sale</span>
           </div>
         </div>
 
-        <div className="hero-copy">
+        <div className="hero-copy max-w-xl [&_h1]:m-0 [&_h1]:text-4xl [&_h1]:font-extrabold [&_h1]:leading-tight [&_p]:mt-4 [&_p]:text-base [&_p]:leading-7 [&_p]:text-neutral-600">
           <h1>Kelola transaksi toko dengan lebih rapi.</h1>
           <p>Login untuk masuk ke dashboard kasir, product, transaksi, dan laporan penjualan.</p>
         </div>
       </section>
 
-      <section className="login-card" aria-label="Form login">
-        <div className="login-heading">
+      <section className="login-card min-h-screen flex flex-col justify-center p-10" aria-label="Form login">
+        <div className="login-heading mx-auto mb-6 w-full max-w-md [&_p]:mb-2 [&_p]:text-xs [&_p]:font-extrabold [&_p]:uppercase [&_p]:text-teal-700 [&_h2]:m-0 [&_h2]:text-3xl [&_h2]:font-extrabold [&_h2]:text-slate-900">
           <p>Login</p>
           <h2>Masuk ke akun</h2>
         </div>
 
-        <form className="login-form" onSubmit={handleSubmit}>
+        <form className="login-form mx-auto grid w-full max-w-md gap-4 rounded-lg border border-slate-200 bg-white p-7 shadow-lg shadow-slate-900/5 [&_label]:grid [&_label]:gap-2 [&_label]:text-sm [&_label]:font-extrabold [&_label]:text-slate-600" onSubmit={handleSubmit}>
           <label>
             Email
             <Input
@@ -68,7 +67,7 @@ export function LoginPage({ onLogin, onForgotPassword }: LoginPageProps) {
 
           <label>
             Password
-            <div className="password-field">
+            <div className="password-field relative [&_input]:pr-14 [&_button]:absolute [&_button]:right-3 [&_button]:top-1/2 [&_button]:grid [&_button]:h-7 [&_button]:min-h-7 [&_button]:w-7 [&_button]:-translate-y-1/2 [&_button]:place-items-center [&_button]:rounded-full [&_button]:border-0 [&_button]:bg-transparent [&_button]:p-0 [&_button]:text-slate-500 [&_button:hover]:bg-teal-50 [&_button:hover]:text-teal-700 [&_svg]:h-5 [&_svg]:w-5 [&_svg]:fill-none [&_svg]:stroke-current">
               <Input
                 type={showPassword ? 'text' : 'password'}
                 value={password}
@@ -99,23 +98,23 @@ export function LoginPage({ onLogin, onForgotPassword }: LoginPageProps) {
             </div>
           </label>
 
-          <div className="login-options">
-            <label className="remember-field">
+          <div className="login-options flex items-center justify-between gap-3">
+            <label className="remember-field flex items-center gap-2 text-sm font-bold text-slate-600 [&_input]:h-4 [&_input]:min-h-4 [&_input]:w-4 [&_input]:accent-teal-700">
               <Input type="checkbox" defaultChecked />
               Ingat saya
             </label>
-            <Button className="forgot-password-link" type="button" onClick={onForgotPassword}>
+            <Button className="forgot-password-link border-0 bg-transparent p-0 font-extrabold text-teal-700" type="button" onClick={onForgotPassword}>
               Lupa password?
             </Button>
           </div>
 
           {errorMessage && (
-            <div className="login-error-state">
+            <div className="login-error-state rounded-lg border border-red-200 bg-red-50 p-3 text-sm font-bold leading-6 text-red-800">
               {errorMessage}
             </div>
           )}
 
-          <Button className="submit-button" variant="primary" size="large" type="submit" disabled={isSubmitting}>
+          <Button className="submit-button min-h-12 rounded-lg font-extrabold disabled:cursor-not-allowed disabled:opacity-70" variant="primary" size="large" type="submit" disabled={isSubmitting}>
             {isSubmitting ? 'Memproses...' : 'Masuk'}
           </Button>
         </form>

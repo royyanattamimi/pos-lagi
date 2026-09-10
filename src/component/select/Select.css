@@ -1,9 +1,0 @@
-.ui-select {
-  width: 100%; min-height: 44px; border: 1px solid #d7dde5; border-radius: 8px;
-  padding: 10px 12px; color: #18202f; background: #fff; font: inherit; letter-spacing: 0;
-  transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
-}
-.ui-select:hover:not(:disabled) { border-color: #aab4c2; }
-.ui-select:focus { border-color: #171717; box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.08); }
-.ui-select:focus-visible { outline: 3px solid rgba(0, 0, 0, 0.14); outline-offset: 2px; }
-.ui-select:disabled { color: #7c8795; background: #f1f3f6; cursor: not-allowed; }

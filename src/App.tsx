@@ -11,12 +11,11 @@ import {
   updateRemoteProduct,
 } from './storage/productStorage'
 import { createRemoteTransaction, loadRemoteTransactions } from './storage/transactionStorage'
-import { loadPosData, loadRemotePosData, saveRemotePosData } from './storage/posStorage'
+import { loadPosData, savePosData } from './storage/posStorage'
 import type { Product, ProductInput, ShiftInput, ShiftSession, TransactionRecord } from './types'
 
 function App() {
   const [storedData] = useState(loadPosData)
-  const [isStorageReady, setIsStorageReady] = useState(false)
   const [isAuthReady, setIsAuthReady] = useState(!supabase)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false)
@@ -49,29 +48,8 @@ function App() {
   }, [])
 
   useEffect(() => {
-    let isMounted = true
-
-    loadRemotePosData().then((remoteData) => {
-      if (!isMounted) return
-
-      setProducts(remoteData.products)
-      setTransactions(remoteData.transactions)
-      setCurrentShift(remoteData.currentShift)
-      setShiftHistory(remoteData.shiftHistory)
-      setIsShiftStarted(remoteData.currentShift?.status === 'Berjalan')
-      setIsStorageReady(true)
-    })
-
-    return () => {
-      isMounted = false
-    }
-  }, [])
-
-  useEffect(() => {
-    if (!isStorageReady) return
-
-    void saveRemotePosData({ products, transactions, currentShift, shiftHistory })
-  }, [isStorageReady, products, transactions, currentShift, shiftHistory])
+    savePosData({ products, transactions, currentShift, shiftHistory })
+  }, [products, transactions, currentShift, shiftHistory])
 
   useEffect(() => {
     if (!isLoggedIn) return
@@ -218,7 +196,7 @@ function App() {
   }
 
   if (!isAuthReady) {
-    return <main className="app-loading">Memuat sesi login...</main>
+    return <main className="app-loading min-h-screen grid place-items-center bg-slate-100 text-slate-600 text-sm font-extrabold">Memuat sesi login...</main>
   }
 
   if (isLoggedIn && isShiftStarted) {

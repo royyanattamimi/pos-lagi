@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import './DashboardPage.css'
 import { DashboardHeader } from '../../component/header/DashboardHeader'
 import { PageHeader } from '../../component/header/PageHeader'
 import { Sidebar } from '../../component/sidebar/Sidebar'
@@ -170,7 +169,7 @@ export function DashboardPage({
   }
 
   return (
-    <main className="dashboard-page">
+    <main className="dashboard-page min-h-screen grid grid-cols-1 bg-slate-100 text-slate-900 md:grid-cols-[280px_minmax(0,1fr)]">
       <Sidebar
         activePage="dashboard"
         onDashboard={() => setActivePage('dashboard')}
@@ -181,7 +180,7 @@ export function DashboardPage({
         profileName={currentShift?.cashierName}
       />
 
-      <section className="dashboard-content">
+      <section className="dashboard-content min-w-0 p-5 md:p-8">
         <DashboardHeader
           products={products}
           transactions={transactions}
@@ -195,10 +194,10 @@ export function DashboardPage({
           description="Pantau penjualan, transaksi, dan ketersediaan product dari satu tempat."
         />
 
-        <section className="stats-grid" aria-label="Ringkasan data">
+        <section className="stats-grid mb-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4" aria-label="Ringkasan data">
           {stats.map((stat) => (
             <Button
-              className="stat-card"
+              className="stat-card grid min-h-32 gap-2 rounded-lg border border-slate-200 bg-white p-5 text-left shadow-lg shadow-slate-900/5 hover:border-slate-300"
               type="button"
               key={stat.label}
               onClick={() => {
@@ -219,8 +218,8 @@ export function DashboardPage({
         </section>
 
         {activeDetail && (
-          <section className="dashboard-detail-panel">
-            <div className="panel-header">
+          <section className="dashboard-detail-panel rounded-lg border border-slate-200 bg-white p-5 shadow-lg shadow-slate-900/5">
+            <div className="panel-header mb-4 flex items-start justify-between gap-3 border-b border-slate-100 pb-4 [&_p]:mb-1 [&_p]:text-xs [&_p]:font-black [&_p]:uppercase [&_p]:text-teal-700 [&_h2]:m-0 [&_h2]:text-xl [&_h2]:font-black">
               <div>
                 <p>Rincian Dashboard</p>
                 <h2>
@@ -233,12 +232,12 @@ export function DashboardPage({
             </div>
 
             {activeDetail === 'sales-today' && (
-              <div className="dashboard-detail-list">
+              <div className="dashboard-detail-list grid gap-3">
                 {todayTransactions.length === 0 ? (
-                  <div className="empty-dashboard-state">Belum ada penjualan hari ini.</div>
+                  <div className="empty-dashboard-state rounded-lg border border-dashed border-slate-300 bg-slate-50 p-5 text-sm font-bold text-slate-500">Belum ada penjualan hari ini.</div>
                 ) : todayTransactions.map((sale) => (
                   <Button
-                    className="sales-detail-row transaction-detail-trigger"
+                    className="sales-detail-row transaction-detail-trigger grid w-full grid-cols-[1fr_auto] gap-3 rounded-lg border border-slate-100 bg-white p-3 text-left hover:border-slate-300"
                     type="button"
                     key={sale.id}
                     onClick={() => setSelectedTransaction(sale)}
@@ -255,12 +254,12 @@ export function DashboardPage({
             )}
 
             {activeDetail === 'transactions' && (
-              <div className="dashboard-detail-list">
+              <div className="dashboard-detail-list grid gap-3">
                 {transactions.length === 0 ? (
-                  <div className="empty-dashboard-state">Belum ada transaksi. Buat transaksi baru setelah product tersedia.</div>
+                  <div className="empty-dashboard-state rounded-lg border border-dashed border-slate-300 bg-slate-50 p-5 text-sm font-bold text-slate-500">Belum ada transaksi. Buat transaksi baru setelah product tersedia.</div>
                 ) : transactions.map((transaction) => (
                   <Button
-                    className="transaction-row transaction-detail-trigger"
+                    className="transaction-row transaction-detail-trigger grid w-full grid-cols-[1fr_auto] gap-3 rounded-lg border border-slate-100 bg-white p-3 text-left hover:border-slate-300"
                     type="button"
                     key={transaction.id}
                     onClick={() => setSelectedTransaction(transaction)}
@@ -278,12 +277,12 @@ export function DashboardPage({
             )}
 
             {activeDetail === 'active-products' && (
-              <div className="dashboard-detail-list">
+              <div className="dashboard-detail-list grid gap-3">
                 {activeProducts.length === 0 ? (
-                  <div className="empty-dashboard-state">Belum ada product aktif. Tambahkan product manual dulu.</div>
+                  <div className="empty-dashboard-state rounded-lg border border-dashed border-slate-300 bg-slate-50 p-5 text-sm font-bold text-slate-500">Belum ada product aktif. Tambahkan product manual dulu.</div>
                 ) : activeProducts.map((product) => (
-                  <div className="product-row" key={product.name}>
-                    <div className="dashboard-product-name">
+                  <div className="product-row flex items-center justify-between gap-3 rounded-lg border border-slate-100 bg-white p-3" key={product.name}>
+                    <div className="dashboard-product-name flex items-center gap-3 [&_img]:h-12 [&_img]:w-14 [&_img]:rounded-lg [&_img]:object-cover [&_span]:text-sm [&_span]:text-slate-500">
                       <img src={product.image} alt={product.name} />
                       <div>
                         <strong>{product.name}</strong>

@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import type { Product, TransactionRecord } from '../../types'
 import { Button } from '../button/Button'
 import { Input } from '../input/Input'
-import './DashboardHeader.css'
 
 type DashboardHeaderProps = {
   products: Product[]
@@ -54,17 +53,17 @@ export function DashboardHeader({
   const hasResults = productResults.length > 0 || transactionResults.length > 0
 
   return (
-    <header className="dashboard-header" id="dashboard">
-      <div className="dashboard-header-actions">
-        <div className="dashboard-search-area">
-          <div className="dashboard-search-buttons" aria-label="Pencarian cepat">
+    <header className="dashboard-header mb-5" id="dashboard">
+      <div className="dashboard-header-actions flex items-start justify-between gap-4 max-md:flex-col">
+        <div className="dashboard-search-area relative">
+          <div className="dashboard-search-buttons flex gap-2" aria-label="Pencarian cepat">
             <Button type="button" onClick={() => setIsSearchOpen((currentValue) => !currentValue)}>
               Search Product & Transaksi
             </Button>
           </div>
 
           {isSearchOpen && (
-            <div className="dashboard-search-panel">
+            <div className="dashboard-search-panel absolute z-20 mt-2 w-[min(420px,calc(100vw-40px))] rounded-lg border border-slate-200 bg-white p-3 shadow-xl shadow-slate-900/10">
               <Input
                 autoFocus
                 value={searchQuery}
@@ -72,7 +71,7 @@ export function DashboardHeader({
                 placeholder="Cari product atau transaksi"
               />
 
-              <div className="dashboard-search-results">
+              <div className="dashboard-search-results mt-3 grid gap-2 [&_span]:text-sm [&_span]:font-bold [&_span]:text-slate-500 [&_button]:justify-start [&_button]:text-left [&_small]:block [&_small]:text-xs [&_small]:text-slate-500">
                 {!normalizedQuery && <span>Ketik nama product, kategori, no receipt, atau kasir.</span>}
                 {normalizedQuery && !hasResults && <span>Data tidak ditemukan.</span>}
 
@@ -93,7 +92,7 @@ export function DashboardHeader({
             </div>
           )}
         </div>
-        <div className="dashboard-date">
+        <div className="dashboard-date text-right max-md:text-left [&_strong]:block [&_strong]:text-slate-950 [&_span]:text-sm [&_span]:font-bold [&_span]:text-slate-500">
           <strong>{formattedDate}</strong>
           <span>{formattedTime}</span>
         </div>

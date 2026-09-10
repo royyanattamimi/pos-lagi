@@ -4,7 +4,6 @@ import { PageHeader } from '../../component/header/PageHeader'
 import { Button } from '../../component/button/Button'
 import { Input } from '../../component/input/Input'
 import type { ShiftSession, TransactionRecord } from '../../types'
-import './ShiftPage.css'
 
 type ShiftPageProps = {
   onDashboard: () => void
@@ -136,7 +135,7 @@ export function ShiftPage({
   })
 
   return (
-    <main className="shift-page">
+    <main className="shift-page min-h-screen grid grid-cols-1 bg-slate-100 text-slate-900 md:grid-cols-[280px_minmax(0,1fr)]">
       <Sidebar
         activePage="shift"
         onDashboard={onDashboard}
@@ -146,7 +145,7 @@ export function ShiftPage({
         onProfile={onProfile}
       />
 
-      <section className="shift-content">
+      <section className="shift-content min-w-0 p-5 md:p-8">
         <PageHeader
           eyebrow="Shift"
           title="Start dan end shift"
@@ -158,7 +157,7 @@ export function ShiftPage({
           )}
         />
 
-        <section className="shift-status-grid" aria-label="Status shift">
+        <section className="shift-status-grid mb-5 grid gap-3 md:grid-cols-3 [&_article]:rounded-lg [&_article]:border [&_article]:border-slate-200 [&_article]:bg-white [&_article]:p-4 [&_article]:shadow-lg [&_article]:shadow-slate-900/5 [&_span]:text-sm [&_span]:font-bold [&_span]:text-slate-500 [&_strong]:block [&_strong]:text-xl [&_strong]:font-black" aria-label="Status shift">
           <article>
             <span>Status Shift</span>
             <strong>{isShiftOpen ? 'Berjalan' : 'Selesai'}</strong>
@@ -180,8 +179,8 @@ export function ShiftPage({
           </article>
         </section>
 
-        <section className="shift-date-panel" aria-label="Cek transaksi berdasarkan tanggal">
-          <div className="shift-date-control">
+        <section className="shift-date-panel mb-5 rounded-lg border border-slate-200 bg-white p-5 shadow-lg shadow-slate-900/5" aria-label="Cek transaksi berdasarkan tanggal">
+          <div className="shift-date-control mb-4 grid gap-3 md:grid-cols-[220px_auto]">
             <label>
               Cek Tanggal Transaksi
               <Input
@@ -192,7 +191,7 @@ export function ShiftPage({
             </label>
           </div>
 
-          <div className="shift-date-summary">
+          <div className="shift-date-summary mb-4 grid gap-3 md:grid-cols-3 [&_article]:rounded-lg [&_article]:bg-slate-50 [&_article]:p-3 [&_span]:text-xs [&_span]:font-extrabold [&_span]:text-slate-500 [&_strong]:block [&_strong]:font-black">
             <article>
               <span>Total Transaksi</span>
               <strong>{selectedDateTransactions.length}</strong>
@@ -207,11 +206,11 @@ export function ShiftPage({
             </article>
           </div>
 
-          <div className="shift-date-transactions">
+          <div className="shift-date-transactions grid gap-3">
             {selectedDateTransactions.length === 0 ? (
               <span>Belum ada transaksi pada tanggal ini.</span>
             ) : selectedDateTransactions.map((transaction) => (
-              <div className="shift-date-row" key={transaction.id}>
+              <div className="shift-date-row grid gap-2 rounded-lg border border-slate-100 p-3 md:grid-cols-[1fr_120px_140px]" key={transaction.id}>
                 <div>
                   <strong>{transaction.id}</strong>
                   <span>{formatTime(transaction.createdAt)} - {transaction.cashier}</span>
@@ -224,13 +223,13 @@ export function ShiftPage({
           </div>
         </section>
 
-        <section className="shift-panel">
-          <div className="shift-panel-header">
+        <section className="shift-panel rounded-lg border border-slate-200 bg-white p-5 shadow-lg shadow-slate-900/5">
+          <div className="shift-panel-header mb-4 flex items-start justify-between gap-3 border-b border-slate-100 pb-4 [&_p]:mb-1 [&_p]:text-xs [&_p]:font-black [&_p]:uppercase [&_p]:text-teal-700 [&_h2]:m-0 [&_h2]:text-xl [&_h2]:font-black">
             <div>
               <p>Rekapan</p>
               <h2>Rekap shift</h2>
             </div>
-            <div className="recap-tabs">
+            <div className="recap-tabs flex flex-wrap gap-2 [&_.active]:bg-slate-950 [&_.active]:text-white">
               <Button
                 className={recapView === 'daily' ? 'active' : ''}
                 type="button"
@@ -255,16 +254,16 @@ export function ShiftPage({
             </div>
           </div>
 
-          <div className="shift-recap-table">
+          <div className="shift-recap-table grid gap-3">
             {activeRecaps.length === 0 ? (
-              <div className="shift-recap-row">
+              <div className="shift-recap-row grid gap-2 rounded-lg border border-slate-100 p-3 md:grid-cols-[1fr_120px_140px]">
                 <div>
                   <strong>Belum ada rekap</strong>
                   <span>Start shift dulu agar data muncul.</span>
                 </div>
               </div>
             ) : activeRecaps.map((recap) => (
-              <div className="shift-recap-row" key={`${recap.period}-${recap.start}`}>
+              <div className="shift-recap-row grid gap-2 rounded-lg border border-slate-100 p-3 md:grid-cols-[1fr_120px_140px]" key={`${recap.period}-${recap.start}`}>
                 <div>
                   <strong>{recap.period}</strong>
                   <span>Status: {recap.status}</span>
