@@ -29,9 +29,9 @@ export function Sidebar({
     .toUpperCase()
 
   return (
-    <aside className="app-sidebar sticky top-0 flex h-screen flex-col border-r border-slate-200 bg-white p-5 max-md:static max-md:h-auto">
+    <aside className="app-sidebar sticky top-0 flex h-screen flex-col border-r border-white/70 bg-white/80 p-5 shadow-xl shadow-slate-950/5 backdrop-blur-xl max-md:static max-md:h-auto">
       <div className="sidebar-brand flex items-center gap-3">
-        <span className="grid h-11 w-11 place-items-center rounded-lg bg-teal-300 font-black text-teal-950">PL</span>
+        <span className="grid h-11 w-11 place-items-center rounded-2xl bg-slate-950 font-black text-white shadow-lg shadow-slate-950/20">PL</span>
         <div>
           <strong className="block text-slate-950">POS Lagi</strong>
           <small className="block text-xs font-bold text-slate-500">Cabang Utama</small>
@@ -40,21 +40,21 @@ export function Sidebar({
 
       <nav className="sidebar-nav mt-8 grid gap-2" aria-label="Navigasi aplikasi">
         <Button
-          className={activePage === 'dashboard' ? 'bg-slate-950 text-white hover:bg-slate-900' : 'justify-start'}
+          className={activePage === 'dashboard' ? 'justify-start bg-slate-950 text-white hover:bg-slate-900' : 'justify-start'}
           type="button"
           onClick={onDashboard}
         >
           Dashboard
         </Button>
         <Button
-          className={activePage === 'product' ? 'bg-slate-950 text-white hover:bg-slate-900' : 'justify-start'}
+          className={activePage === 'product' ? 'justify-start bg-slate-950 text-white hover:bg-slate-900' : 'justify-start'}
           type="button"
           onClick={onProduct}
         >
           Product
         </Button>
         <Button
-          className={activePage === 'transaction' ? 'bg-slate-950 text-white hover:bg-slate-900' : 'justify-start'}
+          className={activePage === 'transaction' ? 'justify-start bg-slate-950 text-white hover:bg-slate-900' : 'justify-start'}
           type="button"
           onClick={onTransaction}
         >

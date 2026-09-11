@@ -39,7 +39,7 @@ export function TransactionDetailPage({
   }
 
   return (
-    <main className="transaction-detail-page min-h-screen grid grid-cols-1 bg-slate-100 text-slate-900 md:grid-cols-[280px_minmax(0,1fr)]">
+    <main className="transaction-detail-page min-h-screen grid grid-cols-1 bg-[linear-gradient(180deg,#f8fafc_0%,#eef2f7_100%)] text-slate-900 md:grid-cols-[280px_minmax(0,1fr)]">
       <Sidebar
         activePage="dashboard"
         onDashboard={onDashboard}
@@ -82,7 +82,7 @@ export function TransactionDetailPage({
         </section>
 
         <section className="transaction-detail-layout grid items-start gap-5 xl:grid-cols-[1fr_320px]">
-          <article className="transaction-detail-panel rounded-lg border border-slate-200 bg-white p-5 shadow-lg shadow-slate-900/5 [&_header]:mb-4 [&_header]:flex [&_header]:items-start [&_header]:justify-between [&_header]:border-b [&_header]:border-slate-100 [&_header]:pb-4 [&_p]:mb-1 [&_p]:text-xs [&_p]:font-black [&_p]:uppercase [&_p]:text-teal-700 [&_h2]:m-0 [&_h2]:text-xl [&_h2]:font-black">
+          <article className="transaction-detail-panel rounded-2xl border border-white/70 bg-white/85 p-5 shadow-xl shadow-slate-950/5 backdrop-blur-sm [&_header]:mb-4 [&_header]:flex [&_header]:items-start [&_header]:justify-between [&_header]:border-b [&_header]:border-slate-100 [&_header]:pb-4 [&_p]:mb-1 [&_p]:text-xs [&_p]:font-black [&_p]:uppercase [&_p]:text-teal-700 [&_h2]:m-0 [&_h2]:text-xl [&_h2]:font-black">
             <header>
               <div>
                 <p>Item Transaksi</p>
@@ -106,7 +106,7 @@ export function TransactionDetailPage({
             </div>
           </article>
 
-          <aside className="transaction-payment-panel grid gap-3 rounded-lg border border-slate-200 bg-white p-5 shadow-lg shadow-slate-900/5 [&_div]:flex [&_div]:justify-between [&_span]:text-slate-500 [&_strong]:text-slate-950">
+          <aside className="transaction-payment-panel grid gap-3 rounded-2xl border border-white/70 bg-white/85 p-5 shadow-xl shadow-slate-950/5 backdrop-blur-sm [&_div]:flex [&_div]:justify-between [&_span]:text-slate-500 [&_strong]:text-slate-950">
             <div>
               <span>Subtotal</span>
               <strong>{formatCurrency(transaction.subtotal)}</strong>

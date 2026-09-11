@@ -135,7 +135,7 @@ export function ShiftPage({
   })
 
   return (
-    <main className="shift-page min-h-screen grid grid-cols-1 bg-slate-100 text-slate-900 md:grid-cols-[280px_minmax(0,1fr)]">
+    <main className="shift-page min-h-screen grid grid-cols-1 bg-[linear-gradient(180deg,#f8fafc_0%,#eef2f7_100%)] text-slate-900 md:grid-cols-[280px_minmax(0,1fr)]">
       <Sidebar
         activePage="shift"
         onDashboard={onDashboard}
@@ -179,7 +179,7 @@ export function ShiftPage({
           </article>
         </section>
 
-        <section className="shift-date-panel mb-5 rounded-lg border border-slate-200 bg-white p-5 shadow-lg shadow-slate-900/5" aria-label="Cek transaksi berdasarkan tanggal">
+        <section className="shift-date-panel mb-5 rounded-2xl border border-white/70 bg-white/85 p-5 shadow-xl shadow-slate-950/5 backdrop-blur-sm" aria-label="Cek transaksi berdasarkan tanggal">
           <div className="shift-date-control mb-4 grid gap-3 md:grid-cols-[220px_auto]">
             <label>
               Cek Tanggal Transaksi
@@ -223,7 +223,7 @@ export function ShiftPage({
           </div>
         </section>
 
-        <section className="shift-panel rounded-lg border border-slate-200 bg-white p-5 shadow-lg shadow-slate-900/5">
+        <section className="shift-panel rounded-2xl border border-white/70 bg-white/85 p-5 shadow-xl shadow-slate-950/5 backdrop-blur-sm">
           <div className="shift-panel-header mb-4 flex items-start justify-between gap-3 border-b border-slate-100 pb-4 [&_p]:mb-1 [&_p]:text-xs [&_p]:font-black [&_p]:uppercase [&_p]:text-teal-700 [&_h2]:m-0 [&_h2]:text-xl [&_h2]:font-black">
             <div>
               <p>Rekapan</p>

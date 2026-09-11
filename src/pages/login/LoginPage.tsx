@@ -30,29 +30,38 @@ export function LoginPage({ onLogin, onForgotPassword }: LoginPageProps) {
   }
 
   return (
-    <main className="login-page min-h-screen grid grid-cols-1 bg-white text-slate-900 lg:grid-cols-[minmax(320px,0.92fr)_minmax(380px,1fr)]">
-      <section className="login-hero min-h-screen flex flex-col justify-between gap-12 bg-neutral-100 p-10 text-neutral-950" aria-label="Kasir">
+    <main className="login-page min-h-screen grid grid-cols-1 bg-[linear-gradient(135deg,#f8fafc_0%,#ecfeff_46%,#f8fafc_100%)] text-slate-900 lg:grid-cols-[minmax(320px,0.92fr)_minmax(380px,1fr)]">
+      <section className="login-hero min-h-screen flex flex-col justify-between gap-12 bg-slate-950 p-10 text-white shadow-2xl shadow-slate-950/20" aria-label="Kasir">
         <div className="login-brand flex items-center gap-3">
-          <span className="brand-mark grid h-12 w-12 place-items-center rounded-lg bg-teal-300 font-black text-teal-950"></span>
+          <span className="brand-mark grid h-12 w-12 place-items-center rounded-2xl bg-white font-black text-slate-950 shadow-lg shadow-white/10">PL</span>
           <div>
             <strong>Kasir</strong>
             <span>Point Of Sale</span>
           </div>
         </div>
 
-        <div className="hero-copy max-w-xl [&_h1]:m-0 [&_h1]:text-4xl [&_h1]:font-extrabold [&_h1]:leading-tight [&_p]:mt-4 [&_p]:text-base [&_p]:leading-7 [&_p]:text-neutral-600">
+        <div className="hero-copy max-w-xl [&_h1]:m-0 [&_h1]:text-5xl [&_h1]:font-extrabold [&_h1]:leading-tight [&_p]:mt-4 [&_p]:text-base [&_p]:leading-7 [&_p]:text-slate-300">
           <h1>Kelola transaksi toko dengan lebih rapi.</h1>
           <p>Login untuk masuk ke dashboard kasir, product, transaksi, dan laporan penjualan.</p>
         </div>
+
+        <div className="grid gap-3 sm:grid-cols-3">
+          {['Produk', 'Transaksi', 'Shift'].map((item) => (
+            <div className="rounded-2xl border border-white/10 bg-white/10 p-4 shadow-xl shadow-black/10 backdrop-blur" key={item}>
+              <span className="text-xs font-black uppercase tracking-[0.18em] text-teal-200">{item}</span>
+              <strong className="mt-2 block text-2xl font-black">Live</strong>
+            </div>
+          ))}
+        </div>
       </section>
 
-      <section className="login-card min-h-screen flex flex-col justify-center p-10" aria-label="Form login">
-        <div className="login-heading mx-auto mb-6 w-full max-w-md [&_p]:mb-2 [&_p]:text-xs [&_p]:font-extrabold [&_p]:uppercase [&_p]:text-teal-700 [&_h2]:m-0 [&_h2]:text-3xl [&_h2]:font-extrabold [&_h2]:text-slate-900">
+      <section className="login-card min-h-screen flex flex-col justify-center p-6 md:p-10" aria-label="Form login">
+        <div className="login-heading mx-auto mb-6 w-full max-w-md [&_p]:mb-2 [&_p]:text-xs [&_p]:font-extrabold [&_p]:uppercase [&_p]:text-teal-700 [&_h2]:m-0 [&_h2]:text-4xl [&_h2]:font-extrabold [&_h2]:text-slate-900">
           <p>Login</p>
           <h2>Masuk ke akun</h2>
         </div>
 
-        <form className="login-form mx-auto grid w-full max-w-md gap-4 rounded-lg border border-slate-200 bg-white p-7 shadow-lg shadow-slate-900/5 [&_label]:grid [&_label]:gap-2 [&_label]:text-sm [&_label]:font-extrabold [&_label]:text-slate-600" onSubmit={handleSubmit}>
+        <form className="login-form mx-auto grid w-full max-w-md gap-4 rounded-2xl border border-white/70 bg-white/85 p-7 shadow-2xl shadow-slate-950/10 backdrop-blur-xl [&_label]:grid [&_label]:gap-2 [&_label]:text-sm [&_label]:font-extrabold [&_label]:text-slate-600" onSubmit={handleSubmit}>
           <label>
             Email
             <Input
@@ -114,7 +123,7 @@ export function LoginPage({ onLogin, onForgotPassword }: LoginPageProps) {
             </div>
           )}
 
-          <Button className="submit-button min-h-12 rounded-lg font-extrabold disabled:cursor-not-allowed disabled:opacity-70" variant="primary" size="large" type="submit" disabled={isSubmitting}>
+          <Button className="submit-button min-h-12 rounded-xl font-extrabold disabled:cursor-not-allowed disabled:opacity-70" variant="primary" size="large" type="submit" disabled={isSubmitting}>
             {isSubmitting ? 'Memproses...' : 'Masuk'}
           </Button>
         </form>

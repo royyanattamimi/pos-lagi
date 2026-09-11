@@ -169,7 +169,7 @@ export function DashboardPage({
   }
 
   return (
-    <main className="dashboard-page min-h-screen grid grid-cols-1 bg-slate-100 text-slate-900 md:grid-cols-[280px_minmax(0,1fr)]">
+    <main className="dashboard-page min-h-screen grid grid-cols-1 bg-[linear-gradient(180deg,#f8fafc_0%,#eef2f7_100%)] text-slate-900 md:grid-cols-[280px_minmax(0,1fr)]">
       <Sidebar
         activePage="dashboard"
         onDashboard={() => setActivePage('dashboard')}
@@ -197,7 +197,7 @@ export function DashboardPage({
         <section className="stats-grid mb-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4" aria-label="Ringkasan data">
           {stats.map((stat) => (
             <Button
-              className="stat-card grid min-h-32 gap-2 rounded-lg border border-slate-200 bg-white p-5 text-left shadow-lg shadow-slate-900/5 hover:border-slate-300"
+              className="stat-card group grid min-h-36 content-between gap-3 rounded-2xl border border-white/70 bg-white/85 p-5 text-left shadow-xl shadow-slate-950/5 backdrop-blur-sm hover:-translate-y-0.5 hover:border-teal-200 hover:shadow-teal-900/10 [&_small]:text-xs [&_small]:font-black [&_small]:uppercase [&_small]:tracking-[0.14em] [&_small]:text-teal-700 [&_span]:text-sm [&_span]:font-bold [&_span]:text-slate-500 [&_strong]:text-3xl [&_strong]:font-black [&_strong]:text-slate-950"
               type="button"
               key={stat.label}
               onClick={() => {
@@ -218,7 +218,7 @@ export function DashboardPage({
         </section>
 
         {activeDetail && (
-          <section className="dashboard-detail-panel rounded-lg border border-slate-200 bg-white p-5 shadow-lg shadow-slate-900/5">
+          <section className="dashboard-detail-panel rounded-2xl border border-white/70 bg-white/85 p-5 shadow-xl shadow-slate-950/5 backdrop-blur-sm">
             <div className="panel-header mb-4 flex items-start justify-between gap-3 border-b border-slate-100 pb-4 [&_p]:mb-1 [&_p]:text-xs [&_p]:font-black [&_p]:uppercase [&_p]:text-teal-700 [&_h2]:m-0 [&_h2]:text-xl [&_h2]:font-black">
               <div>
                 <p>Rincian Dashboard</p>
@@ -234,10 +234,10 @@ export function DashboardPage({
             {activeDetail === 'sales-today' && (
               <div className="dashboard-detail-list grid gap-3">
                 {todayTransactions.length === 0 ? (
-                  <div className="empty-dashboard-state rounded-lg border border-dashed border-slate-300 bg-slate-50 p-5 text-sm font-bold text-slate-500">Belum ada penjualan hari ini.</div>
+                  <div className="empty-dashboard-state rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5 text-sm font-bold text-slate-500">Belum ada penjualan hari ini.</div>
                 ) : todayTransactions.map((sale) => (
                   <Button
-                    className="sales-detail-row transaction-detail-trigger grid w-full grid-cols-[1fr_auto] gap-3 rounded-lg border border-slate-100 bg-white p-3 text-left hover:border-slate-300"
+                    className="sales-detail-row transaction-detail-trigger grid w-full grid-cols-[1fr_auto] gap-3 rounded-2xl border border-slate-100 bg-white/90 p-3 text-left hover:border-slate-300"
                     type="button"
                     key={sale.id}
                     onClick={() => setSelectedTransaction(sale)}
@@ -256,10 +256,10 @@ export function DashboardPage({
             {activeDetail === 'transactions' && (
               <div className="dashboard-detail-list grid gap-3">
                 {transactions.length === 0 ? (
-                  <div className="empty-dashboard-state rounded-lg border border-dashed border-slate-300 bg-slate-50 p-5 text-sm font-bold text-slate-500">Belum ada transaksi. Buat transaksi baru setelah product tersedia.</div>
+                  <div className="empty-dashboard-state rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5 text-sm font-bold text-slate-500">Belum ada transaksi. Buat transaksi baru setelah product tersedia.</div>
                 ) : transactions.map((transaction) => (
                   <Button
-                    className="transaction-row transaction-detail-trigger grid w-full grid-cols-[1fr_auto] gap-3 rounded-lg border border-slate-100 bg-white p-3 text-left hover:border-slate-300"
+                    className="transaction-row transaction-detail-trigger grid w-full grid-cols-[1fr_auto] gap-3 rounded-2xl border border-slate-100 bg-white/90 p-3 text-left hover:border-slate-300"
                     type="button"
                     key={transaction.id}
                     onClick={() => setSelectedTransaction(transaction)}
@@ -279,9 +279,9 @@ export function DashboardPage({
             {activeDetail === 'active-products' && (
               <div className="dashboard-detail-list grid gap-3">
                 {activeProducts.length === 0 ? (
-                  <div className="empty-dashboard-state rounded-lg border border-dashed border-slate-300 bg-slate-50 p-5 text-sm font-bold text-slate-500">Belum ada product aktif. Tambahkan product manual dulu.</div>
+                  <div className="empty-dashboard-state rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5 text-sm font-bold text-slate-500">Belum ada product aktif. Tambahkan product manual dulu.</div>
                 ) : activeProducts.map((product) => (
-                  <div className="product-row flex items-center justify-between gap-3 rounded-lg border border-slate-100 bg-white p-3" key={product.name}>
+                  <div className="product-row flex items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-white/90 p-3" key={product.name}>
                     <div className="dashboard-product-name flex items-center gap-3 [&_img]:h-12 [&_img]:w-14 [&_img]:rounded-lg [&_img]:object-cover [&_span]:text-sm [&_span]:text-slate-500">
                       <img src={product.image} alt={product.name} />
                       <div>
