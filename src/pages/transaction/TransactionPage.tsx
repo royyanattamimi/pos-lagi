@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
-import { History } from 'lucide-react'
+import { History, Minus, Plus, ArrowLeft, ArrowRight, Check, RotateCcw } from 'lucide-react'
+import { ProductImage } from '../../component/product/ProductImage'
 import { Sidebar } from '../../component/sidebar/Sidebar'
 import { PageHeader } from '../../component/header/PageHeader'
 import { Button } from '../../component/button/Button'
@@ -188,7 +189,7 @@ export function TransactionPage({
                 <History aria-hidden="true" />
                 Riwayat Transaksi
               </Button>
-              <Button type="button" onClick={resetTransaction}>Reset</Button>
+              <Button type="button" onClick={resetTransaction}><RotateCcw aria-hidden="true" />Reset</Button>
             </>
           )}
         />
@@ -215,6 +216,7 @@ export function TransactionPage({
                 {categories.map((category) => (
                   <Button
                     className={selectedCategory === category ? 'selected' : ''}
+                    aria-pressed={selectedCategory === category}
                     type="button"
                     key={category}
                     onClick={() => setSelectedCategory(category)}
@@ -234,7 +236,7 @@ export function TransactionPage({
                     key={product.id}
                     onClick={() => addProduct(product)}
                   >
-                    <img src={product.image} alt={product.name} />
+                    <ProductImage src={product.image} name={product.name} category={product.category} />
                     <strong>{product.name}</strong>
                     <span>{product.category}</span>
                     <b>{formatCurrency(product.price)}</b>
@@ -262,8 +264,8 @@ export function TransactionPage({
                         <span>{formatCurrency(item.product.price)} per item</span>
                       </div>
                       <div className="mini-cart-control grid grid-cols-[36px_1fr_36px] gap-2">
-                        <Button type="button" onClick={() => updateQuantity(item.productId, item.quantity - 1)}>
-                          -
+                        <Button type="button" aria-label={`Kurangi ${item.product.name}`} title={`Kurangi ${item.product.name}`} onClick={() => updateQuantity(item.productId, item.quantity - 1)}>
+                          <Minus aria-hidden="true" />
                         </Button>
                         <Input
                           min="1"
@@ -272,8 +274,8 @@ export function TransactionPage({
                           onChange={(event) => updateQuantity(item.productId, Number(event.target.value))}
                           aria-label={`Jumlah ${item.product.name}`}
                         />
-                        <Button type="button" onClick={() => updateQuantity(item.productId, item.quantity + 1)}>
-                          +
+                        <Button type="button" aria-label={`Tambah ${item.product.name}`} title={`Tambah ${item.product.name}`} onClick={() => updateQuantity(item.productId, item.quantity + 1)}>
+                          <Plus aria-hidden="true" />
                         </Button>
                       </div>
                       <b>{formatCurrency(item.total)}</b>
@@ -293,7 +295,7 @@ export function TransactionPage({
                 disabled={cartItems.length === 0}
                 onClick={() => setStep('review')}
               >
-                Review Pesanan
+                Review Pesanan <ArrowRight aria-hidden="true" />
               </Button>
             </aside>
           </section>
@@ -314,7 +316,7 @@ export function TransactionPage({
                 {cartItems.map((item) => (
                   <div className="cart-table-row grid gap-3 rounded-lg border border-slate-100 p-3 md:grid-cols-[1fr_120px_120px] md:items-center" key={item.productId}>
                     <div className="review-product-cell flex items-center gap-3 [&_img]:h-14 [&_img]:w-16 [&_img]:rounded-lg [&_img]:object-cover [&_span]:block [&_span]:text-sm [&_span]:text-slate-500 [&_small]:text-xs [&_small]:text-slate-500">
-                      <img src={item.product.image} alt={item.product.name} />
+                      <ProductImage src={item.product.image} name={item.product.name} category={item.product.category} />
                       <div>
                         <strong>{item.product.name}</strong>
                         <span>{item.product.category}</span>
@@ -322,12 +324,12 @@ export function TransactionPage({
                       </div>
                     </div>
                     <div className="quantity-control grid grid-cols-[36px_1fr_36px] items-center gap-2 text-center">
-                      <Button type="button" onClick={() => updateQuantity(item.productId, item.quantity - 1)}>
-                        -
+                      <Button type="button" aria-label={`Kurangi ${item.product.name}`} title={`Kurangi ${item.product.name}`} onClick={() => updateQuantity(item.productId, item.quantity - 1)}>
+                        <Minus aria-hidden="true" />
                       </Button>
                       <strong>{item.quantity}</strong>
-                      <Button type="button" onClick={() => updateQuantity(item.productId, item.quantity + 1)}>
-                        +
+                      <Button type="button" aria-label={`Tambah ${item.product.name}`} title={`Tambah ${item.product.name}`} onClick={() => updateQuantity(item.productId, item.quantity + 1)}>
+                        <Plus aria-hidden="true" />
                       </Button>
                     </div>
                     <b>{formatCurrency(item.total)}</b>
@@ -351,9 +353,9 @@ export function TransactionPage({
               </div>
 
               <div className="transaction-actions review-actions mt-4 flex gap-2">
-                <Button type="button" onClick={() => setStep('select')}>Kembali</Button>
+                <Button type="button" onClick={() => setStep('select')}><ArrowLeft aria-hidden="true" />Kembali</Button>
                 <Button className="primary-action w-full" variant="primary" type="button" onClick={() => setStep('payment')}>
-                  Pembayaran
+                  Pembayaran <ArrowRight aria-hidden="true" />
                 </Button>
               </div>
             </aside>
@@ -373,6 +375,7 @@ export function TransactionPage({
               {['Cash', 'QRIS', 'Debit'].map((method) => (
                 <Button
                   className={paymentMethod === method ? 'selected' : ''}
+                  aria-pressed={paymentMethod === method}
                   type="button"
                   key={method}
                   onClick={() => setPaymentMethod(method)}
@@ -400,7 +403,7 @@ export function TransactionPage({
             </div>
 
             <div className="transaction-actions mt-4 flex gap-2">
-              <Button type="button" onClick={() => setStep('review')}>Kembali</Button>
+              <Button type="button" onClick={() => setStep('review')}><ArrowLeft aria-hidden="true" />Kembali</Button>
               <Button
                 className="primary-action w-full"
                 variant="primary"
@@ -408,7 +411,7 @@ export function TransactionPage({
                 disabled={!canFinish}
                 onClick={finishPayment}
               >
-                Finish
+                <Check aria-hidden="true" /> Selesaikan transaksi
               </Button>
             </div>
           </section>

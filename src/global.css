@@ -1,5 +1,86 @@
 @import "tailwindcss";
 
+/* Transaction controls override shared button sizing within this page only. */
+.transaction-page .mini-cart-control,
+.transaction-page .quantity-control {
+  display: grid;
+  grid-template-columns: 28px 40px 28px;
+  width: fit-content;
+  gap: 4px;
+  align-items: center;
+  min-width: 0;
+}
+.transaction-page .mini-cart-control button,
+.transaction-page .quantity-control button {
+  width: 28px;
+  height: 28px;
+  min-height: 28px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+}
+.transaction-page .mini-cart-control input {
+  height: 28px;
+  min-height: 28px;
+  padding: 0 4px;
+  text-align: center;
+  appearance: textfield;
+  font-variant-numeric: tabular-nums;
+}
+.transaction-page .mini-cart-control input::-webkit-inner-spin-button,
+.transaction-page .mini-cart-control input::-webkit-outer-spin-button { appearance: none; margin: 0; }
+.transaction-page .catalog-item {
+  display: grid;
+  grid-template-rows: 80px auto auto auto;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  padding: 8px;
+  align-items: start;
+  justify-items: stretch;
+  gap: 4px;
+  text-align: left;
+}
+.transaction-page .catalog-item strong { line-height: 1.4; }
+.transaction-page .catalog-item img { height: 80px; }
+.transaction-page .catalog-item span { font-size: 11px; }
+.transaction-page .product-catalog { grid-template-columns: repeat(auto-fill, minmax(min(100%, 140px), 1fr)); align-items: start; }
+.transaction-page .primary-action,
+.transaction-page .transaction-actions button,
+.transaction-page .payment-methods button,
+.transaction-page .category-list button,
+.transaction-page .page-header-actions button {
+  width: fit-content;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 28px;
+  padding: 4px 8px;
+  gap: 4px;
+  font-size: 12px;
+  line-height: 18px;
+  border-radius: 5px;
+  flex: 0 0 auto;
+}
+.transaction-page .transaction-content button svg { width: 14px; height: 14px; }
+.transaction-page .transaction-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+.transaction-page .payment-methods { display: flex; flex-wrap: wrap; gap: 8px; }
+.transaction-page .page-header-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.transaction-page .cart-table-row { grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 1440px) {
+  .transaction-page .cart-table-row { grid-template-columns: minmax(0, 1fr) 140px 110px; }
+}
+
+@layer components {
+  .saved-product-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr)); gap: 16px; }
+  .saved-product-card { min-width: 0; overflow: hidden; border: 1px solid #e2e8f0; border-radius: 8px; background: white; }
+  .saved-product-photo { aspect-ratio: 4 / 3; overflow: hidden; background: #f4f6f5; }
+  .saved-product-photo img { width: 100%; height: 100%; object-fit: contain; }
+  .saved-product-info { display: grid; gap: 10px; padding: 16px; }
+  .saved-product-info h3 { min-height: 48px; overflow-wrap: anywhere; }
+  .saved-product-info .product-edit-button { flex: 1; }
+  .saved-product-grid > .empty-state { grid-column: 1 / -1; }
+}
+
 /* Shared layout rules also constrain legacy page grids by available space. */
 @layer components {
   .app-sidebar { position: sticky; top: 0; display: flex; flex-direction: column; height: 100dvh; padding: 28px 16px 20px; background: white; border-right: 1px solid #e5e9ed; }

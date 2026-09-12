@@ -7,6 +7,8 @@ import { Button } from '../../component/button/Button'
 import { Input } from '../../component/input/Input'
 import { Select } from '../../component/select/Select'
 import type { Product, ProductInput } from '../../types'
+import { ProductImage } from '../../component/product/ProductImage'
+import { productPhotos, defaultProductPhoto } from '../../component/product/productPhotos'
 
 type ProductPageProps = {
   onDashboard: () => void
@@ -107,7 +109,7 @@ export function ProductPage({
       name: form.name.trim(),
       category: form.category,
       price,
-      image: form.image || '/product-images/snack-real.png',
+      image: form.image || defaultProductPhoto(form.category),
     }
 
     if (editingProductId) {
@@ -280,7 +282,7 @@ export function ProductPage({
                   ) : products.map((product) => (
                     <div className="product-table-row grid gap-3 data-row md:grid-cols-[minmax(200px,1fr)_110px_120px_114px] md:items-center" key={product.id}>
                       <div className="product-name-cell flex items-center gap-3 [&_img]:h-14 [&_img]:w-16 [&_img]:rounded-lg [&_img]:object-cover [&_span]:text-sm [&_span]:text-slate-500">
-                        <img src={product.image} alt={product.name} />
+                        <ProductImage src={product.image} name={product.name} category={product.category} />
                         <div>
                           <strong>{product.name}</strong>
                           <span>{product.category}</span>
@@ -408,12 +410,22 @@ export function ProductPage({
               </label>
 
               <div className="image-preview grid min-h-24 grid-cols-[96px_minmax(0,1fr)] items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 [&_img]:h-20 [&_img]:w-24 [&_img]:rounded-lg [&_img]:object-cover [&_div]:grid [&_div]:grid-cols-[22px_minmax(0,1fr)] [&_div]:items-center [&_div]:gap-2 [&_svg]:h-5 [&_svg]:w-5 [&_span]:text-sm [&_span]:font-semibold [&_span]:text-slate-500">
-                <img src={form.image || '/product-images/snack-real.png'} alt="Preview product" />
+                <ProductImage src={form.image} name="Pratinjau foto produk" category={form.category} />
                 <div>
                   <ImagePlus aria-hidden="true" />
                   <span>{form.image ? 'Image siap digunakan' : 'Upload image agar product tampil lebih jelas'}</span>
                 </div>
               </div>
+
+              <fieldset className="grid gap-2">
+                <legend className="mb-2 text-sm font-semibold text-slate-600">Foto pilihan</legend>
+                <div className="grid grid-cols-4 gap-2">
+                  {productPhotos.map((photo) => <button type="button" key={photo.label} title={photo.label} aria-label={`Gunakan foto ${photo.label}`} aria-pressed={(form.image || defaultProductPhoto(form.category)) === photo.src} onClick={() => setForm((current) => ({ ...current, image: photo.src }))} className="overflow-hidden rounded-lg border border-slate-200 bg-white p-1 aria-pressed:border-emerald-600 aria-pressed:ring-2 aria-pressed:ring-emerald-600">
+                    <ProductImage src={photo.src} name={photo.label} className="aspect-square w-full rounded object-cover" />
+                    <span className="block py-1 text-center text-[10px] text-slate-600">{photo.label}</span>
+                  </button>)}
+                </div>
+              </fieldset>
 
               <Button className="product-primary" variant="primary" type="submit">
                 {editingProductId ? 'Update Product' : 'Simpan Product'}
@@ -459,15 +471,7 @@ export function ProductPage({
               </Button>
             </form>
 
-            <div className="product-table grid gap-3">
-              {filteredProducts.length > 0 && (
-                <div className="product-table-head hidden grid-cols-[minmax(200px,1fr)_110px_120px_114px] gap-3 px-3 text-xs font-black uppercase text-slate-400 md:grid" aria-hidden="true">
-                  <span>Product</span>
-                  <span>Kategori</span>
-                  <span>Harga</span>
-                  <span>Aksi</span>
-                </div>
-              )}
+            <div className="saved-product-grid">
               {filteredProducts.length === 0 ? (
                 <div className="empty-product-state empty-state">
                   {products.length === 0
@@ -475,16 +479,15 @@ export function ProductPage({
                     : 'Product tidak ditemukan pada pencarian atau kategori ini.'}
                 </div>
               ) : filteredProducts.map((product) => (
-                <div className="product-table-row grid gap-3 data-row md:grid-cols-[minmax(200px,1fr)_110px_120px_114px] md:items-center" key={product.id}>
-                  <div className="product-name-cell flex items-center gap-3 [&_img]:h-14 [&_img]:w-16 [&_img]:rounded-lg [&_img]:object-cover [&_span]:text-sm [&_span]:text-slate-500">
-                    <img src={product.image} alt={product.name} />
-                    <div>
-                      <strong>{product.name}</strong>
-                    </div>
+                <article className="saved-product-card" key={product.id}>
+                  <div className="saved-product-photo">
+                    <ProductImage src={product.image} name={product.name} category={product.category} />
                   </div>
+                  <div className="saved-product-info">
                   <span className="product-category w-fit rounded-lg bg-slate-100 px-2 py-1 text-xs font-bold text-slate-600">{product.category}</span>
-                  <strong>{formatCurrency(product.price)}</strong>
-                  <div className="product-row-actions flex justify-start gap-2 md:justify-end">
+                  <h3 className="font-semibold text-slate-900">{product.name}</h3>
+                  <strong className="text-lg text-emerald-700">{formatCurrency(product.price)}</strong>
+                  <div className="product-row-actions mt-1 flex gap-2 border-t border-slate-100 pt-3">
                     <Button className="product-edit-button" type="button" onClick={() => handleEditProduct(product)}>
                       Edit
                     </Button>
@@ -500,7 +503,8 @@ export function ProductPage({
                       <Trash2 aria-hidden="true" />
                     </Button>
                   </div>
-                </div>
+                  </div>
+                </article>
               ))}
             </div>
           </article>

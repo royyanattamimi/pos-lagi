@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { ProductImage } from '../../component/product/ProductImage'
 import { ArrowUpRight, Plus, Wallet, ReceiptText, Package, Clock3 } from 'lucide-react'
 import { DashboardHeader } from '../../component/header/DashboardHeader'
 import { PageHeader } from '../../component/header/PageHeader'
@@ -325,7 +326,7 @@ export function DashboardPage({
                 ) : activeProducts.map((product) => (
                   <div className="product-row flex items-center justify-between gap-3 data-row" key={product.name}>
                     <div className="dashboard-product-name flex items-center gap-3 [&_img]:h-12 [&_img]:w-14 [&_img]:rounded-lg [&_img]:object-cover [&_span]:text-sm [&_span]:text-slate-500">
-                      <img src={product.image} alt={product.name} />
+                      <ProductImage src={product.image} name={product.name} category={product.category} />
                       <div>
                         <strong>{product.name}</strong>
                         <span>{product.category}</span>
