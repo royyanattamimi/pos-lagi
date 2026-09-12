@@ -56,7 +56,7 @@ export function ProfilePage({
     .toUpperCase()
 
   return (
-    <main className="profile-page min-h-screen grid grid-cols-1 bg-[linear-gradient(180deg,#f8fafc_0%,#eef2f7_100%)] text-slate-900 md:grid-cols-[280px_minmax(0,1fr)]">
+    <main className="profile-page app-shell">
       <Sidebar
         activePage="profile"
         onDashboard={onDashboard}
@@ -67,7 +67,7 @@ export function ProfilePage({
         profileName={currentShift?.cashierName}
       />
 
-      <section className="profile-content min-w-0 p-5 md:p-8">
+      <section className="profile-content content-shell">
         <PageHeader
           eyebrow="Profile"
           title="Pengaturan profile kasir"
@@ -75,7 +75,7 @@ export function ProfilePage({
           actions={<Button type="button" onClick={onDashboard}>Kembali</Button>}
         />
 
-        <section className="profile-overview mb-5 flex items-center justify-between gap-4 rounded-2xl border border-white/70 bg-white/85 p-5 shadow-xl shadow-slate-950/5 backdrop-blur-sm max-md:flex-col max-md:items-start">
+        <section className="profile-overview mb-5 flex items-center justify-between gap-4 surface-panel max-md:flex-col max-md:items-start">
           <div className="profile-photo grid h-20 w-20 place-items-center rounded-full bg-teal-100 text-2xl font-black text-teal-800">{initials}</div>
           <div>
             <h2>{displayName}</h2>
@@ -89,7 +89,7 @@ export function ProfilePage({
         </section>
 
         <section className="profile-grid grid gap-5 xl:grid-cols-2">
-          <article className="profile-panel rounded-2xl border border-white/70 bg-white/85 p-5 shadow-xl shadow-slate-950/5 backdrop-blur-sm">
+          <article className="profile-panel surface-panel">
             <div className="profile-panel-header mb-4 border-b border-slate-100 pb-4 [&_p]:mb-1 [&_p]:text-xs [&_p]:font-black [&_p]:uppercase [&_p]:text-teal-700 [&_h2]:m-0 [&_h2]:text-xl [&_h2]:font-black">
               <p>Data Profile</p>
               <h2>Informasi pengguna</h2>
@@ -129,7 +129,7 @@ export function ProfilePage({
             </form>
           </article>
 
-          <article className="profile-panel rounded-2xl border border-white/70 bg-white/85 p-5 shadow-xl shadow-slate-950/5 backdrop-blur-sm">
+          <article className="profile-panel surface-panel">
             <div className="profile-panel-header mb-4 border-b border-slate-100 pb-4 [&_p]:mb-1 [&_p]:text-xs [&_p]:font-black [&_p]:uppercase [&_p]:text-teal-700 [&_h2]:m-0 [&_h2]:text-xl [&_h2]:font-black">
               <p>Akses Akun</p>
               <h2>Role dan operasional</h2>

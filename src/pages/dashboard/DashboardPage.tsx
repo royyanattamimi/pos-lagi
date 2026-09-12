@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { ArrowUpRight, Plus, Wallet, ReceiptText, Package, Clock3 } from 'lucide-react'
 import { DashboardHeader } from '../../component/header/DashboardHeader'
 import { PageHeader } from '../../component/header/PageHeader'
 import { Sidebar } from '../../component/sidebar/Sidebar'
@@ -60,14 +61,24 @@ export function DashboardPage({
   const salesToday = todayTransactions.reduce((total, transaction) => total + transaction.grandTotal, 0)
   const activeProducts = products
   const stats = [
-    { key: 'sales-today', label: 'Penjualan Hari Ini', value: formatCurrency(salesToday) },
-    { key: 'transactions', label: 'Transaksi', value: String(transactions.length) },
-    { key: 'active-products', label: 'Product Aktif', value: String(activeProducts.length) },
+    { key: 'sales-today', label: 'Penjualan hari ini', value: formatCurrency(salesToday), icon: Wallet, tone: 'green' },
+    { key: 'transactions', label: 'Total transaksi', value: String(transactions.length), icon: ReceiptText, tone: 'blue' },
+    { key: 'active-products', label: 'Produk aktif', value: String(activeProducts.length), icon: Package, tone: 'amber' },
   ]
+  const weeklySales = Array.from({ length: 7 }, (_, index) => {
+    const date = new Date()
+    date.setDate(date.getDate() - 6 + index)
+    const total = transactions.filter((item) => new Date(item.createdAt).toLocaleDateString('id-ID') === date.toLocaleDateString('id-ID')).reduce((sum, item) => sum + item.grandTotal, 0)
+    return { label: date.toLocaleDateString('id-ID', { weekday: 'short' }), date: date.toLocaleDateString('id-ID'), total }
+  })
+  const maxSales = Math.max(...weeklySales.map((day) => day.total), 1)
+  const weeklyTotal = weeklySales.reduce((sum, day) => sum + day.total, 0)
+  const recentTransactions = [...transactions].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 5)
   if (selectedTransaction) {
     return (
       <TransactionDetailPage
         transaction={selectedTransaction}
+        onShift={() => { setSelectedTransaction(null); setActivePage('shift') }}
         onBack={() => setSelectedTransaction(null)}
         onDashboard={() => {
           setSelectedTransaction(null)
@@ -110,6 +121,7 @@ export function DashboardPage({
     return (
       <TransactionHistoryPage
         transactions={transactions}
+        onShift={() => setActivePage('shift')}
         onDashboard={() => setActivePage('dashboard')}
         onProduct={() => setActivePage('product')}
         onTransaction={() => setActivePage('checkout')}
@@ -169,7 +181,7 @@ export function DashboardPage({
   }
 
   return (
-    <main className="dashboard-page min-h-screen grid grid-cols-1 bg-[linear-gradient(180deg,#f8fafc_0%,#eef2f7_100%)] text-slate-900 md:grid-cols-[280px_minmax(0,1fr)]">
+    <main className="dashboard-page app-shell">
       <Sidebar
         activePage="dashboard"
         onDashboard={() => setActivePage('dashboard')}
@@ -180,7 +192,7 @@ export function DashboardPage({
         profileName={currentShift?.cashierName}
       />
 
-      <section className="dashboard-content min-w-0 p-5 md:p-8">
+      <section className="dashboard-content content-shell">
         <DashboardHeader
           products={products}
           transactions={transactions}
@@ -190,35 +202,65 @@ export function DashboardPage({
 
         <PageHeader
           eyebrow="Dashboard"
-          title="Ringkasan operasional toko"
-          description="Pantau penjualan, transaksi, dan ketersediaan product dari satu tempat."
+          title={`Selamat datang, ${currentShift?.cashierName || 'Administrator'}`}
+          description="Ringkasan toko hari ini"
+          actions={<Button variant="primary" onClick={() => setActivePage('checkout')}><Plus aria-hidden="true" /> Transaksi baru</Button>}
         />
 
-        <section className="stats-grid mb-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4" aria-label="Ringkasan data">
+        <section className="stats-grid mb-6 grid gap-4 lg:grid-cols-3" aria-label="Ringkasan data">
           {stats.map((stat) => (
-            <Button
-              className="stat-card group grid min-h-36 content-between gap-3 rounded-2xl border border-white/70 bg-white/85 p-5 text-left shadow-xl shadow-slate-950/5 backdrop-blur-sm hover:-translate-y-0.5 hover:border-teal-200 hover:shadow-teal-900/10 [&_small]:text-xs [&_small]:font-black [&_small]:uppercase [&_small]:tracking-[0.14em] [&_small]:text-teal-700 [&_span]:text-sm [&_span]:font-bold [&_span]:text-slate-500 [&_strong]:text-3xl [&_strong]:font-black [&_strong]:text-slate-950"
+            <button
+              className={`stat-card metric-card metric-${stat.tone}`}
               type="button"
               key={stat.label}
               onClick={() => {
                 if (stat.key === 'transactions') {
                   setActiveDetail(null)
-                  setActivePage('checkout')
+                  setActivePage('transaction')
                   return
                 }
 
                 setActiveDetail(stat.key as DashboardDetail)
               }}
             >
-              <span>{stat.label}</span>
+              <span className="metric-label"><span className="metric-icon"><stat.icon size={20} aria-hidden="true" /></span>{stat.label}<ArrowUpRight size={16} aria-hidden="true" /></span>
               <strong>{stat.value}</strong>
-              <small>{stat.key === 'transactions' ? 'Buat transaksi baru' : 'Lihat rincian'}</small>
-            </Button>
+              <small>{stat.key === 'sales-today' ? `${todayTransactions.length} transaksi hari ini` : 'Lihat rincian'} <ArrowUpRight size={13} aria-hidden="true" /></small>
+            </button>
           ))}
         </section>
 
+        <div className="dashboard-overview">
+          <section className="sales-overview">
+            <div className="section-heading"><div><h2>Aktivitas penjualan</h2><span className="text-sm text-slate-500">7 hari terakhir</span></div><span className="status-badge">IDR</span></div>
+            <strong className="weekly-total">{formatCurrency(weeklyTotal)}</strong>
+            <div className="sales-chart" aria-label="Grafik penjualan tujuh hari terakhir">
+              {weeklySales.map((day) => <div className="chart-column" key={day.date} tabIndex={0}>
+                <div className="chart-track"><div className="chart-bar" style={{ height: `${day.total > 0 ? Math.max(3, day.total / maxSales * 100) : 0}%` }} /></div>
+                <span>{day.label}</span>
+                <span className="sr-only">{day.date}: {formatCurrency(day.total)}</span>
+                <span className="chart-tooltip">{day.date}<br />{formatCurrency(day.total)}</span>
+              </div>)}
+            </div>
+            {weeklyTotal === 0 && <p className="text-center text-xs text-slate-500">Belum ada penjualan dalam 7 hari terakhir.</p>}
+          </section>
+          <section className="shift-overview">
+            <div className="section-heading"><h2>Shift saat ini</h2><Clock3 size={20} className="text-emerald-700" aria-hidden="true" /></div>
+            <span className={`status-badge ${isShiftOpen ? 'status-open' : ''}`}>{isShiftOpen ? 'Berjalan' : 'Tidak aktif'}</span>
+            <strong className="mt-5 block text-xl font-semibold break-words">{currentShift?.cashierName || 'Belum ada kasir'}</strong>
+            <dl className="shift-details"><div><dt>Jadwal shift</dt><dd>{currentShift?.shiftTime || '-'}</dd></div><div><dt>Kas awal</dt><dd>{formatCurrency(currentShift?.openingCash || 0)}</dd></div><div><dt>Transaksi hari ini</dt><dd>{todayTransactions.length}</dd></div></dl>
+            <Button className="w-full" onClick={() => setActivePage('shift')}>Detail shift <ArrowUpRight aria-hidden="true" /></Button>
+          </section>
+        </div>
+        <section className="recent-sales">
+          <div className="section-heading"><div><h2>Transaksi terbaru</h2><span className="text-sm text-slate-500">Aktivitas terakhir toko Anda</span></div><Button size="small" variant="ghost" onClick={() => setActivePage('transaction')}>Lihat semua <ArrowUpRight aria-hidden="true" /></Button></div>
+          {recentTransactions.length ? recentTransactions.map((transaction) => <button className="recent-sale-row" key={transaction.id} onClick={() => setSelectedTransaction(transaction)}>
+            <span className="sale-icon"><ReceiptText size={19} aria-hidden="true" /></span><span className="min-w-0"><strong className="block break-words">{transaction.id}</strong><small className="text-slate-500">{transaction.cashier} · {transaction.itemCount} item</small></span><span className="sale-method">{transaction.paymentMethod}</span><strong>{formatCurrency(transaction.grandTotal)}</strong><ArrowUpRight size={16} aria-hidden="true" />
+          </button>) : <div className="dashboard-empty"><ReceiptText size={32} strokeWidth={1.4} aria-hidden="true" /><strong>Belum ada transaksi</strong><Button size="small" onClick={() => setActivePage('checkout')}><Plus aria-hidden="true" /> Transaksi baru</Button></div>}
+        </section>
+
         {activeDetail && (
-          <section className="dashboard-detail-panel rounded-2xl border border-white/70 bg-white/85 p-5 shadow-xl shadow-slate-950/5 backdrop-blur-sm">
+          <section className="dashboard-detail-panel surface-panel">
             <div className="panel-header mb-4 flex items-start justify-between gap-3 border-b border-slate-100 pb-4 [&_p]:mb-1 [&_p]:text-xs [&_p]:font-black [&_p]:uppercase [&_p]:text-teal-700 [&_h2]:m-0 [&_h2]:text-xl [&_h2]:font-black">
               <div>
                 <p>Rincian Dashboard</p>
@@ -234,10 +276,10 @@ export function DashboardPage({
             {activeDetail === 'sales-today' && (
               <div className="dashboard-detail-list grid gap-3">
                 {todayTransactions.length === 0 ? (
-                  <div className="empty-dashboard-state rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5 text-sm font-bold text-slate-500">Belum ada penjualan hari ini.</div>
+                  <div className="empty-dashboard-state empty-state">Belum ada penjualan hari ini.</div>
                 ) : todayTransactions.map((sale) => (
                   <Button
-                    className="sales-detail-row transaction-detail-trigger grid w-full grid-cols-[1fr_auto] gap-3 rounded-2xl border border-slate-100 bg-white/90 p-3 text-left hover:border-slate-300"
+                    className="sales-detail-row transaction-detail-trigger grid w-full grid-cols-[1fr_auto] gap-3 data-row text-left hover:border-slate-300"
                     type="button"
                     key={sale.id}
                     onClick={() => setSelectedTransaction(sale)}
@@ -256,10 +298,10 @@ export function DashboardPage({
             {activeDetail === 'transactions' && (
               <div className="dashboard-detail-list grid gap-3">
                 {transactions.length === 0 ? (
-                  <div className="empty-dashboard-state rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5 text-sm font-bold text-slate-500">Belum ada transaksi. Buat transaksi baru setelah product tersedia.</div>
+                  <div className="empty-dashboard-state empty-state">Belum ada transaksi. Buat transaksi baru setelah product tersedia.</div>
                 ) : transactions.map((transaction) => (
                   <Button
-                    className="transaction-row transaction-detail-trigger grid w-full grid-cols-[1fr_auto] gap-3 rounded-2xl border border-slate-100 bg-white/90 p-3 text-left hover:border-slate-300"
+                    className="transaction-row transaction-detail-trigger grid w-full grid-cols-[1fr_auto] gap-3 data-row text-left hover:border-slate-300"
                     type="button"
                     key={transaction.id}
                     onClick={() => setSelectedTransaction(transaction)}
@@ -279,9 +321,9 @@ export function DashboardPage({
             {activeDetail === 'active-products' && (
               <div className="dashboard-detail-list grid gap-3">
                 {activeProducts.length === 0 ? (
-                  <div className="empty-dashboard-state rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5 text-sm font-bold text-slate-500">Belum ada product aktif. Tambahkan product manual dulu.</div>
+                  <div className="empty-dashboard-state empty-state">Belum ada product aktif. Tambahkan product manual dulu.</div>
                 ) : activeProducts.map((product) => (
-                  <div className="product-row flex items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-white/90 p-3" key={product.name}>
+                  <div className="product-row flex items-center justify-between gap-3 data-row" key={product.name}>
                     <div className="dashboard-product-name flex items-center gap-3 [&_img]:h-12 [&_img]:w-14 [&_img]:rounded-lg [&_img]:object-cover [&_span]:text-sm [&_span]:text-slate-500">
                       <img src={product.image} alt={product.name} />
                       <div>

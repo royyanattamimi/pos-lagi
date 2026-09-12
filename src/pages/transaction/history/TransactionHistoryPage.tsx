@@ -13,6 +13,7 @@ type TransactionHistoryPageProps = {
   onProduct: () => void
   onTransaction: () => void
   onProfile: () => void
+  onShift: () => void
   onNewTransaction: () => void
   onSelectTransaction: (transaction: TransactionRecord) => void
   profileName?: string
@@ -34,6 +35,7 @@ export function TransactionHistoryPage({
   onProduct,
   onTransaction,
   onProfile,
+  onShift,
   onNewTransaction,
   onSelectTransaction,
   profileName,
@@ -73,18 +75,18 @@ export function TransactionHistoryPage({
     : 0
 
   return (
-    <main className="transaction-history-page min-h-screen grid grid-cols-1 bg-[linear-gradient(180deg,#f8fafc_0%,#eef2f7_100%)] text-slate-900 md:grid-cols-[280px_minmax(0,1fr)]">
+    <main className="transaction-history-page app-shell">
       <Sidebar
         activePage="transaction"
         onDashboard={onDashboard}
         onProduct={onProduct}
         onTransaction={onTransaction}
-        onShift={() => undefined}
+        onShift={onShift}
         onProfile={onProfile}
         profileName={profileName}
       />
 
-      <section className="transaction-history-content min-w-0 p-5 md:p-8">
+      <section className="transaction-history-content content-shell">
         <PageHeader
           eyebrow="Transaksi"
           title="Riwayat transaksi"
@@ -122,7 +124,7 @@ export function TransactionHistoryPage({
           </article>
         </section>
 
-        <section className="transaction-history-panel rounded-2xl border border-white/70 bg-white/85 p-5 shadow-xl shadow-slate-950/5 backdrop-blur-sm">
+        <section className="transaction-history-panel surface-panel">
           <div className="transaction-history-toolbar mb-4 grid gap-3 lg:grid-cols-[1fr_180px_180px]">
             <Input
               type="search"
@@ -157,7 +159,7 @@ export function TransactionHistoryPage({
             </div>
 
             {filteredTransactions.length === 0 ? (
-              <div className="transaction-history-empty flex items-center justify-between gap-3 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5 text-sm font-bold text-slate-500">
+              <div className="transaction-history-empty flex items-center justify-between gap-3 empty-state">
                 {transactions.length === 0 ? (
                   <>
                     <div>
@@ -175,7 +177,7 @@ export function TransactionHistoryPage({
               </div>
             ) : filteredTransactions.map((transaction) => (
               <Button
-                className="transaction-history-row grid w-full gap-3 rounded-2xl border border-slate-100 bg-white/90 p-3 text-left hover:border-slate-300 lg:grid-cols-[1fr_150px_70px_120px_130px_90px] lg:items-center [&_small]:block [&_small]:text-xs [&_small]:text-slate-500 [&_em]:w-fit [&_em]:rounded-full [&_em]:bg-teal-50 [&_em]:px-2 [&_em]:py-1 [&_em]:text-xs [&_em]:font-black [&_em]:not-italic [&_em]:text-teal-700"
+                className="transaction-history-row grid w-full gap-3 data-row text-left lg:grid-cols-[1fr_150px_70px_120px_130px_90px] lg:items-center block text-xs text-slate-500 [&_em]:w-fit [&_em]:rounded-full [&_em]:bg-teal-50 [&_em]:px-2 [&_em]:py-1 [&_em]:text-xs [&_em]:font-black [&_em]:not-italic [&_em]:text-teal-700"
                 type="button"
                 key={transaction.id}
                 onClick={() => onSelectTransaction(transaction)}

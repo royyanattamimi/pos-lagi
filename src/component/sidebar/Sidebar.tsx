@@ -1,4 +1,5 @@
 import { Button } from '../button/Button'
+import { LayoutDashboard, Package, ShoppingCart, Clock3, Store, ChevronRight } from 'lucide-react'
 
 type SidebarPage = 'dashboard' | 'product' | 'transaction' | 'shift' | 'profile'
 
@@ -17,10 +18,17 @@ export function Sidebar({
   onDashboard,
   onProduct,
   onTransaction,
+  onShift,
   onProfile,
   profileName,
 }: SidebarProps) {
   const displayName = profileName || 'Administrator'
+  const navigation = [
+    { key: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, action: onDashboard },
+    { key: 'product', label: 'Produk', icon: Package, action: onProduct },
+    { key: 'transaction', label: 'Transaksi', icon: ShoppingCart, action: onTransaction },
+    { key: 'shift', label: 'Shift kasir', icon: Clock3, action: onShift },
+  ]
   const initials = displayName
     .split(' ')
     .map((word) => word[0])
@@ -29,47 +37,33 @@ export function Sidebar({
     .toUpperCase()
 
   return (
-    <aside className="app-sidebar sticky top-0 flex h-screen flex-col border-r border-white/70 bg-white/80 p-5 shadow-xl shadow-slate-950/5 backdrop-blur-xl max-md:static max-md:h-auto">
+    <aside className="app-sidebar">
       <div className="sidebar-brand flex items-center gap-3">
-        <span className="grid h-11 w-11 place-items-center rounded-2xl bg-slate-950 font-black text-white shadow-lg shadow-slate-950/20">PL</span>
+        <span className="brand-symbol"><Store size={23} aria-hidden="true" /></span>
         <div>
-          <strong className="block text-slate-950">POS Lagi</strong>
+          <strong className="block text-lg text-slate-950">POS Lagi<span className="text-emerald-600">.</span></strong>
           <small className="block text-xs font-bold text-slate-500">Cabang Utama</small>
         </div>
       </div>
 
-      <nav className="sidebar-nav mt-8 grid gap-2" aria-label="Navigasi aplikasi">
-        <Button
-          className={activePage === 'dashboard' ? 'justify-start bg-slate-950 text-white hover:bg-slate-900' : 'justify-start'}
-          type="button"
-          onClick={onDashboard}
-        >
-          Dashboard
-        </Button>
-        <Button
-          className={activePage === 'product' ? 'justify-start bg-slate-950 text-white hover:bg-slate-900' : 'justify-start'}
-          type="button"
-          onClick={onProduct}
-        >
-          Product
-        </Button>
-        <Button
-          className={activePage === 'transaction' ? 'justify-start bg-slate-950 text-white hover:bg-slate-900' : 'justify-start'}
-          type="button"
-          onClick={onTransaction}
-        >
-          Transaksi
-        </Button>
+      <p className="nav-caption">WORKSPACE</p>
+      <nav className="sidebar-nav" aria-label="Navigasi aplikasi">
+        {navigation.map(({ key, label, icon: Icon, action }) => (
+          <button key={key} className="nav-link" aria-current={activePage === key ? 'page' : undefined} onClick={action}>
+            <Icon size={19} aria-hidden="true" /><span>{label}</span>
+            {activePage === key && <ChevronRight className="nav-chevron" size={15} aria-hidden="true" />}
+          </button>
+        ))}
       </nav>
 
       <section className="sidebar-profile mt-auto pt-5">
         <Button
-          className={`w-full justify-start ${activePage === 'profile' ? 'bg-slate-950 text-white hover:bg-slate-900' : ''}`}
+          className={`w-full justify-start ${activePage === 'profile' ? 'bg-slate-950 text-white hover:bg-slate-900' : 'border-transparent bg-slate-50 shadow-none'}`}
           type="button"
           onClick={onProfile}
         >
-          <span className="profile-avatar grid h-9 w-9 place-items-center rounded-full bg-teal-100 text-sm font-black text-teal-800">{initials}</span>
-          <span>
+          <span className="profile-avatar grid h-8 w-8 shrink-0 place-items-center rounded-full bg-teal-100 text-sm font-black text-teal-800">{initials}</span>
+          <span className="min-w-0 break-words text-left">
             <strong className="block">{displayName}</strong>
             <small className="block text-xs opacity-75">Administrator</small>
           </span>

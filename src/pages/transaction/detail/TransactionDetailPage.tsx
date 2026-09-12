@@ -10,6 +10,7 @@ type TransactionDetailPageProps = {
   onProduct: () => void
   onTransaction: () => void
   onProfile: () => void
+  onShift: () => void
   profileName?: string
 }
 
@@ -30,6 +31,7 @@ export function TransactionDetailPage({
   onProduct,
   onTransaction,
   onProfile,
+  onShift,
   profileName,
 }: TransactionDetailPageProps) {
   const transactionDate = new Date(transaction.createdAt)
@@ -39,18 +41,18 @@ export function TransactionDetailPage({
   }
 
   return (
-    <main className="transaction-detail-page min-h-screen grid grid-cols-1 bg-[linear-gradient(180deg,#f8fafc_0%,#eef2f7_100%)] text-slate-900 md:grid-cols-[280px_minmax(0,1fr)]">
+    <main className="transaction-detail-page app-shell">
       <Sidebar
         activePage="dashboard"
         onDashboard={onDashboard}
         onProduct={onProduct}
         onTransaction={onTransaction}
-        onShift={() => undefined}
+        onShift={onShift}
         onProfile={onProfile}
         profileName={profileName}
       />
 
-      <section className="transaction-detail-content min-w-0 p-5 md:p-8">
+      <section className="transaction-detail-content content-shell">
         <PageHeader
           eyebrow="Rincian Transaksi"
           title={transaction.id}
@@ -63,7 +65,7 @@ export function TransactionDetailPage({
           )}
         />
 
-        <section className="transaction-detail-summary mb-5 grid gap-3 md:grid-cols-3 [&_article]:rounded-lg [&_article]:border [&_article]:border-slate-200 [&_article]:bg-white [&_article]:p-4 [&_span]:text-sm [&_span]:font-bold [&_span]:text-slate-500 [&_strong]:block [&_strong]:text-lg [&_strong]:font-black [&_small]:text-sm [&_small]:text-slate-500" aria-label="Informasi transaksi">
+        <section className="transaction-detail-summary mb-5 grid gap-3 md:grid-cols-3 [&_article]:rounded-lg [&_article]:border [&_article]:border-slate-200 [&_article]:bg-white [&_article]:p-4 [&_span]:text-sm [&_span]:font-bold [&_span]:text-slate-500 [&_strong]:block [&_strong]:text-lg [&_strong]:font-black text-sm text-slate-500" aria-label="Informasi transaksi">
           <article>
             <span>Tanggal dan Waktu</span>
             <strong>{transactionDate.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}</strong>
@@ -82,7 +84,7 @@ export function TransactionDetailPage({
         </section>
 
         <section className="transaction-detail-layout grid items-start gap-5 xl:grid-cols-[1fr_320px]">
-          <article className="transaction-detail-panel rounded-2xl border border-white/70 bg-white/85 p-5 shadow-xl shadow-slate-950/5 backdrop-blur-sm [&_header]:mb-4 [&_header]:flex [&_header]:items-start [&_header]:justify-between [&_header]:border-b [&_header]:border-slate-100 [&_header]:pb-4 [&_p]:mb-1 [&_p]:text-xs [&_p]:font-black [&_p]:uppercase [&_p]:text-teal-700 [&_h2]:m-0 [&_h2]:text-xl [&_h2]:font-black">
+          <article className="transaction-detail-panel surface-panel [&_header]:mb-4 [&_header]:flex [&_header]:items-start [&_header]:justify-between [&_header]:border-b [&_header]:border-slate-100 [&_header]:pb-4 [&_p]:mb-1 [&_p]:text-xs [&_p]:font-black [&_p]:uppercase [&_p]:text-teal-700 [&_h2]:m-0 [&_h2]:text-xl [&_h2]:font-black">
             <header>
               <div>
                 <p>Item Transaksi</p>
@@ -106,7 +108,7 @@ export function TransactionDetailPage({
             </div>
           </article>
 
-          <aside className="transaction-payment-panel grid gap-3 rounded-2xl border border-white/70 bg-white/85 p-5 shadow-xl shadow-slate-950/5 backdrop-blur-sm [&_div]:flex [&_div]:justify-between [&_span]:text-slate-500 [&_strong]:text-slate-950">
+          <aside className="transaction-payment-panel grid gap-3 surface-panel [&_div]:flex [&_div]:justify-between [&_span]:text-slate-500 [&_strong]:text-slate-950">
             <div>
               <span>Subtotal</span>
               <strong>{formatCurrency(transaction.subtotal)}</strong>

@@ -167,7 +167,7 @@ export function TransactionPage({
   }
 
   return (
-    <main className="transaction-page min-h-screen grid grid-cols-1 bg-[linear-gradient(180deg,#f8fafc_0%,#eef2f7_100%)] text-slate-900 md:grid-cols-[280px_minmax(0,1fr)]">
+    <main className="transaction-page app-shell">
       <Sidebar
         activePage="transaction"
         onDashboard={onDashboard}
@@ -177,7 +177,7 @@ export function TransactionPage({
         onProfile={onProfile}
       />
 
-      <section className="transaction-content min-w-0 p-5 md:p-8">
+      <section className="transaction-content content-shell">
         <PageHeader
           eyebrow="Transaksi"
           title="Buat transaksi baru"
@@ -203,7 +203,7 @@ export function TransactionPage({
 
         {step === 'select' && (
           <section className="transaction-grid grid items-start gap-5 xl:grid-cols-[minmax(0,1.35fr)_minmax(340px,0.65fr)]">
-            <article className="transaction-panel rounded-2xl border border-white/70 bg-white/85 p-5 shadow-xl shadow-slate-950/5 backdrop-blur-sm">
+            <article className="transaction-panel surface-panel">
               <div className="transaction-panel-header mb-4 flex items-start justify-between gap-3 border-b border-slate-100 pb-4 [&_p]:mb-1 [&_p]:text-xs [&_p]:font-black [&_p]:uppercase [&_p]:text-teal-700 [&_h2]:m-0 [&_h2]:text-xl [&_h2]:font-black">
                 <div>
                   <p>Product</p>
@@ -226,7 +226,7 @@ export function TransactionPage({
 
               <div className="product-catalog grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                 {products.length === 0 ? (
-                  <div className="empty-order rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5 text-sm font-bold text-slate-500">Belum ada product. Input product manual dulu di halaman Product.</div>
+                  <div className="empty-order empty-state">Belum ada product. Input product manual dulu di halaman Product.</div>
                 ) : filteredProducts.map((product) => (
                   <Button
                     className="catalog-item grid min-h-52 content-start justify-items-start gap-2 rounded-lg border border-slate-200 bg-white p-3 text-left hover:border-teal-300 [&_img]:h-28 [&_img]:w-full [&_img]:rounded-lg [&_img]:object-cover [&_span]:text-sm [&_span]:text-slate-500 [&_b]:text-teal-700"
@@ -243,7 +243,7 @@ export function TransactionPage({
               </div>
             </article>
 
-            <aside className="transaction-panel order-panel rounded-2xl border border-white/70 bg-white/85 p-5 shadow-xl shadow-slate-950/5 backdrop-blur-sm xl:sticky xl:top-5">
+            <aside className="transaction-panel order-panel surface-panel xl:sticky xl:top-5">
               <div className="transaction-panel-header mb-4 flex items-start justify-between gap-3 border-b border-slate-100 pb-4 [&_p]:mb-1 [&_p]:text-xs [&_p]:font-black [&_p]:uppercase [&_p]:text-teal-700 [&_h2]:m-0 [&_h2]:text-xl [&_h2]:font-black">
                 <div>
                   <p>Keranjang</p>
@@ -252,7 +252,7 @@ export function TransactionPage({
               </div>
 
               {cartItems.length === 0 ? (
-                <div className="empty-order rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5 text-sm font-bold text-slate-500">Belum ada product dipilih.</div>
+                <div className="empty-order empty-state">Belum ada product dipilih.</div>
               ) : (
                 <div className="mini-cart grid gap-3">
                   {cartItems.map((item) => (
@@ -301,7 +301,7 @@ export function TransactionPage({
 
         {step === 'review' && (
           <section className="review-layout grid items-start gap-5 xl:grid-cols-[minmax(0,1.35fr)_minmax(340px,0.65fr)]">
-            <article className="transaction-panel review-items-panel rounded-2xl border border-white/70 bg-white/85 p-5 shadow-xl shadow-slate-950/5 backdrop-blur-sm">
+            <article className="transaction-panel review-items-panel surface-panel">
               <div className="transaction-panel-header mb-4 flex items-start justify-between gap-3 border-b border-slate-100 pb-4 [&_p]:mb-1 [&_p]:text-xs [&_p]:font-black [&_p]:uppercase [&_p]:text-teal-700 [&_h2]:m-0 [&_h2]:text-xl [&_h2]:font-black">
                 <div>
                   <p>Review Pesanan</p>
@@ -336,7 +336,7 @@ export function TransactionPage({
               </div>
             </article>
 
-            <aside className="transaction-panel review-summary-panel rounded-2xl border border-white/70 bg-white/85 p-5 shadow-xl shadow-slate-950/5 backdrop-blur-sm">
+            <aside className="transaction-panel review-summary-panel surface-panel">
               <div className="transaction-panel-header mb-4 flex items-start justify-between gap-3 border-b border-slate-100 pb-4 [&_p]:mb-1 [&_p]:text-xs [&_p]:font-black [&_p]:uppercase [&_p]:text-teal-700 [&_h2]:m-0 [&_h2]:text-xl [&_h2]:font-black">
                 <div>
                   <p>Ringkasan</p>
@@ -361,7 +361,7 @@ export function TransactionPage({
         )}
 
         {step === 'payment' && (
-          <section className="transaction-panel payment-panel rounded-2xl border border-white/70 bg-white/85 p-5 shadow-xl shadow-slate-950/5 backdrop-blur-sm">
+          <section className="transaction-panel payment-panel surface-panel">
             <div className="transaction-panel-header mb-4 flex items-start justify-between gap-3 border-b border-slate-100 pb-4 [&_p]:mb-1 [&_p]:text-xs [&_p]:font-black [&_p]:uppercase [&_p]:text-teal-700 [&_h2]:m-0 [&_h2]:text-xl [&_h2]:font-black">
               <div>
                 <p>Pembayaran</p>

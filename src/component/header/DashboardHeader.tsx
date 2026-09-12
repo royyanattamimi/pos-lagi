@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import type { Product, TransactionRecord } from '../../types'
 import { Button } from '../button/Button'
 import { Input } from '../input/Input'
+import { Search } from 'lucide-react'
 
 type DashboardHeaderProps = {
   products: Product[]
@@ -58,7 +59,7 @@ export function DashboardHeader({
         <div className="dashboard-search-area relative">
           <div className="dashboard-search-buttons flex gap-2" aria-label="Pencarian cepat">
             <Button type="button" onClick={() => setIsSearchOpen((currentValue) => !currentValue)}>
-              Search Product & Transaksi
+              <Search aria-hidden="true" /> Cari produk & transaksi
             </Button>
           </div>
 

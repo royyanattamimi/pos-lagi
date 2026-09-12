@@ -33,7 +33,7 @@ export function ForgotPasswordPage({ onBackToLogin, onResetPassword }: ForgotPas
     <main className="login-page min-h-screen grid grid-cols-1 bg-[linear-gradient(135deg,#f8fafc_0%,#ecfeff_46%,#f8fafc_100%)] text-slate-900 lg:grid-cols-[minmax(320px,0.92fr)_minmax(380px,1fr)]">
       <section className="login-hero min-h-screen flex flex-col justify-between gap-12 bg-slate-950 p-10 text-white shadow-2xl shadow-slate-950/20" aria-label="Reset password POS Lagi">
         <div className="login-brand flex items-center gap-3">
-          <span className="brand-mark grid h-12 w-12 place-items-center rounded-2xl bg-white font-black text-slate-950 shadow-lg shadow-white/10">PL</span>
+          <span className="brand-mark grid h-12 w-12 place-items-center rounded-lg bg-white font-black text-slate-950 shadow-lg shadow-white/10">PL</span>
           <div>
             <strong>POS Lagi</strong>
             <span>Cashier Management System</span>
@@ -52,7 +52,7 @@ export function ForgotPasswordPage({ onBackToLogin, onResetPassword }: ForgotPas
           <h2>Reset password akun</h2>
         </div>
 
-        <form className="login-form mx-auto grid w-full max-w-md gap-4 rounded-2xl border border-white/70 bg-white/85 p-7 shadow-2xl shadow-slate-950/10 backdrop-blur-xl [&_label]:grid [&_label]:gap-2 [&_label]:text-sm [&_label]:font-extrabold [&_label]:text-slate-600" onSubmit={handleSubmit}>
+        <form className="login-form mx-auto grid w-full max-w-md gap-4 rounded-lg border border-white/70 bg-white/85 p-7 shadow-2xl shadow-slate-950/10 backdrop-blur-xl [&_label]:grid [&_label]:gap-2 [&_label]:text-sm [&_label]:font-extrabold [&_label]:text-slate-600" onSubmit={handleSubmit}>
           <label>
             Email akun
             <Input

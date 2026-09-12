@@ -39,7 +39,7 @@ export function ReceiptPage({
   }
 
   return (
-    <main className="receipt-page min-h-screen grid grid-cols-1 bg-[linear-gradient(180deg,#f8fafc_0%,#eef2f7_100%)] text-slate-900 md:grid-cols-[280px_minmax(0,1fr)]">
+    <main className="receipt-page app-shell">
       <Sidebar
         activePage="transaction"
         onDashboard={onDashboard}
@@ -49,7 +49,7 @@ export function ReceiptPage({
         onProfile={onProfile}
       />
 
-      <section className="receipt-content min-w-0 p-5 md:p-8">
+      <section className="receipt-content content-shell">
         <PageHeader
           eyebrow="Receipt"
           title="Transaksi selesai"
@@ -80,7 +80,7 @@ export function ReceiptPage({
 
             <div className="receipt-items grid gap-3 border-y border-dashed border-slate-300 py-4">
               {transaction.items.map((item) => (
-                <div className="receipt-item grid grid-cols-[1fr_auto] gap-2 text-sm [&_small]:block [&_small]:text-slate-500" key={item.productId}>
+                <div className="receipt-item grid grid-cols-[1fr_auto] gap-2 text-sm block text-slate-500" key={item.productId}>
                   <div>
                     <strong>{item.name}</strong>
                     <span>{item.quantity} x {formatCurrency(item.price)}</span>
@@ -104,7 +104,7 @@ export function ReceiptPage({
             </footer>
           </article>
 
-          <aside className="receipt-summary rounded-2xl border border-white/70 bg-white/85 p-5 shadow-xl shadow-slate-950/5 backdrop-blur-sm [&_h2]:m-0 [&_h2]:text-xl [&_h2]:font-black [&_p]:text-slate-500">
+          <aside className="receipt-summary surface-panel [&_h2]:m-0 [&_h2]:text-xl [&_h2]:font-black [&_p]:text-slate-500">
             <article>
               <span>Total Item</span>
               <strong>{totalItems}</strong>
