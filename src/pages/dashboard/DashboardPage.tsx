@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ProductImage } from '../../component/product/ProductImage'
+import { ActiveProductsPage } from '../product/ActiveProductsPage'
 import { ArrowUpRight, Plus, Wallet, ReceiptText, Package, Clock3 } from 'lucide-react'
 import { DashboardHeader } from '../../component/header/DashboardHeader'
 import { PageHeader } from '../../component/header/PageHeader'
@@ -26,8 +26,8 @@ type DashboardPageProps = {
   onLogout: () => void
 }
 
-type ActivePage = 'dashboard' | 'product' | 'transaction' | 'checkout' | 'shift' | 'profile'
-type DashboardDetail = 'sales-today' | 'transactions' | 'active-products' | null
+type ActivePage = 'dashboard' | 'product' | 'active-products' | 'transaction' | 'checkout' | 'shift' | 'profile'
+type DashboardDetail = 'sales-today' | 'transactions' | null
 
 const currency = new Intl.NumberFormat('id-ID', {
   style: 'currency',
@@ -134,6 +134,15 @@ export function DashboardPage({
     )
   }
 
+  if (activePage === 'active-products') {
+    return <ActiveProductsPage products={products} profileName={currentShift?.cashierName}
+      onDashboard={() => setActivePage('dashboard')}
+      onProduct={() => setActivePage('product')}
+      onTransaction={() => setActivePage('checkout')}
+      onShift={() => setActivePage('shift')}
+      onProfile={() => setActivePage('profile')} />
+  }
+
   if (activePage === 'product') {
     return (
       <ProductPage
@@ -215,6 +224,12 @@ export function DashboardPage({
               type="button"
               key={stat.label}
               onClick={() => {
+                if (stat.key === 'active-products') {
+                  setActiveDetail(null)
+                  setActivePage('active-products')
+                  window.scrollTo(0, 0)
+                  return
+                }
                 if (stat.key === 'transactions') {
                   setActiveDetail(null)
                   setActivePage('transaction')
@@ -268,7 +283,6 @@ export function DashboardPage({
                 <h2>
                   {activeDetail === 'sales-today' && 'Penjualan Hari Ini'}
                   {activeDetail === 'transactions' && 'Transaksi'}
-                  {activeDetail === 'active-products' && 'Product Aktif'}
                 </h2>
               </div>
               <Button type="button" onClick={() => setActiveDetail(null)}>Kembali</Button>
@@ -319,24 +333,6 @@ export function DashboardPage({
               </div>
             )}
 
-            {activeDetail === 'active-products' && (
-              <div className="dashboard-detail-list grid gap-3">
-                {activeProducts.length === 0 ? (
-                  <div className="empty-dashboard-state empty-state">Belum ada product aktif. Tambahkan product manual dulu.</div>
-                ) : activeProducts.map((product) => (
-                  <div className="product-row flex items-center justify-between gap-3 data-row" key={product.name}>
-                    <div className="dashboard-product-name flex items-center gap-3 [&_img]:h-12 [&_img]:w-14 [&_img]:rounded-lg [&_img]:object-cover [&_span]:text-sm [&_span]:text-slate-500">
-                      <ProductImage src={product.image} name={product.name} category={product.category} />
-                      <div>
-                        <strong>{product.name}</strong>
-                        <span>{product.category}</span>
-                      </div>
-                    </div>
-                    <strong>{formatCurrency(product.price)}</strong>
-                  </div>
-                ))}
-              </div>
-            )}
           </section>
         )}
       </section>
