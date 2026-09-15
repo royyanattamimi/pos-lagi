@@ -1,4 +1,5 @@
 import type { Product, ShiftSession, TransactionRecord } from '../types'
+import { closeExpiredShift } from './shiftLifecycle'
 
 const STORAGE_KEY = 'pos-lagi:data:v1'
 
@@ -22,6 +23,7 @@ export function loadPosData(): PosStoredData {
     if (!storedValue) return emptyPosData
 
     const parsedData = JSON.parse(storedValue) as Partial<PosStoredData>
+    const now = Date.now()
     return {
       products: Array.isArray(parsedData.products)
         ? parsedData.products.map((product) => ({
@@ -33,8 +35,10 @@ export function loadPosData(): PosStoredData {
           }))
         : [],
       transactions: Array.isArray(parsedData.transactions) ? parsedData.transactions : [],
-      currentShift: parsedData.currentShift ?? null,
-      shiftHistory: Array.isArray(parsedData.shiftHistory) ? parsedData.shiftHistory : [],
+      currentShift: parsedData.currentShift ? closeExpiredShift(parsedData.currentShift, now) : null,
+      shiftHistory: Array.isArray(parsedData.shiftHistory)
+        ? parsedData.shiftHistory.map((shift) => closeExpiredShift(shift, now))
+        : [],
     }
   } catch {
     return emptyPosData

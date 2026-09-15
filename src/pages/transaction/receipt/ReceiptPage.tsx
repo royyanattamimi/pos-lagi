@@ -84,6 +84,7 @@ export function ReceiptPage({
                   <div>
                     <strong>{item.name}</strong>
                     <span>{item.quantity} x {formatCurrency(item.price)}</span>
+                    {item.note && <div className="mt-1 whitespace-pre-wrap break-words text-xs text-slate-600">Catatan: {item.note}</div>}
                   </div>
                   <b>{formatCurrency(item.total)}</b>
                 </div>

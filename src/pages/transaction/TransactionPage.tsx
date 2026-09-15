@@ -5,6 +5,7 @@ import { Sidebar } from '../../component/sidebar/Sidebar'
 import { PageHeader } from '../../component/header/PageHeader'
 import { Button } from '../../component/button/Button'
 import { Input } from '../../component/input/Input'
+import { ItemNote } from './ItemNote'
 import { ReceiptPage } from './receipt/ReceiptPage'
 import type { Product, ShiftSession, TransactionItem, TransactionRecord } from '../../types'
 
@@ -23,6 +24,7 @@ type TransactionPageProps = {
 type Step = 'select' | 'review' | 'payment' | 'finish'
 
 type CartItem = {
+  note?: string
   productId: number
   quantity: number
 }
@@ -113,6 +115,12 @@ export function TransactionPage({
     )
   }
 
+  function updateNote(productId: number, note: string) {
+    setCart((currentCart) => currentCart.map((item) =>
+      item.productId === productId ? { ...item, note } : item,
+    ))
+  }
+
   function resetTransaction() {
     setStep('select')
     setSelectedCategory('Semua')
@@ -129,6 +137,7 @@ export function TransactionPage({
       price: item.product.price,
       quantity: item.quantity,
       total: item.total,
+      note: item.note?.trim() || undefined,
     }))
     const createdAt = new Date().toISOString()
     const transaction: TransactionRecord = {
@@ -278,6 +287,7 @@ export function TransactionPage({
                           <Plus aria-hidden="true" />
                         </Button>
                       </div>
+                      <ItemNote name={item.product.name} value={item.note ?? ''} onChange={(note) => updateNote(item.productId, note)} />
                       <b>{formatCurrency(item.total)}</b>
                     </div>
                   ))}
@@ -321,6 +331,7 @@ export function TransactionPage({
                         <strong>{item.product.name}</strong>
                         <span>{item.product.category}</span>
                         <small>{formatCurrency(item.product.price)} per item</small>
+                        <ItemNote name={item.product.name} value={item.note ?? ''} onChange={(note) => updateNote(item.productId, note)} />
                       </div>
                     </div>
                     <div className="quantity-control grid grid-cols-[36px_1fr_36px] items-center gap-2 text-center">

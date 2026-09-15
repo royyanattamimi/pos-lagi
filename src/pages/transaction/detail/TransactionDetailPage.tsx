@@ -100,6 +100,7 @@ export function TransactionDetailPage({
                   <div>
                     <strong>{item.name}</strong>
                     <small>{formatCurrency(item.price)} per item</small>
+                    {item.note && <div className="mt-1 whitespace-pre-wrap break-words text-xs text-slate-600">Catatan: {item.note}</div>}
                   </div>
                   <span>{item.quantity}x</span>
                   <strong>{formatCurrency(item.total)}</strong>

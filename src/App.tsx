@@ -12,6 +12,7 @@ import {
 } from './storage/productStorage'
 import { createRemoteTransaction, loadRemoteTransactions } from './storage/transactionStorage'
 import { loadPosData, savePosData } from './storage/posStorage'
+import { closeExpiredShift, getShiftDeadline } from './storage/shiftLifecycle'
 import type { Product, ProductInput, ShiftInput, ShiftSession, TransactionRecord } from './types'
 
 function App() {
@@ -24,6 +25,40 @@ function App() {
   const [transactions, setTransactions] = useState<TransactionRecord[]>(storedData.transactions)
   const [currentShift, setCurrentShift] = useState<ShiftSession | null>(storedData.currentShift)
   const [shiftHistory, setShiftHistory] = useState<ShiftSession[]>(storedData.shiftHistory)
+
+  useEffect(() => {
+    if (!currentShift || currentShift.status !== 'Berjalan') return
+    const activeShift = currentShift
+
+    let timeout: ReturnType<typeof setTimeout>
+    function checkShift() {
+      clearTimeout(timeout)
+      const now = Date.now()
+      const endedShift = closeExpiredShift(activeShift, now)
+      if (endedShift.status === 'Selesai') {
+        setCurrentShift(endedShift)
+        setShiftHistory((history) => history.map((shift) => closeExpiredShift(shift, now)))
+        setIsShiftStarted(false)
+        return
+      }
+
+      const remaining = getShiftDeadline(activeShift) - now
+      if (Number.isFinite(remaining)) {
+        timeout = setTimeout(checkShift, Math.max(1, Math.min(remaining, 60_000)))
+      }
+    }
+
+    checkShift()
+    window.addEventListener('focus', checkShift)
+    window.addEventListener('pageshow', checkShift)
+    document.addEventListener('visibilitychange', checkShift)
+    return () => {
+      clearTimeout(timeout)
+      window.removeEventListener('focus', checkShift)
+      window.removeEventListener('pageshow', checkShift)
+      document.removeEventListener('visibilitychange', checkShift)
+    }
+  }, [currentShift])
 
   useEffect(() => {
     if (!supabase) return

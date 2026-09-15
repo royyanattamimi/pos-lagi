@@ -54,6 +54,7 @@ export function StartShiftPage({ onStartShift, onBackToLogin }: StartShiftPagePr
           <p>Shift Kasir</p>
           <h1>Mulai shift sebelum transaksi</h1>
           <span>Isi data kas awal agar operasional kasir hari ini tercatat rapi.</span>
+          <span>Shift otomatis berakhir pukul 00.00 mengikuti waktu perangkat.</span>
         </div>
 
         <form className="shift-form grid gap-4 [&_label]:grid [&_label]:gap-2 [&_label]:text-sm [&_label]:font-bold [&_label]:text-slate-600" onSubmit={handleSubmit}>

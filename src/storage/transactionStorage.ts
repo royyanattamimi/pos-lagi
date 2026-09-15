@@ -17,6 +17,7 @@ type TransactionRow = {
 }
 
 type TransactionItemRow = {
+  note?: string | null
   product_id: number
   name: string
   price: number
@@ -48,6 +49,7 @@ export async function loadRemoteTransactions(
         name,
         price,
         quantity,
+        note,
         total
       )
     `)
@@ -89,6 +91,7 @@ export async function createRemoteTransaction(transaction: TransactionRecord) {
     price: item.price,
     quantity: item.quantity,
     total: item.total,
+    note: item.note?.trim() || null,
   }))
 
   const { error: itemError } = await supabase
@@ -124,5 +127,6 @@ function mapTransactionItemRow(row: TransactionItemRow): TransactionItem {
     price: Number(row.price),
     quantity: Number(row.quantity),
     total: Number(row.total),
+    note: row.note || undefined,
   }
 }
