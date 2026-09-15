@@ -9,6 +9,7 @@ import type { TransactionRecord } from '../../../types'
 
 type TransactionHistoryPageProps = {
   transactions: TransactionRecord[]
+  initialDateFilter?: string
   onDashboard: () => void
   onProduct: () => void
   onTransaction: () => void
@@ -31,6 +32,7 @@ function formatCurrency(value: number) {
 
 export function TransactionHistoryPage({
   transactions,
+  initialDateFilter = '',
   onDashboard,
   onProduct,
   onTransaction,
@@ -42,7 +44,7 @@ export function TransactionHistoryPage({
 }: TransactionHistoryPageProps) {
   const [query, setQuery] = useState('')
   const [paymentFilter, setPaymentFilter] = useState('Semua')
-  const [dateFilter, setDateFilter] = useState('')
+  const [dateFilter, setDateFilter] = useState(initialDateFilter)
 
   const paymentMethods = useMemo(
     () => ['Semua', ...Array.from(new Set(transactions.map((transaction) => transaction.paymentMethod)))],
@@ -56,7 +58,9 @@ export function TransactionHistoryPage({
       const matchesQuery = !normalizedQuery || [transaction.id, transaction.cashier]
         .some((value) => value.toLowerCase().includes(normalizedQuery))
       const matchesPayment = paymentFilter === 'Semua' || transaction.paymentMethod === paymentFilter
-      const matchesDate = !dateFilter || transaction.createdAt.slice(0, 10) === dateFilter
+      const transactionDate = new Date(transaction.createdAt)
+      const localDateKey = `${transactionDate.getFullYear()}-${String(transactionDate.getMonth() + 1).padStart(2, '0')}-${String(transactionDate.getDate()).padStart(2, '0')}`
+      const matchesDate = !dateFilter || localDateKey === dateFilter
 
       return matchesQuery && matchesPayment && matchesDate
     })

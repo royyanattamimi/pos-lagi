@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { SalesChart } from './SalesChart'
 import { ActiveProductsPage } from '../product/ActiveProductsPage'
 import { ArrowUpRight, Plus, Wallet, ReceiptText, Package, Clock3 } from 'lucide-react'
 import { DashboardHeader } from '../../component/header/DashboardHeader'
@@ -27,6 +28,7 @@ type DashboardPageProps = {
 }
 
 type ActivePage = 'dashboard' | 'product' | 'active-products' | 'transaction' | 'checkout' | 'shift' | 'profile'
+type SalesPeriod = 'weekly' | 'monthly' | 'yearly'
 type DashboardDetail = 'sales-today' | 'transactions' | null
 
 const currency = new Intl.NumberFormat('id-ID', {
@@ -53,6 +55,8 @@ export function DashboardPage({
 }: DashboardPageProps) {
   const [activePage, setActivePage] = useState<ActivePage>('dashboard')
   const [activeDetail, setActiveDetail] = useState<DashboardDetail>(null)
+  const [salesPeriod, setSalesPeriod] = useState<SalesPeriod>('weekly')
+  const [historyDateFilter, setHistoryDateFilter] = useState('')
   const [selectedTransaction, setSelectedTransaction] = useState<TransactionRecord | null>(null)
   const isShiftOpen = currentShift?.status === 'Berjalan'
   const todayKey = new Date().toLocaleDateString('id-ID')
@@ -63,17 +67,40 @@ export function DashboardPage({
   const activeProducts = products
   const stats = [
     { key: 'sales-today', label: 'Penjualan hari ini', value: formatCurrency(salesToday), icon: Wallet, tone: 'green' },
-    { key: 'transactions', label: 'Total transaksi', value: String(transactions.length), icon: ReceiptText, tone: 'blue' },
+    { key: 'transactions', label: 'Total transaksi hari ini', value: String(todayTransactions.length), icon: ReceiptText, tone: 'blue' },
     { key: 'active-products', label: 'Produk aktif', value: String(activeProducts.length), icon: Package, tone: 'amber' },
   ]
-  const weeklySales = Array.from({ length: 7 }, (_, index) => {
-    const date = new Date()
-    date.setDate(date.getDate() - 6 + index)
-    const total = transactions.filter((item) => new Date(item.createdAt).toLocaleDateString('id-ID') === date.toLocaleDateString('id-ID')).reduce((sum, item) => sum + item.grandTotal, 0)
-    return { label: date.toLocaleDateString('id-ID', { weekday: 'short' }), date: date.toLocaleDateString('id-ID'), total }
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = now.getMonth()
+  const periodDescription = salesPeriod === 'weekly'
+    ? '7 hari terakhir'
+    : salesPeriod === 'monthly'
+      ? now.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })
+      : String(year)
+  const bucketCount = salesPeriod === 'weekly' ? 7
+    : salesPeriod === 'monthly' ? new Date(year, month + 1, 0).getDate() : 12
+  const periodSales = Array.from({ length: bucketCount }, (_, index) => {
+    const start = salesPeriod === 'yearly'
+      ? new Date(year, index, 1)
+      : new Date(year, month, salesPeriod === 'weekly' ? now.getDate() - 6 + index : index + 1)
+    const end = salesPeriod === 'yearly'
+      ? new Date(year, index + 1, 1)
+      : new Date(start.getFullYear(), start.getMonth(), start.getDate() + 1)
+    const total = transactions.reduce((sum, transaction) => {
+      const createdAt = new Date(transaction.createdAt)
+      return createdAt >= start && createdAt < end ? sum + transaction.grandTotal : sum
+    }, 0)
+    const label = salesPeriod === 'yearly'
+      ? start.toLocaleDateString('id-ID', { month: 'short' })
+      : salesPeriod === 'monthly' ? String(start.getDate())
+        : start.toLocaleDateString('id-ID', { weekday: 'short' })
+    const date = salesPeriod === 'yearly'
+      ? start.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })
+      : start.toLocaleDateString('id-ID')
+    return { label, date, total }
   })
-  const maxSales = Math.max(...weeklySales.map((day) => day.total), 1)
-  const weeklyTotal = weeklySales.reduce((sum, day) => sum + day.total, 0)
+  const periodTotal = periodSales.reduce((sum, day) => sum + day.total, 0)
   const recentTransactions = [...transactions].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 5)
   if (selectedTransaction) {
     return (
@@ -108,7 +135,7 @@ export function DashboardPage({
         onDashboard={() => setActivePage('dashboard')}
         onProduct={() => setActivePage('product')}
         onTransaction={() => setActivePage('checkout')}
-        onHistory={() => setActivePage('transaction')}
+        onHistory={() => { setHistoryDateFilter(''); setActivePage('transaction') }}
         onShift={() => setActivePage('shift')}
         onProfile={() => setActivePage('profile')}
         products={products}
@@ -122,6 +149,7 @@ export function DashboardPage({
     return (
       <TransactionHistoryPage
         transactions={transactions}
+        initialDateFilter={historyDateFilter}
         onShift={() => setActivePage('shift')}
         onDashboard={() => setActivePage('dashboard')}
         onProduct={() => setActivePage('product')}
@@ -231,6 +259,8 @@ export function DashboardPage({
                   return
                 }
                 if (stat.key === 'transactions') {
+                  const today = new Date()
+                  setHistoryDateFilter(`${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`)
                   setActiveDetail(null)
                   setActivePage('transaction')
                   return
@@ -248,17 +278,22 @@ export function DashboardPage({
 
         <div className="dashboard-overview">
           <section className="sales-overview">
-            <div className="section-heading"><div><h2>Aktivitas penjualan</h2><span className="text-sm text-slate-500">7 hari terakhir</span></div><span className="status-badge">IDR</span></div>
-            <strong className="weekly-total">{formatCurrency(weeklyTotal)}</strong>
-            <div className="sales-chart" aria-label="Grafik penjualan tujuh hari terakhir">
-              {weeklySales.map((day) => <div className="chart-column" key={day.date} tabIndex={0}>
-                <div className="chart-track"><div className="chart-bar" style={{ height: `${day.total > 0 ? Math.max(3, day.total / maxSales * 100) : 0}%` }} /></div>
-                <span>{day.label}</span>
-                <span className="sr-only">{day.date}: {formatCurrency(day.total)}</span>
-                <span className="chart-tooltip">{day.date}<br />{formatCurrency(day.total)}</span>
-              </div>)}
+            <div className="section-heading">
+              <div><h2>Aktivitas penjualan</h2><span className="text-sm text-slate-500">{periodDescription}</span></div>
+              <select
+                className="status-badge cursor-pointer border border-slate-200 focus:outline-2 focus:outline-teal-600"
+                aria-label="Periode aktivitas penjualan"
+                value={salesPeriod}
+                onChange={(event) => setSalesPeriod(event.target.value as SalesPeriod)}
+              >
+                <option value="weekly">Mingguan</option>
+                <option value="monthly">Bulanan</option>
+                <option value="yearly">Tahunan</option>
+              </select>
             </div>
-            {weeklyTotal === 0 && <p className="text-center text-xs text-slate-500">Belum ada penjualan dalam 7 hari terakhir.</p>}
+            <strong className="weekly-total">{formatCurrency(periodTotal)}</strong>
+            <SalesChart key={salesPeriod} data={periodSales} description={periodDescription} />
+            {periodTotal === 0 && <p className="text-center text-xs text-slate-500">Belum ada penjualan pada periode ini.</p>}
           </section>
           <section className="shift-overview">
             <div className="section-heading"><h2>Shift saat ini</h2><Clock3 size={20} className="text-emerald-700" aria-hidden="true" /></div>
@@ -269,7 +304,7 @@ export function DashboardPage({
           </section>
         </div>
         <section className="recent-sales">
-          <div className="section-heading"><div><h2>Transaksi terbaru</h2><span className="text-sm text-slate-500">Aktivitas terakhir toko Anda</span></div><Button size="small" variant="ghost" onClick={() => setActivePage('transaction')}>Lihat semua <ArrowUpRight aria-hidden="true" /></Button></div>
+          <div className="section-heading"><div><h2>Transaksi terbaru</h2><span className="text-sm text-slate-500">Aktivitas terakhir toko Anda</span></div><Button size="small" variant="ghost" onClick={() => { setHistoryDateFilter(''); setActivePage('transaction') }}>Lihat semua <ArrowUpRight aria-hidden="true" /></Button></div>
           {recentTransactions.length ? recentTransactions.map((transaction) => <button className="recent-sale-row" key={transaction.id} onClick={() => setSelectedTransaction(transaction)}>
             <span className="sale-icon"><ReceiptText size={19} aria-hidden="true" /></span><span className="min-w-0"><strong className="block break-words">{transaction.id}</strong><small className="text-slate-500">{transaction.cashier} · {transaction.itemCount} item</small></span><span className="sale-method">{transaction.paymentMethod}</span><strong>{formatCurrency(transaction.grandTotal)}</strong><ArrowUpRight size={16} aria-hidden="true" />
           </button>) : <div className="dashboard-empty"><ReceiptText size={32} strokeWidth={1.4} aria-hidden="true" /><strong>Belum ada transaksi</strong><Button size="small" onClick={() => setActivePage('checkout')}><Plus aria-hidden="true" /> Transaksi baru</Button></div>}
