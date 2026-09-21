@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Plus } from 'lucide-react'
+import { ArrowLeft, Plus } from 'lucide-react'
 import { Button } from '../../../component/button/Button'
 import { PageHeader } from '../../../component/header/PageHeader'
 import { Input } from '../../../component/input/Input'
@@ -9,10 +9,12 @@ import type { TransactionRecord } from '../../../types'
 
 type TransactionHistoryPageProps = {
   transactions: TransactionRecord[]
+  title?: string
   initialDateFilter?: string
   onDashboard: () => void
   onProduct: () => void
   onTransaction: () => void
+  onPaidTransactions: () => void
   onProfile: () => void
   onShift: () => void
   onNewTransaction: () => void
@@ -32,10 +34,12 @@ function formatCurrency(value: number) {
 
 export function TransactionHistoryPage({
   transactions,
+  title = 'Transaksi lunas',
   initialDateFilter = '',
   onDashboard,
   onProduct,
   onTransaction,
+  onPaidTransactions,
   onProfile,
   onShift,
   onNewTransaction,
@@ -55,6 +59,7 @@ export function TransactionHistoryPage({
     const normalizedQuery = query.trim().toLowerCase()
 
     return transactions.filter((transaction) => {
+      if (transaction.status !== 'Lunas') return false
       const matchesQuery = !normalizedQuery || [transaction.id, transaction.cashier]
         .some((value) => value.toLowerCase().includes(normalizedQuery))
       const matchesPayment = paymentFilter === 'Semua' || transaction.paymentMethod === paymentFilter
@@ -63,7 +68,7 @@ export function TransactionHistoryPage({
       const matchesDate = !dateFilter || localDateKey === dateFilter
 
       return matchesQuery && matchesPayment && matchesDate
-    })
+    }).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
   }, [dateFilter, paymentFilter, query, transactions])
 
   const totalRevenue = filteredTransactions.reduce(
@@ -81,10 +86,10 @@ export function TransactionHistoryPage({
   return (
     <main className="transaction-history-page app-shell">
       <Sidebar
-        activePage="transaction"
+        activePage="paid-transactions"
         onDashboard={onDashboard}
         onProduct={onProduct}
-        onTransaction={onTransaction}
+        onTransaction={onTransaction} onPaidTransactions={onPaidTransactions}
         onShift={onShift}
         onProfile={onProfile}
         profileName={profileName}
@@ -92,10 +97,14 @@ export function TransactionHistoryPage({
 
       <section className="transaction-history-content content-shell">
         <PageHeader
-          eyebrow="Transaksi"
-          title="Riwayat transaksi"
-          description="Pantau seluruh transaksi yang tersimpan dan buka rincian setiap pembayaran."
+          eyebrow="Riwayat pembayaran"
+          title={title}
+          description="Daftar transaksi yang sudah dibayar lunas beserta rincian pembayarannya."
           actions={(
+            <>
+            <Button type="button" onClick={onDashboard}>
+              <ArrowLeft aria-hidden="true" /> Dashboard
+            </Button>
             <Button
               className="new-transaction-button"
               variant="primary"
@@ -106,6 +115,7 @@ export function TransactionHistoryPage({
               <Plus aria-hidden="true" />
               Buat Transaksi Baru
             </Button>
+            </>
           )}
         />
 

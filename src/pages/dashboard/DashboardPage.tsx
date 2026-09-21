@@ -58,6 +58,17 @@ export function DashboardPage({
   const [salesPeriod, setSalesPeriod] = useState<SalesPeriod>('weekly')
   const [historyDateFilter, setHistoryDateFilter] = useState('')
   const [selectedTransaction, setSelectedTransaction] = useState<TransactionRecord | null>(null)
+  function openCheckout() {
+    setSelectedTransaction(null)
+    setActivePage('checkout')
+  }
+
+  function openTransactions() {
+    setSelectedTransaction(null)
+    setHistoryDateFilter('')
+    setActivePage('transaction')
+  }
+
   const isShiftOpen = currentShift?.status === 'Berjalan'
   const todayKey = new Date().toLocaleDateString('id-ID')
   const todayTransactions = transactions.filter(
@@ -101,7 +112,10 @@ export function DashboardPage({
     return { label, date, total }
   })
   const periodTotal = periodSales.reduce((sum, day) => sum + day.total, 0)
-  const recentTransactions = [...transactions].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 5)
+  const recentTransactions = [...transactions]
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 5)
+
   if (selectedTransaction) {
     return (
       <TransactionDetailPage
@@ -116,10 +130,7 @@ export function DashboardPage({
           setSelectedTransaction(null)
           setActivePage('product')
         }}
-        onTransaction={() => {
-          setSelectedTransaction(null)
-          setActivePage('checkout')
-        }}
+        onTransaction={openCheckout} onPaidTransactions={openTransactions}
         onProfile={() => {
           setSelectedTransaction(null)
           setActivePage('profile')
@@ -134,8 +145,8 @@ export function DashboardPage({
       <TransactionPage
         onDashboard={() => setActivePage('dashboard')}
         onProduct={() => setActivePage('product')}
-        onTransaction={() => setActivePage('checkout')}
-        onHistory={() => { setHistoryDateFilter(''); setActivePage('transaction') }}
+        onTransaction={openCheckout} onPaidTransactions={openTransactions}
+        onHistory={openTransactions}
         onShift={() => setActivePage('shift')}
         onProfile={() => setActivePage('profile')}
         products={products}
@@ -148,12 +159,13 @@ export function DashboardPage({
   if (activePage === 'transaction') {
     return (
       <TransactionHistoryPage
+        key={`${activePage}-${historyDateFilter}`}
         transactions={transactions}
         initialDateFilter={historyDateFilter}
         onShift={() => setActivePage('shift')}
         onDashboard={() => setActivePage('dashboard')}
         onProduct={() => setActivePage('product')}
-        onTransaction={() => setActivePage('checkout')}
+        onTransaction={openCheckout} onPaidTransactions={openTransactions}
         onProfile={() => setActivePage('profile')}
         onNewTransaction={() => setActivePage('checkout')}
         onSelectTransaction={setSelectedTransaction}
@@ -166,7 +178,7 @@ export function DashboardPage({
     return <ActiveProductsPage products={products} profileName={currentShift?.cashierName}
       onDashboard={() => setActivePage('dashboard')}
       onProduct={() => setActivePage('product')}
-      onTransaction={() => setActivePage('checkout')}
+      onTransaction={openCheckout} onPaidTransactions={openTransactions}
       onShift={() => setActivePage('shift')}
       onProfile={() => setActivePage('profile')} />
   }
@@ -176,7 +188,7 @@ export function DashboardPage({
       <ProductPage
         onDashboard={() => setActivePage('dashboard')}
         onProduct={() => setActivePage('product')}
-        onTransaction={() => setActivePage('checkout')}
+        onTransaction={openCheckout} onPaidTransactions={openTransactions}
         onShift={() => setActivePage('shift')}
         onProfile={() => setActivePage('profile')}
         products={products}
@@ -192,7 +204,7 @@ export function DashboardPage({
       <ProfilePage
         onDashboard={() => setActivePage('dashboard')}
         onProduct={() => setActivePage('product')}
-        onTransaction={() => setActivePage('checkout')}
+        onTransaction={openCheckout} onPaidTransactions={openTransactions}
         onShift={() => setActivePage('shift')}
         onProfile={() => setActivePage('profile')}
         onLogout={onLogout}
@@ -207,7 +219,7 @@ export function DashboardPage({
       <ShiftPage
         onDashboard={() => setActivePage('dashboard')}
         onProduct={() => setActivePage('product')}
-        onTransaction={() => setActivePage('checkout')}
+        onTransaction={openCheckout} onPaidTransactions={openTransactions}
         onShift={() => setActivePage('shift')}
         onProfile={() => setActivePage('profile')}
         currentShift={currentShift}
@@ -224,7 +236,7 @@ export function DashboardPage({
         activePage="dashboard"
         onDashboard={() => setActivePage('dashboard')}
         onProduct={() => setActivePage('product')}
-        onTransaction={() => setActivePage('checkout')}
+        onTransaction={openCheckout} onPaidTransactions={openTransactions}
         onShift={() => setActivePage('shift')}
         onProfile={() => setActivePage('profile')}
         profileName={currentShift?.cashierName}
@@ -304,10 +316,34 @@ export function DashboardPage({
           </section>
         </div>
         <section className="recent-sales">
-          <div className="section-heading"><div><h2>Transaksi terbaru</h2><span className="text-sm text-slate-500">Aktivitas terakhir toko Anda</span></div><Button size="small" variant="ghost" onClick={() => { setHistoryDateFilter(''); setActivePage('transaction') }}>Lihat semua <ArrowUpRight aria-hidden="true" /></Button></div>
-          {recentTransactions.length ? recentTransactions.map((transaction) => <button className="recent-sale-row" key={transaction.id} onClick={() => setSelectedTransaction(transaction)}>
-            <span className="sale-icon"><ReceiptText size={19} aria-hidden="true" /></span><span className="min-w-0"><strong className="block break-words">{transaction.id}</strong><small className="text-slate-500">{transaction.cashier} · {transaction.itemCount} item</small></span><span className="sale-method">{transaction.paymentMethod}</span><strong>{formatCurrency(transaction.grandTotal)}</strong><ArrowUpRight size={16} aria-hidden="true" />
-          </button>) : <div className="dashboard-empty"><ReceiptText size={32} strokeWidth={1.4} aria-hidden="true" /><strong>Belum ada transaksi</strong><Button size="small" onClick={() => setActivePage('checkout')}><Plus aria-hidden="true" /> Transaksi baru</Button></div>}
+          <div className="section-heading">
+            <div>
+              <h2>Transaksi lunas terbaru</h2>
+              <span className="text-sm text-slate-500">Pembayaran terakhir yang sudah selesai</span>
+            </div>
+          </div>
+          {recentTransactions.length ? recentTransactions.map((transaction) => (
+            <button
+              type="button"
+              className="recent-sale-row"
+              key={transaction.id}
+              onClick={() => setSelectedTransaction(transaction)}
+            >
+              <span className="sale-icon"><ReceiptText size={19} aria-hidden="true" /></span>
+              <span className="min-w-0">
+                <strong className="block break-words">{transaction.id}</strong>
+                <small className="text-slate-500">{transaction.cashier} · {transaction.itemCount} item</small>
+              </span>
+              <span className="sale-method">{transaction.paymentMethod}</span>
+              <strong>{formatCurrency(transaction.grandTotal)}</strong>
+              <ArrowUpRight size={16} aria-hidden="true" />
+            </button>
+          )) : (
+            <div className="dashboard-empty">
+              <ReceiptText size={32} strokeWidth={1.4} aria-hidden="true" />
+              <strong>Belum ada transaksi</strong>
+            </div>
+          )}
         </section>
 
         {activeDetail && (

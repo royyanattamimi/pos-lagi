@@ -9,6 +9,7 @@ type TransactionDetailPageProps = {
   onDashboard: () => void
   onProduct: () => void
   onTransaction: () => void
+  onPaidTransactions: () => void
   onProfile: () => void
   onShift: () => void
   profileName?: string
@@ -30,6 +31,7 @@ export function TransactionDetailPage({
   onDashboard,
   onProduct,
   onTransaction,
+  onPaidTransactions,
   onProfile,
   onShift,
   profileName,
@@ -43,10 +45,10 @@ export function TransactionDetailPage({
   return (
     <main className="transaction-detail-page app-shell">
       <Sidebar
-        activePage="dashboard"
+        activePage="paid-transactions"
         onDashboard={onDashboard}
         onProduct={onProduct}
-        onTransaction={onTransaction}
+        onTransaction={onTransaction} onPaidTransactions={onPaidTransactions}
         onShift={onShift}
         onProfile={onProfile}
         profileName={profileName}

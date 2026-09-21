@@ -66,6 +66,34 @@
 .transaction-page .payment-methods { display: flex; flex-wrap: wrap; gap: 8px; }
 .transaction-page .page-header-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .transaction-page .cart-table-row { grid-template-columns: minmax(0, 1fr); }
+.transaction-select-page .order-panel { min-width: 0; padding-top: 28px; }
+.transaction-select-page .mini-cart-row { overflow-wrap: anywhere; }
+.transaction-select-page .order-panel > .primary-action { width: 100%; }
+@media (min-width: 1024px) {
+  .transaction-select-page { grid-template-columns: 224px minmax(0, 1fr) 280px; }
+  .transaction-select-page .order-panel {
+    position: sticky;
+    top: 0;
+    height: 100dvh;
+    padding: 28px 16px 16px;
+    display: flex;
+    flex-direction: column;
+    border: 0;
+    border-left: 1px solid #e5e9ed;
+    border-radius: 0;
+  }
+  .transaction-select-page .order-panel > .mini-cart {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    align-content: start;
+  }
+  .transaction-select-page .order-panel > :not(.mini-cart):not(.empty-order) { flex-shrink: 0; }
+  .transaction-select-page .order-panel > .empty-order { flex: 1; }
+}
+@media (min-width: 768px) and (max-width: 1023px) {
+  .transaction-select-page > .order-panel { grid-column: 2; margin: 0 24px 24px; }
+}
 @media (min-width: 1440px) {
   .transaction-page .cart-table-row { grid-template-columns: minmax(0, 1fr) 140px 110px; }
 }

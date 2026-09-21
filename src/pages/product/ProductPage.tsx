@@ -14,6 +14,7 @@ type ProductPageProps = {
   onDashboard: () => void
   onProduct: () => void
   onTransaction: () => void
+  onPaidTransactions: () => void
   onShift: () => void
   onProfile: () => void
   products: Product[]
@@ -40,6 +41,7 @@ export function ProductPage({
   onDashboard,
   onProduct,
   onTransaction,
+  onPaidTransactions,
   onShift,
   onProfile,
   products,
@@ -174,7 +176,7 @@ export function ProductPage({
         activePage="product"
         onDashboard={onDashboard}
         onProduct={onProduct}
-        onTransaction={onTransaction}
+        onTransaction={onTransaction} onPaidTransactions={onPaidTransactions}
         onShift={onShift}
         onProfile={onProfile}
       />

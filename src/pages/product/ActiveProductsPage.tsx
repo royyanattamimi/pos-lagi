@@ -14,13 +14,14 @@ type ActiveProductsPageProps = {
   onDashboard: () => void
   onProduct: () => void
   onTransaction: () => void
+  onPaidTransactions: () => void
   onShift: () => void
   onProfile: () => void
 }
 
 const currency = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 })
 
-export function ActiveProductsPage({ products, profileName, onDashboard, onProduct, onTransaction, onShift, onProfile }: ActiveProductsPageProps) {
+export function ActiveProductsPage({ products, profileName, onDashboard, onProduct, onTransaction, onPaidTransactions, onShift, onProfile }: ActiveProductsPageProps) {
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState('')
   const [sort, setSort] = useState('name')
@@ -32,7 +33,7 @@ export function ActiveProductsPage({ products, profileName, onDashboard, onProdu
 
   return (
     <main className="active-products-page app-shell">
-      <Sidebar activePage="product" onDashboard={onDashboard} onProduct={onProduct} onTransaction={onTransaction} onShift={onShift} onProfile={onProfile} profileName={profileName} />
+      <Sidebar activePage="product" onDashboard={onDashboard} onProduct={onProduct} onTransaction={onTransaction} onPaidTransactions={onPaidTransactions} onShift={onShift} onProfile={onProfile} profileName={profileName} />
       <section className="content-shell">
         <PageHeader eyebrow="Katalog" title="Produk aktif" actions={<>
           <Button size="small" onClick={onDashboard}><ArrowLeft aria-hidden="true" />Kembali</Button>

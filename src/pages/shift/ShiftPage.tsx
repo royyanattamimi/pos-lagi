@@ -9,6 +9,7 @@ type ShiftPageProps = {
   onDashboard: () => void
   onProduct: () => void
   onTransaction: () => void
+  onPaidTransactions: () => void
   onShift: () => void
   onProfile: () => void
   currentShift: ShiftSession | null
@@ -81,6 +82,7 @@ export function ShiftPage({
   onDashboard,
   onProduct,
   onTransaction,
+  onPaidTransactions,
   onShift,
   onProfile,
   currentShift,
@@ -140,7 +142,7 @@ export function ShiftPage({
         activePage="shift"
         onDashboard={onDashboard}
         onProduct={onProduct}
-        onTransaction={onTransaction}
+        onTransaction={onTransaction} onPaidTransactions={onPaidTransactions}
         onShift={onShift}
         onProfile={onProfile}
       />

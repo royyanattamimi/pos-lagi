@@ -1,13 +1,14 @@
 import { Button } from '../button/Button'
-import { LayoutDashboard, Package, ShoppingCart, Clock3, Store, ChevronRight } from 'lucide-react'
+import { LayoutDashboard, Package, ShoppingCart, Clock3, Store, ChevronRight, ReceiptText } from 'lucide-react'
 
-type SidebarPage = 'dashboard' | 'product' | 'transaction' | 'shift' | 'profile'
+type SidebarPage = 'dashboard' | 'product' | 'transaction' | 'paid-transactions' | 'shift' | 'profile'
 
 type SidebarProps = {
   activePage: SidebarPage
   onDashboard: () => void
   onProduct: () => void
   onTransaction: () => void
+  onPaidTransactions: () => void
   onShift: () => void
   onProfile: () => void
   profileName?: string
@@ -18,6 +19,7 @@ export function Sidebar({
   onDashboard,
   onProduct,
   onTransaction,
+  onPaidTransactions,
   onShift,
   onProfile,
   profileName,
@@ -26,6 +28,7 @@ export function Sidebar({
   const navigation = [
     { key: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, action: onDashboard },
     { key: 'transaction', label: 'Transaksi', icon: ShoppingCart, action: onTransaction },
+    { key: 'paid-transactions', label: 'Transaksi lunas', icon: ReceiptText, action: onPaidTransactions },
     { key: 'product', label: 'Produk', icon: Package, action: onProduct },
     { key: 'shift', label: 'Shift kasir', icon: Clock3, action: onShift },
   ]

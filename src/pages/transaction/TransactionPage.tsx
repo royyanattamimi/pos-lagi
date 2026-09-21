@@ -13,6 +13,7 @@ type TransactionPageProps = {
   onDashboard: () => void
   onProduct: () => void
   onTransaction: () => void
+  onPaidTransactions: () => void
   onHistory: () => void
   onShift: () => void
   onProfile: () => void
@@ -29,15 +30,6 @@ type CartItem = {
   quantity: number
 }
 
-const steps: Step[] = ['select', 'review', 'payment', 'finish']
-
-const stepLabel: Record<Step, string> = {
-  select: 'Pilih Product',
-  review: 'Review Pesanan',
-  payment: 'Pembayaran',
-  finish: 'Finish',
-}
-
 const currency = new Intl.NumberFormat('id-ID', {
   style: 'currency',
   currency: 'IDR',
@@ -52,6 +44,7 @@ export function TransactionPage({
   onDashboard,
   onProduct,
   onTransaction,
+  onPaidTransactions,
   onHistory,
   onShift,
   onProfile,
@@ -169,7 +162,7 @@ export function TransactionPage({
         onNewTransaction={resetTransaction}
         onDashboard={onDashboard}
         onProduct={onProduct}
-        onTransaction={resetTransaction}
+        onTransaction={resetTransaction} onPaidTransactions={onPaidTransactions}
         onShift={onShift}
         onProfile={onProfile}
       />
@@ -177,12 +170,12 @@ export function TransactionPage({
   }
 
   return (
-    <main className="transaction-page app-shell">
+    <main className={`transaction-page app-shell ${step === 'select' ? 'transaction-select-page' : ''}`}>
       <Sidebar
         activePage="transaction"
         onDashboard={onDashboard}
         onProduct={onProduct}
-        onTransaction={onTransaction}
+        onTransaction={onTransaction} onPaidTransactions={onPaidTransactions}
         onShift={onShift}
         onProfile={onProfile}
       />
@@ -196,23 +189,15 @@ export function TransactionPage({
             <>
               <Button className="transaction-history-button" type="button" onClick={onHistory}>
                 <History aria-hidden="true" />
-                Riwayat Transaksi
+                Transaksi lunas
               </Button>
               <Button type="button" onClick={resetTransaction}><RotateCcw aria-hidden="true" />Reset</Button>
             </>
           )}
         />
 
-        <section className="transaction-stepper mb-5 grid gap-2 md:grid-cols-4 [&_span]:rounded-lg [&_span]:border [&_span]:border-slate-200 [&_span]:bg-white [&_span]:px-3 [&_span]:py-2 [&_span]:text-sm [&_span]:font-extrabold [&_span]:text-slate-500 [&_.done]:border-teal-200 [&_.done]:bg-teal-50 [&_.done]:text-teal-800" aria-label="Flow transaksi">
-          {steps.map((currentStep, index) => (
-            <span className={steps.indexOf(step) >= index ? 'done' : ''} key={currentStep}>
-              {index + 1}. {stepLabel[currentStep]}
-            </span>
-          ))}
-        </section>
-
         {step === 'select' && (
-          <section className="transaction-grid grid items-start gap-5 xl:grid-cols-[minmax(0,1.35fr)_minmax(340px,0.65fr)]">
+          <section className="transaction-grid grid items-start gap-5">
             <article className="transaction-panel surface-panel">
               <div className="transaction-panel-header mb-4 flex items-start justify-between gap-3 border-b border-slate-100 pb-4 [&_p]:mb-1 [&_p]:text-xs [&_p]:font-black [&_p]:uppercase [&_p]:text-teal-700 [&_h2]:m-0 [&_h2]:text-xl [&_h2]:font-black">
                 <div>
@@ -254,60 +239,8 @@ export function TransactionPage({
               </div>
             </article>
 
-            <aside className="transaction-panel order-panel surface-panel xl:sticky xl:top-5">
-              <div className="transaction-panel-header mb-4 flex items-start justify-between gap-3 border-b border-slate-100 pb-4 [&_p]:mb-1 [&_p]:text-xs [&_p]:font-black [&_p]:uppercase [&_p]:text-teal-700 [&_h2]:m-0 [&_h2]:text-xl [&_h2]:font-black">
-                <div>
-                  <p>Keranjang</p>
-                  <h2>Pesanan berjalan</h2>
-                </div>
-              </div>
 
-              {cartItems.length === 0 ? (
-                <div className="empty-order empty-state">Belum ada product dipilih.</div>
-              ) : (
-                <div className="mini-cart grid gap-3">
-                  {cartItems.map((item) => (
-                    <div className="mini-cart-row grid gap-2 rounded-lg border border-slate-100 p-3" key={item.productId}>
-                      <div className="mini-cart-info grid gap-1 [&_span]:text-sm [&_span]:text-slate-500">
-                        <strong>{item.product.name}</strong>
-                        <span>{formatCurrency(item.product.price)} per item</span>
-                      </div>
-                      <div className="mini-cart-control grid grid-cols-[36px_1fr_36px] gap-2">
-                        <Button type="button" aria-label={`Kurangi ${item.product.name}`} title={`Kurangi ${item.product.name}`} onClick={() => updateQuantity(item.productId, item.quantity - 1)}>
-                          <Minus aria-hidden="true" />
-                        </Button>
-                        <Input
-                          min="1"
-                          type="number"
-                          value={item.quantity}
-                          onChange={(event) => updateQuantity(item.productId, Number(event.target.value))}
-                          aria-label={`Jumlah ${item.product.name}`}
-                        />
-                        <Button type="button" aria-label={`Tambah ${item.product.name}`} title={`Tambah ${item.product.name}`} onClick={() => updateQuantity(item.productId, item.quantity + 1)}>
-                          <Plus aria-hidden="true" />
-                        </Button>
-                      </div>
-                      <ItemNote name={item.product.name} value={item.note ?? ''} onChange={(note) => updateNote(item.productId, note)} />
-                      <b>{formatCurrency(item.total)}</b>
-                    </div>
-                  ))}
-                </div>
-              )}
 
-              <div className="summary-box my-4 grid gap-2 rounded-lg bg-slate-50 p-4 [&_span]:flex [&_span]:items-center [&_span]:justify-between [&_strong]:text-slate-950">
-                <span>Subtotal <strong>{formatCurrency(subtotal)}</strong></span>
-              </div>
-
-              <Button
-                className="primary-action w-full"
-                variant="primary"
-                type="button"
-                disabled={cartItems.length === 0}
-                onClick={() => setStep('review')}
-              >
-                Review Pesanan <ArrowRight aria-hidden="true" />
-              </Button>
-            </aside>
           </section>
         )}
 
@@ -429,6 +362,63 @@ export function TransactionPage({
         )}
 
       </section>
+
+
+      {step === 'select' && (
+        <aside aria-label="Keranjang pesanan" className="transaction-panel order-panel surface-panel">
+          <div className="transaction-panel-header mb-4 flex items-start justify-between gap-3 border-b border-slate-100 pb-4 [&_p]:mb-1 [&_p]:text-xs [&_p]:font-black [&_p]:uppercase [&_p]:text-teal-700 [&_h2]:m-0 [&_h2]:text-xl [&_h2]:font-black">
+            <div>
+              <h2>Pesanan</h2>
+            </div>
+          </div>
+
+          {cartItems.length === 0 ? (
+            <div className="empty-order empty-state">Belum ada product dipilih.</div>
+          ) : (
+            <div className="mini-cart grid gap-3">
+              {cartItems.map((item) => (
+                <div className="mini-cart-row grid gap-2 rounded-lg border border-slate-100 p-3" key={item.productId}>
+                  <div className="mini-cart-info grid gap-1 [&_span]:text-sm [&_span]:text-slate-500">
+                    <strong>{item.product.name}</strong>
+                    <span>{formatCurrency(item.product.price)} per item</span>
+                  </div>
+                  <div className="mini-cart-control grid grid-cols-[36px_1fr_36px] gap-2">
+                    <Button type="button" aria-label={`Kurangi ${item.product.name}`} title={`Kurangi ${item.product.name}`} onClick={() => updateQuantity(item.productId, item.quantity - 1)}>
+                      <Minus aria-hidden="true" />
+                    </Button>
+                    <Input
+                      min="1"
+                      type="number"
+                      value={item.quantity}
+                      onChange={(event) => updateQuantity(item.productId, Number(event.target.value))}
+                      aria-label={`Jumlah ${item.product.name}`}
+                    />
+                    <Button type="button" aria-label={`Tambah ${item.product.name}`} title={`Tambah ${item.product.name}`} onClick={() => updateQuantity(item.productId, item.quantity + 1)}>
+                      <Plus aria-hidden="true" />
+                    </Button>
+                  </div>
+                  <ItemNote name={item.product.name} value={item.note ?? ''} onChange={(note) => updateNote(item.productId, note)} />
+                  <b>{formatCurrency(item.total)}</b>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="summary-box my-4 grid gap-2 rounded-lg bg-slate-50 p-4 [&_span]:flex [&_span]:items-center [&_span]:justify-between [&_strong]:text-slate-950">
+            <span>Subtotal <strong>{formatCurrency(subtotal)}</strong></span>
+          </div>
+
+          <Button
+            className="primary-action w-full"
+            variant="primary"
+            type="button"
+            disabled={cartItems.length === 0}
+            onClick={() => setStep('review')}
+          >
+            Review Pesanan <ArrowRight aria-hidden="true" />
+          </Button>
+        </aside>
+      )}
     </main>
   )
 }

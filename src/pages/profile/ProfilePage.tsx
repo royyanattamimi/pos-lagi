@@ -10,6 +10,7 @@ type ProfilePageProps = {
   onDashboard: () => void
   onProduct: () => void
   onTransaction: () => void
+  onPaidTransactions: () => void
   onShift: () => void
   onProfile: () => void
   onLogout: () => void
@@ -21,6 +22,7 @@ export function ProfilePage({
   onDashboard,
   onProduct,
   onTransaction,
+  onPaidTransactions,
   onShift,
   onProfile,
   onLogout,
@@ -61,7 +63,7 @@ export function ProfilePage({
         activePage="profile"
         onDashboard={onDashboard}
         onProduct={onProduct}
-        onTransaction={onTransaction}
+        onTransaction={onTransaction} onPaidTransactions={onPaidTransactions}
         onShift={onShift}
         onProfile={onProfile}
         profileName={currentShift?.cashierName}

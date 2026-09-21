@@ -9,6 +9,7 @@ type ReceiptPageProps = {
   onDashboard: () => void
   onProduct: () => void
   onTransaction: () => void
+  onPaidTransactions: () => void
   onShift: () => void
   onProfile: () => void
 }
@@ -29,6 +30,7 @@ export function ReceiptPage({
   onDashboard,
   onProduct,
   onTransaction,
+  onPaidTransactions,
   onShift,
   onProfile,
 }: ReceiptPageProps) {
@@ -41,10 +43,10 @@ export function ReceiptPage({
   return (
     <main className="receipt-page app-shell">
       <Sidebar
-        activePage="transaction"
+        activePage="paid-transactions"
         onDashboard={onDashboard}
         onProduct={onProduct}
-        onTransaction={onTransaction}
+        onTransaction={onTransaction} onPaidTransactions={onPaidTransactions}
         onShift={onShift}
         onProfile={onProfile}
       />
