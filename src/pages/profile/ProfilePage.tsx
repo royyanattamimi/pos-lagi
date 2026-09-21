@@ -1,4 +1,7 @@
-import { useState } from 'react'
+import { useState, type FormEvent } from 'react'
+import { Save, RotateCcw, UserRound, Settings } from 'lucide-react'
+import { useProfile } from '../../context/useProfile'
+import type { UserProfile } from '../../storage/profileStorage'
 import { Sidebar } from '../../component/sidebar/Sidebar'
 import { PageHeader } from '../../component/header/PageHeader'
 import { Button } from '../../component/button/Button'
@@ -30,32 +33,45 @@ export function ProfilePage({
   currentShift,
 }: ProfilePageProps) {
   const [showLogoutReminder, setShowLogoutReminder] = useState(false)
-  const [profile, setProfile] = useState({
-    name: currentShift?.cashierName || '',
-    email: '',
-    phone: '',
-    staffId: '',
-    role: '',
-    branch: '',
-    shift: currentShift?.shiftTime || '',
-    accountStatus: '',
-  })
-  const displayName = profile.name || 'Profile belum diisi'
-  const displayRole = profile.role || 'Role belum diisi'
-  const displayBranch = profile.branch || 'Cabang belum diisi'
-  const displayShift = profile.shift || currentShift?.shiftTime || 'Shift belum diisi'
-  const configuredAccessCount = [
-    profile.role,
-    profile.branch,
-    profile.shift,
-    profile.accountStatus,
-  ].filter(Boolean).length
-  const initials = (profile.name || 'P')
-    .split(' ')
-    .map((word) => word[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase()
+  const { profile: savedProfile, updateProfile } = useProfile()
+  const initialProfile = {
+    ...savedProfile,
+    name: savedProfile.name || currentShift?.cashierName || '',
+    shift: savedProfile.shift || currentShift?.shiftTime || '',
+  }
+  const [profile, setProfile] = useState(initialProfile)
+  const [baseline, setBaseline] = useState(initialProfile)
+  const [message, setMessage] = useState('')
+  const [error, setError] = useState('')
+  const isDirty = JSON.stringify(profile) !== JSON.stringify(baseline)
+  const configuredFields = [profile.name, profile.email, profile.phone, profile.staffId, profile.role, profile.branch]
+  const completed = configuredFields.filter((value) => value.trim()).length
+  const initials = (profile.name.trim() || 'P').split(/\s+/).map((word) => word[0]).join('').slice(0, 2).toUpperCase()
+
+  function edit(field: keyof UserProfile, value: string) {
+    setProfile((previous) => ({ ...previous, [field]: value }))
+    setMessage('')
+    setError('')
+  }
+
+  function handleSave(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    if (!profile.name.trim()) {
+      setError('Nama lengkap wajib diisi.')
+      return
+    }
+    const next = Object.fromEntries(Object.entries(profile).map(([key, value]) => [key, value.trim()])) as UserProfile
+    try {
+      updateProfile(next)
+      setProfile(next)
+      setBaseline(next)
+      setError('')
+      setMessage('Profil berhasil disimpan di browser ini.')
+    } catch {
+      setMessage('')
+      setError('Profil belum tersimpan. Penyimpanan browser tidak tersedia atau penuh. Coba simpan kembali.')
+    }
+  }
 
   return (
     <main className="profile-page app-shell">
@@ -71,124 +87,86 @@ export function ProfilePage({
 
       <section className="profile-content content-shell">
         <PageHeader
-          eyebrow="Profile"
-          title="Pengaturan profile kasir"
-          description="Atur identitas akun, cabang kerja, role, dan informasi shift pengguna."
-          actions={<Button type="button" onClick={onDashboard}>Kembali</Button>}
+          eyebrow="Profil"
+          title="Pengaturan profil"
+          description="Lengkapi identitas dan pengaturan kerja, lalu simpan perubahan Anda."
+          actions={<Button type="button" onClick={onDashboard}>Kembali ke dashboard</Button>}
         />
 
-        <section className="profile-overview mb-5 flex items-center justify-between gap-4 surface-panel max-md:flex-col max-md:items-start">
-          <div className="profile-photo grid h-20 w-20 place-items-center rounded-full bg-teal-100 text-2xl font-black text-teal-800">{initials}</div>
-          <div>
-            <h2>{displayName}</h2>
-            <span>{displayRole}</span>
-            <small>{displayBranch} - Shift {displayShift}</small>
+        <section className="mb-5 flex flex-wrap items-center gap-5 surface-panel">
+          <div className="grid h-20 w-20 shrink-0 place-items-center rounded-full bg-teal-100 text-2xl font-black text-teal-800" aria-hidden="true">{initials}</div>
+          <div className="min-w-0 flex-1">
+            <h2 className="break-words text-xl font-semibold">{profile.name || 'Nama belum diisi'}</h2>
+            <p className="text-sm text-slate-500">{profile.role || 'Jabatan belum diisi'} · {profile.branch || 'Cabang belum diisi'}</p>
+            <p className="mt-1 text-xs text-slate-500">Pratinjau profil · {completed} dari 6 informasi utama terisi</p>
           </div>
-          <div className="profile-access-score rounded-lg bg-slate-50 p-4 text-right [&_strong]:block [&_strong]:text-2xl [&_strong]:font-black [&_span]:text-sm [&_span]:text-slate-500">
-            <strong>{configuredAccessCount}/4</strong>
-            <span>Kelengkapan akses</span>
-          </div>
+          <span className="rounded-full bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-600">{isDirty ? 'Ada perubahan belum disimpan' : 'Tidak ada perubahan'}</span>
         </section>
 
-        <section className="profile-grid grid gap-5 xl:grid-cols-2">
-          <article className="profile-panel surface-panel">
-            <div className="profile-panel-header mb-4 border-b border-slate-100 pb-4 [&_p]:mb-1 [&_p]:text-xs [&_p]:font-black [&_p]:uppercase [&_p]:text-teal-700 [&_h2]:m-0 [&_h2]:text-xl [&_h2]:font-black">
-              <p>Data Profile</p>
-              <h2>Informasi pengguna</h2>
+        <form onSubmit={handleSave} className="mb-5 grid gap-5">
+          <div className="grid items-start gap-5 xl:grid-cols-2">
+            <section className="surface-panel">
+              <h2 className="mb-1 flex items-center gap-2 text-lg font-semibold"><UserRound size={20} aria-hidden="true" /> Informasi pribadi</h2>
+              <p className="mb-5 text-sm text-slate-500">Nama wajib diisi. Informasi lainnya dapat dilengkapi nanti.</p>
+              <div className="grid gap-4">
+                <label className="grid gap-2 text-sm font-semibold">Nama lengkap *
+                  <Input required maxLength={100} autoComplete="name" placeholder="Contoh: Budi Santoso" value={profile.name} onChange={(event) => edit('name', event.target.value)} />
+                </label>
+                <label className="grid gap-2 text-sm font-semibold">Email kontak
+                  <Input type="email" maxLength={254} autoComplete="email" placeholder="nama@contoh.com" value={profile.email} onChange={(event) => edit('email', event.target.value)} />
+                  <span className="text-xs font-normal text-slate-500">Untuk informasi kontak; tidak mengubah email login.</span>
+                </label>
+                <label className="grid gap-2 text-sm font-semibold">Nomor telepon
+                  <Input type="tel" maxLength={25} autoComplete="tel" placeholder="Contoh: 0812 3456 7890" value={profile.phone} onChange={(event) => edit('phone', event.target.value)} />
+                </label>
+                <label className="grid gap-2 text-sm font-semibold">Alamat
+                  <textarea className="rounded-lg border border-slate-200 p-3 font-normal focus:outline-teal-600" rows={3} maxLength={500} autoComplete="street-address" placeholder="Alamat kontak (opsional)" value={profile.address} onChange={(event) => edit('address', event.target.value)} />
+                </label>
+              </div>
+            </section>
+
+            <section className="surface-panel">
+              <h2 className="mb-1 flex items-center gap-2 text-lg font-semibold"><Settings size={20} aria-hidden="true" /> Pengaturan kerja</h2>
+              <p className="mb-5 text-sm text-slate-500">Informasi profil kerja. Tidak mengubah hak akses atau shift yang sedang berjalan.</p>
+              <div className="grid gap-4">
+                <label className="grid gap-2 text-sm font-semibold">ID staf
+                  <Input maxLength={50} placeholder="Contoh: KSR-001" value={profile.staffId} onChange={(event) => edit('staffId', event.target.value)} />
+                </label>
+                <label className="grid gap-2 text-sm font-semibold">Jabatan
+                  <Select value={profile.role} onChange={(event) => edit('role', event.target.value)}>
+                    <option value="">Pilih jabatan</option>
+                    <option>Kasir Utama</option><option>Admin Toko</option><option>Supervisor</option>
+                  </Select>
+                </label>
+                <label className="grid gap-2 text-sm font-semibold">Nama cabang
+                  <Input maxLength={100} placeholder="Contoh: Cabang Utama" value={profile.branch} onChange={(event) => edit('branch', event.target.value)} />
+                </label>
+                <label className="grid gap-2 text-sm font-semibold">Jadwal kerja preferensi
+                  <Input maxLength={100} placeholder="Contoh: 08:00 - 16:00" value={profile.shift} onChange={(event) => edit('shift', event.target.value)} />
+                </label>
+                <label className="grid gap-2 text-sm font-semibold">Catatan profil
+                  <textarea className="rounded-lg border border-slate-200 p-3 font-normal focus:outline-teal-600" rows={3} maxLength={500} placeholder="Informasi tambahan (opsional)" value={profile.notes} onChange={(event) => edit('notes', event.target.value)} />
+                </label>
+              </div>
+            </section>
+          </div>
+
+          <div className="surface-panel">
+            {message && <p role="status" className="mb-3 text-sm font-semibold text-emerald-700">{message}</p>}
+            {error && <p role="alert" className="mb-3 text-sm font-semibold text-red-700">{error}</p>}
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <p className="text-sm text-slate-500">Profil tersimpan untuk akun ini di browser yang sedang digunakan.</p>
+              <div className="flex flex-wrap gap-2">
+                <Button disabled={!isDirty} onClick={() => { setProfile({ ...baseline }); setMessage('Perubahan dibatalkan.'); setError('') }}>
+                  <RotateCcw aria-hidden="true" /> Batalkan perubahan
+                </Button>
+                <Button variant="primary" type="submit"><Save aria-hidden="true" /> Simpan profil</Button>
+              </div>
             </div>
+          </div>
+        </form>
 
-            <form className="profile-form grid gap-4 [&_label]:grid [&_label]:gap-2 [&_label]:text-sm [&_label]:font-bold [&_label]:text-slate-600">
-              <label>
-                Nama Lengkap
-                <Input
-                  value={profile.name}
-                  onChange={(event) => setProfile({ ...profile, name: event.target.value })}
-                />
-              </label>
-              <label>
-                Email
-                <Input
-                  type="email"
-                  value={profile.email}
-                  onChange={(event) => setProfile({ ...profile, email: event.target.value })}
-                />
-              </label>
-              <label>
-                Nomor Telepon
-                <Input
-                  value={profile.phone}
-                  onChange={(event) => setProfile({ ...profile, phone: event.target.value })}
-                />
-              </label>
-              <label>
-                ID Staff
-                <Input
-                  value={profile.staffId}
-                  onChange={(event) => setProfile({ ...profile, staffId: event.target.value })}
-                />
-              </label>
-              <Button variant="primary" type="button">Simpan Profile</Button>
-            </form>
-          </article>
-
-          <article className="profile-panel surface-panel">
-            <div className="profile-panel-header mb-4 border-b border-slate-100 pb-4 [&_p]:mb-1 [&_p]:text-xs [&_p]:font-black [&_p]:uppercase [&_p]:text-teal-700 [&_h2]:m-0 [&_h2]:text-xl [&_h2]:font-black">
-              <p>Akses Akun</p>
-              <h2>Role dan operasional</h2>
-            </div>
-
-            <div className="profile-detail-list grid gap-3 [&_article]:rounded-lg [&_article]:border [&_article]:border-slate-100 [&_article]:bg-slate-50 [&_article]:p-3 [&_span]:text-xs [&_span]:font-extrabold [&_span]:text-slate-500 [&_strong]:block [&_strong]:font-black">
-              <label>
-                Role
-                <Select
-                  value={profile.role}
-                  onChange={(event) => setProfile({ ...profile, role: event.target.value })}
-                >
-                  <option value="">Pilih role</option>
-                  <option>Kasir Utama</option>
-                  <option>Admin Toko</option>
-                  <option>Supervisor</option>
-                </Select>
-              </label>
-              <label>
-                Cabang
-                <Select
-                  value={profile.branch}
-                  onChange={(event) => setProfile({ ...profile, branch: event.target.value })}
-                >
-                  <option value="">Pilih cabang</option>
-                  <option>Cabang Utama</option>
-                  <option>Cabang Barat</option>
-                  <option>Cabang Timur</option>
-                </Select>
-              </label>
-              <label>
-                Shift
-                <Select
-                  value={profile.shift}
-                  onChange={(event) => setProfile({ ...profile, shift: event.target.value })}
-                >
-                  <option value="">Pilih shift</option>
-                  <option>08:00 - 16:00</option>
-                  <option>16:00 - 22:00</option>
-                  <option>22:00 - 06:00</option>
-                </Select>
-              </label>
-              <label>
-                Status Akun
-                <Select
-                  value={profile.accountStatus}
-                  onChange={(event) => setProfile({ ...profile, accountStatus: event.target.value })}
-                >
-                  <option value="">Pilih status</option>
-                  <option>Aktif</option>
-                  <option>Nonaktif</option>
-                  <option>Ditahan sementara</option>
-                </Select>
-              </label>
-            </div>
-          </article>
-
+        <section className="profile-grid grid gap-5">
           <article className="profile-panel profile-danger rounded-lg border border-red-200 bg-white p-5 shadow-lg shadow-red-900/5">
             <div className="profile-panel-header mb-4 border-b border-slate-100 pb-4 [&_p]:mb-1 [&_p]:text-xs [&_p]:font-black [&_p]:uppercase [&_p]:text-teal-700 [&_h2]:m-0 [&_h2]:text-xl [&_h2]:font-black">
               <p>Session</p>

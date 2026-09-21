@@ -1,3 +1,4 @@
+import { useProfile } from '../../context/useProfile'
 import { Button } from '../button/Button'
 import { LayoutDashboard, Package, ShoppingCart, Clock3, Store, ChevronRight, ReceiptText } from 'lucide-react'
 
@@ -24,7 +25,8 @@ export function Sidebar({
   onProfile,
   profileName,
 }: SidebarProps) {
-  const displayName = profileName || 'Administrator'
+  const { profile } = useProfile()
+  const displayName = profile.name || profileName || 'Administrator'
   const navigation = [
     { key: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, action: onDashboard },
     { key: 'transaction', label: 'Transaksi', icon: ShoppingCart, action: onTransaction },
@@ -45,7 +47,7 @@ export function Sidebar({
         <span className="brand-symbol"><Store size={23} aria-hidden="true" /></span>
         <div>
           <strong className="block text-lg text-slate-950">POS Lagi<span className="text-emerald-600">.</span></strong>
-          <small className="block text-xs font-bold text-slate-500">Cabang Utama</small>
+          <small className="block text-xs font-bold text-slate-500">{profile.branch || 'Cabang Utama'}</small>
         </div>
       </div>
 
@@ -68,7 +70,7 @@ export function Sidebar({
           <span className="profile-avatar grid h-8 w-8 shrink-0 place-items-center rounded-full bg-teal-100 text-sm font-black text-teal-800">{initials}</span>
           <span className="min-w-0 break-words text-left">
             <strong className="block">{displayName}</strong>
-            <small className="block text-xs opacity-75">Administrator</small>
+            <small className="block text-xs opacity-75">{profile.role || 'Administrator'}</small>
           </span>
         </Button>
       </section>

@@ -1,3 +1,4 @@
+import { ProfileProvider } from './context/ProfileContext'
 import { useEffect, useState } from 'react'
 import { DashboardPage } from './pages/dashboard/DashboardPage'
 import { ForgotPasswordPage } from './pages/login/ForgotPasswordPage'
@@ -16,6 +17,7 @@ import { closeExpiredShift, getShiftDeadline } from './storage/shiftLifecycle'
 import type { Product, ProductInput, ShiftInput, ShiftSession, TransactionRecord } from './types'
 
 function App() {
+  const [accountId, setAccountId] = useState('local')
   const [storedData] = useState(loadPosData)
   const [isAuthReady, setIsAuthReady] = useState(!supabase)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
@@ -68,11 +70,13 @@ function App() {
     supabase.auth.getSession().then(({ data }) => {
       if (!isMounted) return
 
+      setAccountId(data.session?.user.id || 'local')
       setIsLoggedIn(Boolean(data.session))
       setIsAuthReady(true)
     })
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setAccountId(session?.user.id || 'local')
       setIsLoggedIn(Boolean(session))
     })
 
@@ -234,6 +238,7 @@ function App() {
 
   if (isLoggedIn && isShiftStarted) {
     return (
+      <ProfileProvider key={accountId} accountId={accountId}>
       <DashboardPage
         products={products}
         transactions={transactions}
@@ -246,6 +251,7 @@ function App() {
         onEndShift={handleEndShift}
         onLogout={handleLogout}
       />
+      </ProfileProvider>
     )
   }
 
