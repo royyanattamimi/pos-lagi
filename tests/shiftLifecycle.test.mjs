@@ -70,3 +70,33 @@ test('loading persisted data reconciles current shift and history and can save t
   assert.deepEqual(JSON.parse(stored), loaded)
   assert.deepEqual(storage.loadPosData(), loaded)
 })
+
+const paymentStorage = loadModule('../src/storage/posStorage.ts', { './shiftLifecycle': lifecycle })
+const payment = {
+  id: '#POS-local', createdAt: '2026-09-21T03:00:00Z', cashier: 'Kasir',
+  items: [{ productId: 1, name: 'Kopi', price: 15000, quantity: 2, total: 30000 }],
+  itemCount: 2, subtotal: 30000, tax: 0, grandTotal: 30000,
+  paid: 50000, change: 20000, paymentMethod: 'Cash', status: 'Lunas',
+}
+
+test('an empty or stale server result preserves completed local payments without duplicates', () => {
+  assert.deepEqual(paymentStorage.mergeTransactions([payment], []), [payment])
+  const remote = { ...payment, id: '#POS-remote', createdAt: '2026-09-20T03:00:00Z' }
+  const merged = paymentStorage.mergeTransactions([payment], [remote, { ...payment, items: [] }])
+  assert.deepEqual(merged, [payment, remote])
+  assert.equal(merged.reduce((sum, record) => sum + record.grandTotal, 0), 60000)
+})
+
+test('local payment survives reload and remains counted for the local sales day', () => {
+  let stored
+  const storage = loadModule('../src/storage/posStorage.ts', { './shiftLifecycle': lifecycle }, {
+    localStorage: { getItem: () => stored, setItem: (_key, value) => { stored = value } },
+  })
+  storage.savePosData({ ...storage.emptyPosData, transactions: [payment] })
+  const reloaded = storage.mergeTransactions(storage.loadPosData().transactions, [])
+  const day = new Date('2026-09-21T12:00:00+07:00').toLocaleDateString('id-ID')
+  const sales = reloaded.filter((record) => new Date(record.createdAt).toLocaleDateString('id-ID') === day)
+  assert.equal(sales.length, 1)
+  assert.equal(sales.reduce((sum, record) => sum + record.grandTotal, 0), 30000)
+  assert.deepEqual(sales[0].items, payment.items)
+})

@@ -52,3 +52,13 @@ export function savePosData(data: PosStoredData) {
     // The app remains usable when storage is unavailable or full.
   }
 }
+
+// Completed local payments stay authoritative if a remote write was incomplete.
+export function mergeTransactions(
+  localTransactions: TransactionRecord[],
+  remoteTransactions: TransactionRecord[],
+): TransactionRecord[] {
+  const records = new Map(remoteTransactions.map((transaction) => [transaction.id, transaction]))
+  for (const transaction of localTransactions) records.set(transaction.id, transaction)
+  return [...records.values()].sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt))
+}

@@ -77,7 +77,7 @@ export function TransactionPage({
   const subtotal = cartItems.reduce((total, item) => total + item.total, 0)
   const grandTotal = subtotal
   const paid = Number(paidAmount || 0)
-  const change = Math.max(paid - grandTotal, 0)
+  const change = paymentMethod === 'Cash' ? Math.max(paid - grandTotal, 0) : 0
   const canFinish = paymentMethod !== 'Cash' || paid >= grandTotal
   const filteredProducts =
     selectedCategory === 'Semua'
@@ -134,7 +134,7 @@ export function TransactionPage({
     }))
     const createdAt = new Date().toISOString()
     const transaction: TransactionRecord = {
-      id: `#POS-${createdAt.replace(/\D/g, '').slice(0, 14)}`,
+      id: `#POS-${createdAt.replace(/\D/g, '').slice(0, 14)}-${crypto.randomUUID().slice(0, 8)}`,
       cashier: currentShift?.cashierName || '-',
       createdAt,
       items,
@@ -328,20 +328,51 @@ export function TransactionPage({
               ))}
             </div>
 
-            <label className="paid-input grid gap-2 text-sm font-bold text-slate-600">
-              Nominal dibayar
-              <Input
-                min="0"
-                type="number"
-                value={paidAmount}
-                onChange={(event) => setPaidAmount(event.target.value)}
-                placeholder={String(grandTotal)}
-                disabled={paymentMethod !== 'Cash'}
-              />
-            </label>
+            <div className="paid-input grid gap-2">
+              <label htmlFor="paid-amount" className="text-sm font-bold text-slate-600">
+                Nominal dibayar (Rupiah)
+              </label>
+              <div className="relative">
+                <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm font-bold text-slate-600" aria-hidden="true">Rp</span>
+                <Input
+                  id="paid-amount"
+                  className="pl-11 text-lg font-semibold tabular-nums"
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="off"
+                  value={paymentMethod === 'Cash'
+                    ? (paidAmount === '' ? '' : Number(paidAmount).toLocaleString('id-ID'))
+                    : grandTotal.toLocaleString('id-ID')}
+                  onChange={(event) => {
+                    const digits = event.target.value.replace(/[^0-9]/g, '')
+                    if (digits.length <= 15) setPaidAmount(digits)
+                  }}
+                  placeholder="Contoh: 50.000"
+                  disabled={paymentMethod !== 'Cash'}
+                  aria-describedby="paid-amount-help paid-amount-detail"
+                />
+              </div>
+              <p id="paid-amount-help" className="text-xs text-slate-500">
+                {paymentMethod === 'Cash'
+                  ? 'Masukkan uang tunai yang diterima dari pelanggan. Contoh: 50.000 = lima puluh ribu rupiah.'
+                  : `Pembayaran ${paymentMethod} mengikuti total tagihan secara otomatis.`}
+              </p>
+              <p id="paid-amount-detail" className="text-sm font-medium text-slate-700" aria-live="polite">
+                {paymentMethod !== 'Cash'
+                  ? `Nominal pembayaran: ${formatCurrency(grandTotal)}.`
+                  : paidAmount === ''
+                    ? `Total yang harus dibayar: ${formatCurrency(grandTotal)}.`
+                    : paid < grandTotal
+                      ? `Uang diterima ${formatCurrency(paid)}. Masih kurang ${formatCurrency(grandTotal - paid)}.`
+                      : paid === grandTotal
+                        ? `Uang diterima ${formatCurrency(paid)}. Pembayaran pas, tanpa kembalian.`
+                        : `Uang diterima ${formatCurrency(paid)}. Kembalian ${formatCurrency(change)}.`}
+              </p>
+            </div>
 
             <div className="summary-box my-4 grid gap-2 rounded-lg bg-slate-50 p-4 [&_span]:flex [&_span]:items-center [&_span]:justify-between [&_strong]:text-slate-950">
               <span>Total Tagihan <strong>{formatCurrency(grandTotal)}</strong></span>
+              <span>Nominal Dibayar <strong>{formatCurrency(paymentMethod === 'Cash' ? paid : grandTotal)}</strong></span>
               <span>Kembalian <strong>{formatCurrency(change)}</strong></span>
             </div>
 

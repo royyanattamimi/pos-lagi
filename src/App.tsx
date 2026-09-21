@@ -11,7 +11,7 @@ import {
   updateRemoteProduct,
 } from './storage/productStorage'
 import { createRemoteTransaction, loadRemoteTransactions } from './storage/transactionStorage'
-import { loadPosData, savePosData } from './storage/posStorage'
+import { loadPosData, mergeTransactions, savePosData } from './storage/posStorage'
 import { closeExpiredShift, getShiftDeadline } from './storage/shiftLifecycle'
 import type { Product, ProductInput, ShiftInput, ShiftSession, TransactionRecord } from './types'
 
@@ -98,7 +98,7 @@ function App() {
 
     loadRemoteTransactions(loadPosData().transactions).then((remoteTransactions) => {
       if (!isMounted) return
-      setTransactions(remoteTransactions)
+      setTransactions((currentTransactions) => mergeTransactions(currentTransactions, remoteTransactions))
     })
 
     return () => {
@@ -224,9 +224,7 @@ function App() {
     setTransactions((currentTransactions) => [transaction, ...currentTransactions])
     createRemoteTransaction(transaction).catch((error) => {
       console.error('Gagal menyimpan transaksi ke Supabase:', error.message)
-      setTransactions((currentTransactions) =>
-        currentTransactions.filter((currentTransaction) => currentTransaction.id !== transaction.id),
-      )
+      // Payment has already completed. Keep it locally even if remote storage fails.
     })
   }
 
