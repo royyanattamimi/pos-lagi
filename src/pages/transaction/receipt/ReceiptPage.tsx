@@ -1,3 +1,4 @@
+import { Check, Printer } from 'lucide-react'
 import { Sidebar } from '../../../component/sidebar/Sidebar'
 import { PageHeader } from '../../../component/header/PageHeader'
 import { Button } from '../../../component/button/Button'
@@ -5,7 +6,6 @@ import type { TransactionRecord } from '../../../types'
 
 type ReceiptPageProps = {
   transaction: TransactionRecord
-  onNewTransaction: () => void
   onDashboard: () => void
   onProduct: () => void
   onTransaction: () => void
@@ -26,7 +26,6 @@ function formatCurrency(value: number) {
 
 export function ReceiptPage({
   transaction,
-  onNewTransaction,
   onDashboard,
   onProduct,
   onTransaction,
@@ -53,75 +52,73 @@ export function ReceiptPage({
 
       <section className="receipt-content content-shell">
         <PageHeader
-          eyebrow="Receipt"
-          title="Transaksi selesai"
-          description="Struk pembayaran berhasil dibuat dan siap diperiksa."
+          eyebrow="Pembayaran selesai"
+          title="Nota pembayaran"
+          description="Transaksi sudah lunas. Nota siap dicetak untuk pelanggan."
           actions={(
-            <div className="receipt-header-actions flex flex-wrap gap-2">
-            <Button type="button" onClick={handlePrint}>Print Receipt</Button>
-              <Button variant="primary" type="button" onClick={onNewTransaction}>Transaksi Baru</Button>
-            </div>
+            <Button type="button" onClick={onTransaction}>
+              <Check aria-hidden="true" /> Selesai
+            </Button>
           )}
         />
 
-        <section className="receipt-layout grid items-start gap-5 xl:grid-cols-[minmax(340px,0.7fr)_minmax(300px,0.3fr)]">
-          <article className="receipt-card rounded-lg border border-slate-200 bg-white p-6 shadow-lg shadow-slate-900/5">
-            <div className="receipt-store border-b border-dashed border-slate-300 pb-4 text-center [&_h2]:m-0 [&_h2]:text-2xl [&_h2]:font-black [&_p]:m-1 [&_p]:text-sm [&_p]:text-slate-500">
-              <span>PL</span>
-              <div>
-                <strong>POS Lagi</strong>
-                <small>Cabang Utama</small>
-              </div>
-            </div>
+        <section className="receipt-stage" aria-label="Nota transaksi selesai">
+          <div className="receipt-success" role="status">
+            <span className="receipt-success-icon"><Check size={22} aria-hidden="true" /></span>
+            <strong>Pembayaran berhasil</strong>
+            <span>{formatCurrency(transaction.grandTotal)} · {transaction.paymentMethod}</span>
+          </div>
 
-            <div className="receipt-meta my-4 grid gap-2 [&_span]:flex [&_span]:justify-between [&_span]:text-sm [&_strong]:text-slate-950">
-              <span>No. Receipt <strong>{transaction.id}</strong></span>
-              <span>Kasir <strong>{transaction.cashier}</strong></span>
-              <span>Metode <strong>{transaction.paymentMethod}</strong></span>
-            </div>
+          <article className="thermal-receipt" aria-label={`Nota ${transaction.id}`}>
+            <header className="thermal-store">
+              <h2>POS LAGI</h2>
+              <p>Cabang Utama</p>
+              <p className="thermal-caption">NOTA PEMBAYARAN</p>
+            </header>
 
-            <div className="receipt-items grid gap-3 border-y border-dashed border-slate-300 py-4">
+            <dl className="thermal-meta thermal-divider">
+              <div><dt>No. nota</dt><dd>{transaction.id}</dd></div>
+              <div><dt>Tanggal</dt><dd>{new Date(transaction.createdAt).toLocaleDateString('id-ID')}</dd></div>
+              <div><dt>Waktu</dt><dd>{new Date(transaction.createdAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</dd></div>
+              <div><dt>Kasir</dt><dd>{transaction.cashier}</dd></div>
+            </dl>
+
+            <div className="thermal-items thermal-divider">
               {transaction.items.map((item) => (
-                <div className="receipt-item grid grid-cols-[1fr_auto] gap-2 text-sm block text-slate-500" key={item.productId}>
-                  <div>
-                    <strong>{item.name}</strong>
+                <div className="thermal-item" key={item.productId}>
+                  <strong>{item.name}</strong>
+                  <div className="thermal-line">
                     <span>{item.quantity} x {formatCurrency(item.price)}</span>
-                    {item.note && <div className="mt-1 whitespace-pre-wrap break-words text-xs text-slate-600">Catatan: {item.note}</div>}
+                    <span>{formatCurrency(item.total)}</span>
                   </div>
-                  <b>{formatCurrency(item.total)}</b>
+                  {item.note && <p className="thermal-note">Catatan: {item.note}</p>}
                 </div>
               ))}
             </div>
 
-            <div className="receipt-total my-4 grid gap-2 [&_span]:flex [&_span]:justify-between [&_span]:text-sm [&_strong]:text-slate-950">
-              <span>Subtotal <strong>{formatCurrency(transaction.subtotal)}</strong></span>
-              <span>Total <strong>{formatCurrency(transaction.grandTotal)}</strong></span>
-              <span>Dibayar <strong>{transaction.paymentMethod === 'Cash' ? formatCurrency(transaction.paid) : transaction.paymentMethod}</strong></span>
-              <span>Kembalian <strong>{formatCurrency(transaction.change)}</strong></span>
-            </div>
+            <dl className="thermal-totals thermal-divider">
+              <div><dt>Jumlah item</dt><dd>{totalItems}</dd></div>
+              <div><dt>Subtotal</dt><dd>{formatCurrency(transaction.subtotal)}</dd></div>
+              {transaction.tax !== 0 && <div><dt>Pajak</dt><dd>{formatCurrency(transaction.tax)}</dd></div>}
+              <div className="thermal-grand-total"><dt>TOTAL</dt><dd>{formatCurrency(transaction.grandTotal)}</dd></div>
+              <div><dt>Metode</dt><dd>{transaction.paymentMethod}</dd></div>
+              <div><dt>Dibayar</dt><dd>{formatCurrency(transaction.paid)}</dd></div>
+              <div><dt>Kembalian</dt><dd>{formatCurrency(transaction.change)}</dd></div>
+            </dl>
 
-            <footer className="receipt-footer border-t border-dashed border-slate-300 pt-4 text-center text-sm font-bold text-slate-500">
-              <strong>Terima kasih</strong>
-              <span>Barang yang sudah dibeli dapat ditukar sesuai kebijakan toko.</span>
-              <small>www.poslagi.local</small>
+            <footer className="thermal-footer">
+              <strong className="thermal-paid">LUNAS</strong>
+              <p>Terima kasih atas kunjungan Anda.</p>
+              <p>Simpan nota ini sebagai bukti pembayaran.</p>
+              <span>*** Sampai jumpa kembali ***</span>
             </footer>
           </article>
 
-          <aside className="receipt-summary surface-panel [&_h2]:m-0 [&_h2]:text-xl [&_h2]:font-black [&_p]:text-slate-500">
-            <article>
-              <span>Total Item</span>
-              <strong>{totalItems}</strong>
-            </article>
-            <article>
-              <span>Total Bayar</span>
-              <strong>{formatCurrency(transaction.grandTotal)}</strong>
-            </article>
-            <article>
-              <span>Status</span>
-              <strong>Lunas</strong>
-            </article>
-            <Button variant="primary" type="button" onClick={onDashboard}>Kembali ke Dashboard</Button>
-          </aside>
+          <div className="receipt-actions">
+            <Button variant="primary" type="button" onClick={handlePrint}>
+              <Printer aria-hidden="true" /> Cetak nota
+            </Button>
+          </div>
         </section>
       </section>
     </main>

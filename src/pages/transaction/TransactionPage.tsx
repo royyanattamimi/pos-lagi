@@ -159,7 +159,6 @@ export function TransactionPage({
     return (
       <ReceiptPage
         transaction={receipt}
-        onNewTransaction={resetTransaction}
         onDashboard={onDashboard}
         onProduct={onProduct}
         onTransaction={resetTransaction} onPaidTransactions={onPaidTransactions}
