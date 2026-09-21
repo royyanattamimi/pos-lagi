@@ -25,8 +25,8 @@ export function Sidebar({
   const displayName = profileName || 'Administrator'
   const navigation = [
     { key: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, action: onDashboard },
-    { key: 'product', label: 'Produk', icon: Package, action: onProduct },
     { key: 'transaction', label: 'Transaksi', icon: ShoppingCart, action: onTransaction },
+    { key: 'product', label: 'Produk', icon: Package, action: onProduct },
     { key: 'shift', label: 'Shift kasir', icon: Clock3, action: onShift },
   ]
   const initials = displayName
