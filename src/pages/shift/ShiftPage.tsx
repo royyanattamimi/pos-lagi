@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { getMonthlyCash, getNextMonthStart } from '../../storage/monthlyCash'
 import { Sidebar } from '../../component/sidebar/Sidebar'
 import { PageHeader } from '../../component/header/PageHeader'
 import { Button } from '../../component/button/Button'
@@ -93,10 +94,28 @@ export function ShiftPage({
   const [recapView, setRecapView] = useState<RecapView>('daily')
   const [selectedDate, setSelectedDate] = useState(getDateInputValue())
   const isShiftOpen = currentShift?.status === 'Berjalan'
-  const cashSales = transactions
-    .filter((transaction) => transaction.paymentMethod === 'Cash')
-    .reduce((total, transaction) => total + transaction.grandTotal, 0)
-  const estimatedCash = (currentShift?.openingCash ?? 0) + cashSales
+  const [now, setNow] = useState(() => new Date())
+  useEffect(() => {
+    let timeout: ReturnType<typeof setTimeout>
+    function refreshMonth() {
+      clearTimeout(timeout)
+      const current = new Date()
+      setNow(current)
+      timeout = setTimeout(refreshMonth, Math.max(1, Math.min(getNextMonthStart(current) - current.getTime(), 60_000)))
+    }
+    refreshMonth()
+    window.addEventListener('focus', refreshMonth)
+    window.addEventListener('pageshow', refreshMonth)
+    document.addEventListener('visibilitychange', refreshMonth)
+    return () => {
+      clearTimeout(timeout)
+      window.removeEventListener('focus', refreshMonth)
+      window.removeEventListener('pageshow', refreshMonth)
+      document.removeEventListener('visibilitychange', refreshMonth)
+    }
+  }, [])
+  const estimatedCash = getMonthlyCash(transactions, shiftHistory, currentShift, now)
+  const monthLabel = now.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })
   const selectedDateTransactions = transactions.filter(
     (transaction) => getPeriodKey(transaction.createdAt, 'daily') === selectedDate,
   )
@@ -175,9 +194,10 @@ export function ShiftPage({
             <small>Modal uang tunai saat start shift</small>
           </article>
           <article>
-            <span>Estimasi Kas Akhir</span>
+            <span>Estimasi Kas Akhir Bulan Ini</span>
             <strong>{formatCurrency(estimatedCash)}</strong>
-            <small>Kas awal + pembayaran cash</small>
+            <small className="block">{monthLabel} · Kas awal shift + penjualan tunai bulan ini</small>
+            <small className="mt-1 block text-slate-500">Mulai dari Rp 0 setiap awal bulan. Riwayat tetap tersimpan.</small>
           </article>
         </section>
 
