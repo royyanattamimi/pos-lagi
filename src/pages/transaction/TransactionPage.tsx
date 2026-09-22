@@ -172,7 +172,7 @@ export function TransactionPage({
   }
 
   return (
-    <main className={`transaction-page app-shell ${step === 'select' ? 'transaction-select-page' : ''}`}>
+    <main className={`transaction-page app-shell ${step === 'select' ? 'transaction-select-page' : ''} ${step === 'review' ? 'transaction-review-page' : ''}`}>
       <Sidebar
         activePage="transaction"
         onDashboard={onDashboard}
@@ -187,10 +187,15 @@ export function TransactionPage({
           eyebrow="Transaksi"
           title="Buat transaksi baru"
           description="Pilih product, review pesanan, proses pembayaran, lalu selesaikan transaksi."
+          actions={step !== 'select' ? (
+            <Button onClick={() => setStep(step === 'payment' ? 'review' : 'select')}>
+              <ArrowLeft aria-hidden="true" /> Kembali
+            </Button>
+          ) : undefined}
         />
 
         {step === 'select' && (
-          <section className="transaction-grid grid items-start gap-5">
+          <section className="transaction-grid transaction-layout">
             <article className="transaction-panel surface-panel">
               <div className="transaction-panel-header mb-4 flex items-start justify-between gap-3 border-b border-slate-100 pb-4 [&_p]:mb-1 [&_p]:text-xs [&_p]:font-black [&_p]:uppercase [&_p]:text-teal-700 [&_h2]:m-0 [&_h2]:text-xl [&_h2]:font-black">
                 <div>
@@ -258,13 +263,64 @@ export function TransactionPage({
               </div>
             </article>
 
+            <aside aria-label="Keranjang pesanan" className="transaction-panel order-panel surface-panel">
+              <div className="transaction-panel-header mb-4 flex items-start justify-between gap-3 border-b border-slate-100 pb-4 [&_p]:mb-1 [&_p]:text-xs [&_p]:font-black [&_p]:uppercase [&_p]:text-teal-700 [&_h2]:m-0 [&_h2]:text-xl [&_h2]:font-black">
+                <div>
+                  <h2>Pesanan</h2>
+                </div>
+              </div>
 
+              {cartItems.length === 0 ? (
+                <div className="empty-order empty-state">Belum ada product dipilih.</div>
+              ) : (
+                <div className="mini-cart grid gap-3">
+                  {cartItems.map((item) => (
+                    <div className="mini-cart-row grid gap-2 rounded-lg border border-slate-100 p-3" key={item.productId}>
+                      <div className="mini-cart-info grid gap-1 [&_span]:text-sm [&_span]:text-slate-500">
+                        <strong>{item.product.name}</strong>
+                        <span>{formatCurrency(item.product.price)} per item</span>
+                      </div>
+                      <div className="mini-cart-control grid grid-cols-[36px_1fr_36px] gap-2">
+                        <Button type="button" aria-label={`Kurangi ${item.product.name}`} title={`Kurangi ${item.product.name}`} onClick={() => updateQuantity(item.productId, item.quantity - 1)}>
+                          <Minus aria-hidden="true" />
+                        </Button>
+                        <Input
+                          min="1"
+                          type="number"
+                          value={item.quantity}
+                          onChange={(event) => updateQuantity(item.productId, Number(event.target.value))}
+                          aria-label={`Jumlah ${item.product.name}`}
+                        />
+                        <Button type="button" aria-label={`Tambah ${item.product.name}`} title={`Tambah ${item.product.name}`} onClick={() => updateQuantity(item.productId, item.quantity + 1)}>
+                          <Plus aria-hidden="true" />
+                        </Button>
+                      </div>
+                      <ItemNote name={item.product.name} value={item.note ?? ''} onChange={(note) => updateNote(item.productId, note)} />
+                      <b>{formatCurrency(item.total)}</b>
+                    </div>
+                  ))}
+                </div>
+              )}
 
+              <div className="summary-box my-4 grid gap-2 rounded-lg bg-slate-50 p-4 [&_span]:flex [&_span]:items-center [&_span]:justify-between [&_strong]:text-slate-950">
+                <span>Subtotal <strong>{formatCurrency(subtotal)}</strong></span>
+              </div>
+
+              <Button
+                className="primary-action w-full"
+                variant="primary"
+                type="button"
+                disabled={cartItems.length === 0}
+                onClick={() => setStep('review')}
+              >
+                Review Pesanan <ArrowRight aria-hidden="true" />
+              </Button>
+            </aside>
           </section>
         )}
 
         {step === 'review' && (
-          <section className="review-layout grid items-start gap-5 xl:grid-cols-[minmax(0,1.35fr)_minmax(340px,0.65fr)]">
+          <section className="review-layout transaction-layout">
             <article className="transaction-panel review-items-panel surface-panel">
               <div className="transaction-panel-header mb-4 flex items-start justify-between gap-3 border-b border-slate-100 pb-4 [&_p]:mb-1 [&_p]:text-xs [&_p]:font-black [&_p]:uppercase [&_p]:text-teal-700 [&_h2]:m-0 [&_h2]:text-xl [&_h2]:font-black">
                 <div>
@@ -316,9 +372,8 @@ export function TransactionPage({
               </div>
 
               <div className="transaction-actions review-actions mt-4 flex gap-2">
-                <Button type="button" onClick={() => setStep('select')}><ArrowLeft aria-hidden="true" />Kembali</Button>
-                <Button className="primary-action w-full" variant="primary" type="button" onClick={() => setStep('payment')}>
-                  Pembayaran <ArrowRight aria-hidden="true" />
+                <Button className="primary-action checkout-action" variant="primary" size="large" type="button" onClick={() => setStep('payment')}>
+                  <span>Lanjut ke pembayaran</span> <ArrowRight aria-hidden="true" />
                 </Button>
               </div>
             </aside>
@@ -326,7 +381,8 @@ export function TransactionPage({
         )}
 
         {step === 'payment' && (
-          <section className="transaction-panel payment-panel surface-panel">
+          <section className="payment-layout transaction-layout">
+            <article className="transaction-panel payment-panel surface-panel">
             <div className="transaction-panel-header mb-4 flex items-start justify-between gap-3 border-b border-slate-100 pb-4 [&_p]:mb-1 [&_p]:text-xs [&_p]:font-black [&_p]:uppercase [&_p]:text-teal-700 [&_h2]:m-0 [&_h2]:text-xl [&_h2]:font-black">
               <div>
                 <p>Pembayaran</p>
@@ -390,6 +446,13 @@ export function TransactionPage({
               </p>
             </div>
 
+            </article>
+            <aside className="transaction-panel payment-summary-panel surface-panel">
+              <div className="transaction-panel-header mb-4 border-b border-slate-100 pb-4">
+                <p className="mb-1 text-xs font-black uppercase text-teal-700">Ringkasan</p>
+                <h2 className="m-0 text-xl font-black">Total pembayaran</h2>
+              </div>
+
             <div className="summary-box my-4 grid gap-2 rounded-lg bg-slate-50 p-4 [&_span]:flex [&_span]:items-center [&_span]:justify-between [&_strong]:text-slate-950">
               <span>Total Tagihan <strong>{formatCurrency(grandTotal)}</strong></span>
               <span>Nominal Dibayar <strong>{formatCurrency(paymentMethod === 'Cash' ? paid : grandTotal)}</strong></span>
@@ -397,10 +460,10 @@ export function TransactionPage({
             </div>
 
             <div className="transaction-actions mt-4 flex gap-2">
-              <Button type="button" onClick={() => setStep('review')}><ArrowLeft aria-hidden="true" />Kembali</Button>
               <Button
-                className="primary-action w-full"
+                className="primary-action checkout-action"
                 variant="primary"
+                size="large"
                 type="button"
                 disabled={!canFinish}
                 onClick={finishPayment}
@@ -408,67 +471,11 @@ export function TransactionPage({
                 <Check aria-hidden="true" /> Selesaikan transaksi
               </Button>
             </div>
+            </aside>
           </section>
         )}
 
       </section>
-
-
-      {step === 'select' && (
-        <aside aria-label="Keranjang pesanan" className="transaction-panel order-panel surface-panel">
-          <div className="transaction-panel-header mb-4 flex items-start justify-between gap-3 border-b border-slate-100 pb-4 [&_p]:mb-1 [&_p]:text-xs [&_p]:font-black [&_p]:uppercase [&_p]:text-teal-700 [&_h2]:m-0 [&_h2]:text-xl [&_h2]:font-black">
-            <div>
-              <h2>Pesanan</h2>
-            </div>
-          </div>
-
-          {cartItems.length === 0 ? (
-            <div className="empty-order empty-state">Belum ada product dipilih.</div>
-          ) : (
-            <div className="mini-cart grid gap-3">
-              {cartItems.map((item) => (
-                <div className="mini-cart-row grid gap-2 rounded-lg border border-slate-100 p-3" key={item.productId}>
-                  <div className="mini-cart-info grid gap-1 [&_span]:text-sm [&_span]:text-slate-500">
-                    <strong>{item.product.name}</strong>
-                    <span>{formatCurrency(item.product.price)} per item</span>
-                  </div>
-                  <div className="mini-cart-control grid grid-cols-[36px_1fr_36px] gap-2">
-                    <Button type="button" aria-label={`Kurangi ${item.product.name}`} title={`Kurangi ${item.product.name}`} onClick={() => updateQuantity(item.productId, item.quantity - 1)}>
-                      <Minus aria-hidden="true" />
-                    </Button>
-                    <Input
-                      min="1"
-                      type="number"
-                      value={item.quantity}
-                      onChange={(event) => updateQuantity(item.productId, Number(event.target.value))}
-                      aria-label={`Jumlah ${item.product.name}`}
-                    />
-                    <Button type="button" aria-label={`Tambah ${item.product.name}`} title={`Tambah ${item.product.name}`} onClick={() => updateQuantity(item.productId, item.quantity + 1)}>
-                      <Plus aria-hidden="true" />
-                    </Button>
-                  </div>
-                  <ItemNote name={item.product.name} value={item.note ?? ''} onChange={(note) => updateNote(item.productId, note)} />
-                  <b>{formatCurrency(item.total)}</b>
-                </div>
-              ))}
-            </div>
-          )}
-
-          <div className="summary-box my-4 grid gap-2 rounded-lg bg-slate-50 p-4 [&_span]:flex [&_span]:items-center [&_span]:justify-between [&_strong]:text-slate-950">
-            <span>Subtotal <strong>{formatCurrency(subtotal)}</strong></span>
-          </div>
-
-          <Button
-            className="primary-action w-full"
-            variant="primary"
-            type="button"
-            disabled={cartItems.length === 0}
-            onClick={() => setStep('review')}
-          >
-            Review Pesanan <ArrowRight aria-hidden="true" />
-          </Button>
-        </aside>
-      )}
     </main>
   )
 }

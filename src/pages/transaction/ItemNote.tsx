@@ -14,7 +14,7 @@ export function ItemNote({ name, value, onChange }: ItemNoteProps) {
 
   return (
     <div className="min-w-0">
-      <Button size="small" variant="ghost" aria-expanded={isOpen} aria-controls={inputId} onClick={() => setIsOpen(!isOpen)}>
+      <Button variant="ghost" aria-expanded={isOpen} aria-controls={inputId} onClick={() => setIsOpen(!isOpen)}>
         <StickyNote aria-hidden="true" />{value.trim() ? 'Edit catatan' : 'Catatan'}
       </Button>
       {isOpen ? (
@@ -32,8 +32,8 @@ export function ItemNote({ name, value, onChange }: ItemNoteProps) {
           />
           <small className="text-xs text-slate-500">Berlaku untuk item ini. Jika jumlahnya lebih dari satu, tulis permintaan masing-masing. {value.length}/300</small>
           <div className="flex justify-end gap-2">
-            {value && <Button size="small" variant="ghost" onClick={() => { onChange(''); setIsOpen(false) }}>Hapus</Button>}
-            <Button size="small" onClick={() => setIsOpen(false)}>Selesai</Button>
+            {value && <Button variant="ghost" onClick={() => { onChange(''); setIsOpen(false) }}>Hapus</Button>}
+            <Button onClick={() => setIsOpen(false)}>Selesai</Button>
           </div>
         </div>
       ) : value.trim() ? (
