@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { History, Minus, Plus, ArrowLeft, ArrowRight, Check, RotateCcw } from 'lucide-react'
+import { Minus, Plus, ArrowLeft, ArrowRight, Check, Search } from 'lucide-react'
 import { ProductImage } from '../../component/product/ProductImage'
 import { Sidebar } from '../../component/sidebar/Sidebar'
 import { PageHeader } from '../../component/header/PageHeader'
@@ -14,7 +14,6 @@ type TransactionPageProps = {
   onProduct: () => void
   onTransaction: () => void
   onPaidTransactions: () => void
-  onHistory: () => void
   onShift: () => void
   onProfile: () => void
   products: Product[]
@@ -45,7 +44,6 @@ export function TransactionPage({
   onProduct,
   onTransaction,
   onPaidTransactions,
-  onHistory,
   onShift,
   onProfile,
   products,
@@ -54,6 +52,8 @@ export function TransactionPage({
 }: TransactionPageProps) {
   const [step, setStep] = useState<Step>('select')
   const [selectedCategory, setSelectedCategory] = useState('Semua')
+  const [searchInput, setSearchInput] = useState('')
+  const [searchQuery, setSearchQuery] = useState('')
   const [cart, setCart] = useState<CartItem[]>([])
   const [paymentMethod, setPaymentMethod] = useState('Cash')
   const [paidAmount, setPaidAmount] = useState('')
@@ -79,10 +79,11 @@ export function TransactionPage({
   const paid = Number(paidAmount || 0)
   const change = paymentMethod === 'Cash' ? Math.max(paid - grandTotal, 0) : 0
   const canFinish = paymentMethod !== 'Cash' || paid >= grandTotal
-  const filteredProducts =
-    selectedCategory === 'Semua'
-      ? products
-      : products.filter((product) => product.category === selectedCategory)
+  const normalizedQuery = searchQuery.trim().toLocaleLowerCase('id-ID')
+  const filteredProducts = products.filter((product) =>
+    (selectedCategory === 'Semua' || product.category === selectedCategory) &&
+    (!normalizedQuery || `${product.name} ${product.category}`.toLocaleLowerCase('id-ID').includes(normalizedQuery)),
+  )
 
   function addProduct(product: Product) {
     setCart((currentCart) => {
@@ -117,6 +118,8 @@ export function TransactionPage({
   function resetTransaction() {
     setStep('select')
     setSelectedCategory('Semua')
+    setSearchInput('')
+    setSearchQuery('')
     setCart([])
     setPaymentMethod('Cash')
     setPaidAmount('')
@@ -184,15 +187,6 @@ export function TransactionPage({
           eyebrow="Transaksi"
           title="Buat transaksi baru"
           description="Pilih product, review pesanan, proses pembayaran, lalu selesaikan transaksi."
-          actions={(
-            <>
-              <Button className="transaction-history-button" type="button" onClick={onHistory}>
-                <History aria-hidden="true" />
-                Transaksi lunas
-              </Button>
-              <Button type="button" onClick={resetTransaction}><RotateCcw aria-hidden="true" />Reset</Button>
-            </>
-          )}
         />
 
         {step === 'select' && (
@@ -204,6 +198,30 @@ export function TransactionPage({
                   <h2>Pilih product</h2>
                 </div>
               </div>
+
+              <form
+                role="search"
+                aria-label="Cari produk transaksi"
+                className="mb-4 flex flex-wrap gap-2"
+                onSubmit={(event) => { event.preventDefault(); setSearchQuery(searchInput) }}
+              >
+                <Input
+                  className="min-w-0 flex-1 basis-48"
+                  type="search"
+                  aria-label="Nama atau kategori produk"
+                  placeholder="Cari nama atau kategori produk..."
+                  value={searchInput}
+                  onChange={(event) => {
+                    setSearchInput(event.target.value)
+                    if (!event.target.value) setSearchQuery('')
+                  }}
+                />
+                <Button variant="primary" type="submit"><Search aria-hidden="true" /> Cari</Button>
+                {(searchInput || searchQuery) && (
+                  <Button onClick={() => { setSearchInput(''); setSearchQuery('') }}>Hapus pencarian</Button>
+                )}
+              </form>
+              {normalizedQuery && <p className="mb-3 text-sm text-slate-500" role="status">{filteredProducts.length} produk ditemukan untuk “{searchQuery.trim()}”.</p>}
 
               <div className="category-list mb-4 flex flex-wrap gap-2 [&_.selected]:bg-slate-950 [&_.selected]:text-white">
                 {categories.map((category) => (
@@ -222,6 +240,8 @@ export function TransactionPage({
               <div className="product-catalog grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                 {products.length === 0 ? (
                   <div className="empty-order empty-state">Belum ada product. Input product manual dulu di halaman Product.</div>
+                ) : filteredProducts.length === 0 ? (
+                  <div className="empty-state sm:col-span-2 xl:col-span-3">Produk tidak ditemukan. Coba kata kunci lain atau pilih kategori Semua.</div>
                 ) : filteredProducts.map((product) => (
                   <Button
                     className="catalog-item grid min-h-52 content-start justify-items-start gap-2 rounded-lg border border-slate-200 bg-white p-3 text-left hover:border-teal-300 [&_img]:h-28 [&_img]:w-full [&_img]:rounded-lg [&_img]:object-cover [&_span]:text-sm [&_span]:text-slate-500 [&_b]:text-teal-700"

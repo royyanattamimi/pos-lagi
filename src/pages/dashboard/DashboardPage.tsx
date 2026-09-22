@@ -146,7 +146,6 @@ export function DashboardPage({
         onDashboard={() => setActivePage('dashboard')}
         onProduct={() => setActivePage('product')}
         onTransaction={openCheckout} onPaidTransactions={openTransactions}
-        onHistory={openTransactions}
         onShift={() => setActivePage('shift')}
         onProfile={() => setActivePage('profile')}
         products={products}
@@ -243,12 +242,7 @@ export function DashboardPage({
       />
 
       <section className="dashboard-content content-shell">
-        <DashboardHeader
-          products={products}
-          transactions={transactions}
-          onOpenProduct={() => setActivePage('product')}
-          onOpenTransaction={setSelectedTransaction}
-        />
+        <DashboardHeader />
 
         <PageHeader
           eyebrow="Dashboard"
