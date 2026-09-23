@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Minus, Plus, ArrowLeft, ArrowRight, Check, Search } from 'lucide-react'
+import { Minus, Plus, ArrowLeft, ArrowRight, Check, Search, ShoppingBag, Banknote, QrCode, CreditCard } from 'lucide-react'
 import { ProductImage } from '../../component/product/ProductImage'
 import { Sidebar } from '../../component/sidebar/Sidebar'
 import { PageHeader } from '../../component/header/PageHeader'
@@ -21,7 +21,7 @@ type TransactionPageProps = {
   onCompleteTransaction: (transaction: TransactionRecord) => void
 }
 
-type Step = 'select' | 'review' | 'payment' | 'finish'
+type Step = 'select' | 'payment' | 'finish'
 
 type CartItem = {
   note?: string
@@ -78,7 +78,7 @@ export function TransactionPage({
   const grandTotal = subtotal
   const paid = Number(paidAmount || 0)
   const change = paymentMethod === 'Cash' ? Math.max(paid - grandTotal, 0) : 0
-  const canFinish = paymentMethod !== 'Cash' || paid >= grandTotal
+  const canFinish = cartItems.length > 0 && (paymentMethod !== 'Cash' || paid >= grandTotal)
   const normalizedQuery = searchQuery.trim().toLocaleLowerCase('id-ID')
   const filteredProducts = products.filter((product) =>
     (selectedCategory === 'Semua' || product.category === selectedCategory) &&
@@ -127,6 +127,8 @@ export function TransactionPage({
   }
 
   function finishPayment() {
+    if (!canFinish) return
+
     const items: TransactionItem[] = cartItems.map((item) => ({
       productId: item.productId,
       name: item.product.name,
@@ -172,7 +174,7 @@ export function TransactionPage({
   }
 
   return (
-    <main className={`transaction-page app-shell ${step === 'select' ? 'transaction-select-page' : ''} ${step === 'review' ? 'transaction-review-page' : ''}`}>
+    <main className="transaction-page app-shell">
       <Sidebar
         activePage="transaction"
         onDashboard={onDashboard}
@@ -185,22 +187,35 @@ export function TransactionPage({
       <section className="transaction-content content-shell">
         <PageHeader
           eyebrow="Transaksi"
-          title="Buat transaksi baru"
-          description="Pilih product, review pesanan, proses pembayaran, lalu selesaikan transaksi."
-          actions={step !== 'select' ? (
-            <Button onClick={() => setStep(step === 'payment' ? 'review' : 'select')}>
+          title={step === 'select' ? 'Pilih produk' : 'Ringkasan & pembayaran'}
+          description={step === 'select' ? 'Tambahkan produk, lalu lanjutkan untuk memeriksa pesanan dan membayar.' : 'Periksa produk, jumlah, dan total pesanan sebelum menyelesaikan pembayaran.'}
+          actions={step === 'payment' ? (
+            <Button onClick={() => { setStep('select'); window.scrollTo(0, 0) }}>
               <ArrowLeft aria-hidden="true" /> Kembali
             </Button>
           ) : undefined}
+
         />
 
-        {step === 'select' && (
-          <section className="transaction-grid transaction-layout">
-            <article className="transaction-panel surface-panel">
+        <ol className="transaction-progress" aria-label="Tahapan transaksi">
+          <li aria-current={step === 'select' ? 'step' : undefined} data-complete={step === 'payment'}>
+            <span className="progress-number">{step === 'payment' ? <Check aria-hidden="true" size={16} /> : '1'}</span>
+            <span>Pilih produk</span>
+          </li>
+          <li aria-current={step === 'payment' ? 'step' : undefined}>
+            <span className="progress-number">2</span>
+            <span>Ringkasan & pembayaran</span>
+          </li>
+        </ol>
+
+        <div className={`transaction-layout ${step === 'select' ? 'transaction-select-layout' : ''}`}>
+          {step === 'select' && (
+            <>
+            <article className="transaction-panel catalog-panel surface-panel">
               <div className="transaction-panel-header mb-4 flex items-start justify-between gap-3 border-b border-slate-100 pb-4 [&_p]:mb-1 [&_p]:text-xs [&_p]:font-black [&_p]:uppercase [&_p]:text-teal-700 [&_h2]:m-0 [&_h2]:text-xl [&_h2]:font-black">
                 <div>
-                  <p>Product</p>
-                  <h2>Pilih product</h2>
+                  <p>Katalog produk</p>
+                  <h2>Pilih produk</h2>
                 </div>
               </div>
 
@@ -252,84 +267,70 @@ export function TransactionPage({
                     className="catalog-item grid min-h-52 content-start justify-items-start gap-2 rounded-lg border border-slate-200 bg-white p-3 text-left hover:border-teal-300 [&_img]:h-28 [&_img]:w-full [&_img]:rounded-lg [&_img]:object-cover [&_span]:text-sm [&_span]:text-slate-500 [&_b]:text-teal-700"
                     type="button"
                     key={product.id}
+                    data-selected={cart.some((item) => item.productId === product.id)}
+                    aria-label={`Tambah ${product.name} ke pesanan`}
                     onClick={() => addProduct(product)}
                   >
                     <ProductImage src={product.image} name={product.name} category={product.category} />
                     <strong>{product.name}</strong>
                     <span>{product.category}</span>
                     <b>{formatCurrency(product.price)}</b>
+                    <span className="catalog-add"><Plus size={14} aria-hidden="true" /> {cart.find((item) => item.productId === product.id)?.quantity ? `${cart.find((item) => item.productId === product.id)?.quantity} di pesanan` : 'Tambah'}</span>
                   </Button>
                 ))}
               </div>
             </article>
-
-            <aside aria-label="Keranjang pesanan" className="transaction-panel order-panel surface-panel">
-              <div className="transaction-panel-header mb-4 flex items-start justify-between gap-3 border-b border-slate-100 pb-4 [&_p]:mb-1 [&_p]:text-xs [&_p]:font-black [&_p]:uppercase [&_p]:text-teal-700 [&_h2]:m-0 [&_h2]:text-xl [&_h2]:font-black">
-                <div>
-                  <h2>Pesanan</h2>
-                </div>
+            <aside className="transaction-panel order-panel surface-panel" aria-label="Pesanan dipilih">
+              <div className="transaction-panel-header mb-4 border-b border-slate-100 pb-4">
+                <h2 className="flex items-center gap-2 text-xl font-semibold"><ShoppingBag size={20} aria-hidden="true" /> Pesanan</h2>
               </div>
-
               {cartItems.length === 0 ? (
-                <div className="empty-order empty-state">Belum ada product dipilih.</div>
+                <div className="empty-state order-empty"><ShoppingBag size={32} aria-hidden="true" /><strong>Pesanan masih kosong</strong><span>Pilih produk di katalog untuk mulai membuat pesanan.</span></div>
               ) : (
                 <div className="mini-cart grid gap-3">
                   {cartItems.map((item) => (
-                    <div className="mini-cart-row grid gap-2 rounded-lg border border-slate-100 p-3" key={item.productId}>
-                      <div className="mini-cart-info grid gap-1 [&_span]:text-sm [&_span]:text-slate-500">
+                    <div className="mini-cart-row grid gap-3 rounded-lg border border-slate-200 p-3" key={item.productId}>
+                      <div>
                         <strong>{item.product.name}</strong>
-                        <span>{formatCurrency(item.product.price)} per item</span>
+                        <p className="mt-1 text-sm text-slate-500">{formatCurrency(item.product.price)} per item</p>
                       </div>
-                      <div className="mini-cart-control grid grid-cols-[36px_1fr_36px] gap-2">
-                        <Button type="button" aria-label={`Kurangi ${item.product.name}`} title={`Kurangi ${item.product.name}`} onClick={() => updateQuantity(item.productId, item.quantity - 1)}>
-                          <Minus aria-hidden="true" />
-                        </Button>
-                        <Input
-                          min="1"
-                          type="number"
-                          value={item.quantity}
-                          onChange={(event) => updateQuantity(item.productId, Number(event.target.value))}
-                          aria-label={`Jumlah ${item.product.name}`}
-                        />
-                        <Button type="button" aria-label={`Tambah ${item.product.name}`} title={`Tambah ${item.product.name}`} onClick={() => updateQuantity(item.productId, item.quantity + 1)}>
-                          <Plus aria-hidden="true" />
-                        </Button>
+                      <div className="mini-cart-control">
+                        <Button aria-label={`Kurangi ${item.product.name}`} onClick={() => updateQuantity(item.productId, item.quantity - 1)}><Minus aria-hidden="true" /></Button>
+                        <Input type="number" min="1" value={item.quantity} aria-label={`Jumlah ${item.product.name}`} onChange={(event) => updateQuantity(item.productId, Number(event.target.value))} />
+                        <Button aria-label={`Tambah ${item.product.name}`} onClick={() => updateQuantity(item.productId, item.quantity + 1)}><Plus aria-hidden="true" /></Button>
                       </div>
                       <ItemNote name={item.product.name} value={item.note ?? ''} onChange={(note) => updateNote(item.productId, note)} />
-                      <b>{formatCurrency(item.total)}</b>
+                      <strong>{formatCurrency(item.total)}</strong>
                     </div>
                   ))}
                 </div>
               )}
-
-              <div className="summary-box my-4 grid gap-2 rounded-lg bg-slate-50 p-4 [&_span]:flex [&_span]:items-center [&_span]:justify-between [&_strong]:text-slate-950">
-                <span>Subtotal <strong>{formatCurrency(subtotal)}</strong></span>
+              <div className="selection-footer mt-6 grid gap-4 border-t border-slate-200 pt-5">
+                <div role="status" aria-live="polite">
+                  <p className="text-sm text-slate-500">{cartItems.reduce((total, item) => total + item.quantity, 0)} item dipilih</p>
+                  <strong className="text-xl text-slate-950">{formatCurrency(grandTotal)}</strong>
+                </div>
+                <Button variant="primary" size="large" disabled={cartItems.length === 0} onClick={() => { setStep('payment'); window.scrollTo(0, 0) }}>
+                  Lanjut ke pembayaran <ArrowRight aria-hidden="true" />
+                </Button>
               </div>
-
-              <Button
-                className="primary-action w-full"
-                variant="primary"
-                type="button"
-                disabled={cartItems.length === 0}
-                onClick={() => setStep('review')}
-              >
-                Review Pesanan <ArrowRight aria-hidden="true" />
-              </Button>
             </aside>
-          </section>
-        )}
-
-        {step === 'review' && (
-          <section className="review-layout transaction-layout">
+            </>
+          )}
+          {step === 'payment' && (
+            <>
             <article className="transaction-panel review-items-panel surface-panel">
               <div className="transaction-panel-header mb-4 flex items-start justify-between gap-3 border-b border-slate-100 pb-4 [&_p]:mb-1 [&_p]:text-xs [&_p]:font-black [&_p]:uppercase [&_p]:text-teal-700 [&_h2]:m-0 [&_h2]:text-xl [&_h2]:font-black">
                 <div>
-                  <p>Review Pesanan</p>
-                  <h2>Cek product sebelum pembayaran</h2>
+                  <p>Detail pesanan</p>
+                  <h2>Pesanan & ringkasan total</h2>
                 </div>
                 <strong className="review-item-count rounded-lg bg-teal-50 px-3 py-2 text-sm text-teal-800">{cartItems.length} product</strong>
               </div>
 
+              {cartItems.length === 0 && (
+                <div className="empty-state">Pesanan kosong. Klik Kembali untuk memilih produk.</div>
+              )}
               <div className="cart-table grid gap-3">
                 {cartItems.map((item) => (
                   <div className="cart-table-row grid gap-3 rounded-lg border border-slate-100 p-3 md:grid-cols-[1fr_120px_120px] md:items-center" key={item.productId}>
@@ -355,41 +356,20 @@ export function TransactionPage({
                   </div>
                 ))}
               </div>
-            </article>
-
-            <aside className="transaction-panel review-summary-panel surface-panel">
-              <div className="transaction-panel-header mb-4 flex items-start justify-between gap-3 border-b border-slate-100 pb-4 [&_p]:mb-1 [&_p]:text-xs [&_p]:font-black [&_p]:uppercase [&_p]:text-teal-700 [&_h2]:m-0 [&_h2]:text-xl [&_h2]:font-black">
-                <div>
-                  <p>Ringkasan</p>
-                  <h2>Total pesanan</h2>
-                </div>
-              </div>
-
+              <h3 className="mb-3 mt-6 border-t border-slate-200 pt-5 text-base font-semibold">Ringkasan total</h3>
               <div className="review-summary-list grid gap-3 rounded-lg bg-slate-50 p-4 [&_span]:flex [&_span]:justify-between [&_strong]:text-slate-950">
                 <span>Jumlah Item <strong>{cartItems.reduce((total, item) => total + item.quantity, 0)}</strong></span>
                 <span>Subtotal <strong>{formatCurrency(subtotal)}</strong></span>
                 <span>Total <strong>{formatCurrency(grandTotal)}</strong></span>
               </div>
 
-              <div className="transaction-actions review-actions mt-4 flex gap-2">
-                <Button className="primary-action checkout-action" variant="primary" size="large" type="button" onClick={() => setStep('payment')}>
-                  <span>Lanjut ke pembayaran</span> <ArrowRight aria-hidden="true" />
-                </Button>
+            </article>
+            <section className="transaction-panel payment-panel surface-panel">
+              <div className="transaction-panel-header mb-4 border-b border-slate-100 pb-4">
+                <p className="mb-1 text-xs font-black uppercase text-teal-700">Pembayaran</p>
+                <h2 className="m-0 text-xl font-black">Metode & nominal pembayaran</h2>
               </div>
-            </aside>
-          </section>
-        )}
-
-        {step === 'payment' && (
-          <section className="payment-layout transaction-layout">
-            <article className="transaction-panel payment-panel surface-panel">
-            <div className="transaction-panel-header mb-4 flex items-start justify-between gap-3 border-b border-slate-100 pb-4 [&_p]:mb-1 [&_p]:text-xs [&_p]:font-black [&_p]:uppercase [&_p]:text-teal-700 [&_h2]:m-0 [&_h2]:text-xl [&_h2]:font-black">
-              <div>
-                <p>Pembayaran</p>
-                <h2>Pilih metode pembayaran</h2>
-              </div>
-            </div>
-
+              <h3 className="mb-3 text-sm font-semibold">Metode pembayaran</h3>
             <div className="payment-methods mb-4 flex flex-wrap gap-2 [&_.selected]:bg-slate-950 [&_.selected]:text-white">
               {['Cash', 'QRIS', 'Debit'].map((method) => (
                 <Button
@@ -399,7 +379,8 @@ export function TransactionPage({
                   key={method}
                   onClick={() => setPaymentMethod(method)}
                 >
-                  {method}
+                  {method === 'Cash' ? <Banknote aria-hidden="true" /> : method === 'QRIS' ? <QrCode aria-hidden="true" /> : <CreditCard aria-hidden="true" />}
+                  {method === 'Cash' ? 'Tunai' : method}
                 </Button>
               ))}
             </div>
@@ -446,15 +427,7 @@ export function TransactionPage({
               </p>
             </div>
 
-            </article>
-            <aside className="transaction-panel payment-summary-panel surface-panel">
-              <div className="transaction-panel-header mb-4 border-b border-slate-100 pb-4">
-                <p className="mb-1 text-xs font-black uppercase text-teal-700">Ringkasan</p>
-                <h2 className="m-0 text-xl font-black">Total pembayaran</h2>
-              </div>
-
             <div className="summary-box my-4 grid gap-2 rounded-lg bg-slate-50 p-4 [&_span]:flex [&_span]:items-center [&_span]:justify-between [&_strong]:text-slate-950">
-              <span>Total Tagihan <strong>{formatCurrency(grandTotal)}</strong></span>
               <span>Nominal Dibayar <strong>{formatCurrency(paymentMethod === 'Cash' ? paid : grandTotal)}</strong></span>
               <span>Kembalian <strong>{formatCurrency(change)}</strong></span>
             </div>
@@ -471,9 +444,10 @@ export function TransactionPage({
                 <Check aria-hidden="true" /> Selesaikan transaksi
               </Button>
             </div>
-            </aside>
-          </section>
-        )}
+            </section>
+            </>
+          )}
+        </div>
 
       </section>
     </main>

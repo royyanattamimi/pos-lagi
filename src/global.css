@@ -31,20 +31,36 @@
 .transaction-page .mini-cart-control input::-webkit-outer-spin-button { appearance: none; margin: 0; }
 .transaction-page .catalog-item {
   display: grid;
-  grid-template-rows: 80px auto auto auto;
+  grid-template-rows: auto auto auto auto auto;
   width: 100%;
   min-width: 0;
   min-height: 0;
-  padding: 8px;
+  padding: 10px;
+  border-radius: 12px;
   align-items: start;
   justify-items: stretch;
-  gap: 4px;
+  gap: 8px;
   text-align: left;
 }
-.transaction-page .catalog-item strong { line-height: 1.4; }
-.transaction-page .catalog-item img { height: 80px; }
-.transaction-page .catalog-item span { font-size: 11px; }
-.transaction-page .product-catalog { grid-template-columns: repeat(auto-fill, minmax(min(100%, 140px), 1fr)); align-items: start; }
+.transaction-page .catalog-item strong { font-size: 14px; line-height: 1.4; overflow-wrap: anywhere; }
+.transaction-page .catalog-item img { width: 100%; height: auto; max-height: 120px; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 8px; }
+.transaction-page .catalog-item span { font-size: 12px; }
+.transaction-page .catalog-item b { font-size: 14px; overflow-wrap: anywhere; }
+.transaction-page .catalog-panel { container-type: inline-size; container-name: catalog; }
+.transaction-page .product-catalog { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: 12px; }
+@container catalog (max-width: 259px) {
+  .transaction-page .product-catalog { grid-template-columns: minmax(0, 1fr); }
+}
+@container catalog (min-width: 420px) {
+  .transaction-page .product-catalog { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@container catalog (min-width: 560px) {
+  .transaction-page .product-catalog { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@container catalog (min-width: 720px) {
+  .transaction-page .product-catalog { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+}
+.transaction-page .product-catalog > .empty-state { grid-column: 1 / -1; }
 .transaction-page .primary-action,
 .transaction-page .transaction-actions button,
 .transaction-page .payment-methods button,
@@ -71,11 +87,13 @@
   grid-template-columns: minmax(0, 1fr);
   gap: 16px;
   min-width: 0;
+  align-content: start;
 }
 .transaction-page .transaction-layout > .transaction-panel {
   padding: 20px;
   border: 1px solid #e2e8f0;
-  border-radius: 8px;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px #0f172a04;
 }
 .transaction-page .transaction-panel-header { flex-wrap: wrap; }
 .transaction-page .review-product-cell > div {
@@ -105,15 +123,44 @@
     padding: 24px;
   }
   .transaction-page .transaction-layout {
-    flex: 1;
-    grid-template-columns: minmax(0, 1.6fr) minmax(300px, 1fr);
-    align-items: stretch;
+    align-items: start;
     gap: 24px;
   }
   .transaction-page .transaction-layout > .transaction-panel { padding: 24px; }
+  .transaction-page .transaction-select-layout {
+    grid-template-columns: minmax(0, 1fr) 280px;
+    gap: 20px;
+  }
+  .transaction-page .transaction-select-layout > .order-panel { padding: 16px; }
+}
+.transaction-progress { display: flex; flex-wrap: wrap; gap: 12px 24px; margin: 0 0 24px; padding: 16px 20px; border: 1px solid #e2e8f0; border-radius: 12px; background: white; }
+.transaction-progress li { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; color: #64748b; }
+.transaction-progress .progress-number { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: #f1f5f9; }
+.transaction-progress li[aria-current], .transaction-progress li[data-complete="true"] { color: #047857; }
+.transaction-progress li[aria-current] .progress-number { background: #047857; color: white; }
+.transaction-progress li[data-complete="true"] .progress-number { background: #d1fae5; }
+.transaction-page .catalog-item:hover { border-color: #10b981; box-shadow: 0 4px 12px #04785712; }
+.transaction-page .catalog-item[data-selected="true"] { border-color: #10b981; background: #f0fdf4; }
+.transaction-page .catalog-item .catalog-add { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 7px; border-radius: 6px; background: #ecfdf5; color: #047857; font-size: 12px; }
+.transaction-page .category-list button.selected, .transaction-page .payment-methods button.selected { background: #ecfdf5; color: #047857; border-color: #10b981; box-shadow: inset 0 0 0 1px #10b981; }
+.transaction-page .order-empty { display: grid; justify-items: center; gap: 12px; padding: 36px 20px; text-align: center; font-weight: 400; background: #f8fafc; }
+.transaction-page .order-empty > svg { color: #94a3b8; }
+.transaction-page .order-empty strong { color: #334155; }
+.transaction-page .mini-cart-row { background: #fafcfc; border-radius: 12px; }
+.transaction-page .selection-footer > button { min-height: 48px; width: 100%; }
+.transaction-page .selection-footer > div { display: flex; align-items: center; flex-wrap: wrap; justify-content: space-between; gap: 8px; }
+.transaction-page .review-summary-list { margin-top: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; }
+.transaction-page .review-summary-list > span:last-child { border-top: 1px solid #e2e8f0; padding-top: 16px; font-size: 20px; font-weight: 700; }
+.transaction-page .review-summary-list > span:last-child strong { color: #047857; }
+.transaction-page .payment-methods > button { flex: 1 1 120px; min-height: 52px; border-radius: 10px; }
+.transaction-page .paid-input input { min-height: 52px; border-radius: 10px; }
+.transaction-page .checkout-action { border-radius: 10px; }
+@media (min-width: 1024px) {
+  .transaction-page .order-panel { position: sticky; top: 24px; }
+  .transaction-page .order-panel .mini-cart { max-height: 52dvh; overflow-y: auto; padding-right: 4px; }
 }
 @media (min-width: 1440px) {
-  .transaction-page .cart-table-row { grid-template-columns: minmax(0, 1fr) 140px 110px; }
+  .transaction-page .cart-table-row { grid-template-columns: minmax(0, 1fr) 160px 140px; }
 }
 
 @layer components {
