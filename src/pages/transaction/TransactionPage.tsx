@@ -287,10 +287,10 @@ export function TransactionPage({
               {cartItems.length === 0 ? (
                 <div className="empty-state order-empty"><ShoppingBag size={32} aria-hidden="true" /><strong>Pesanan masih kosong</strong><span>Pilih produk di katalog untuk mulai membuat pesanan.</span></div>
               ) : (
-                <div className="mini-cart grid gap-3">
+                <div className="mini-cart grid gap-3" role="region" aria-label="Daftar pesanan dipilih" tabIndex={0}>
                   {cartItems.map((item) => (
                     <div className="mini-cart-row grid gap-3 rounded-lg border border-slate-200 p-3" key={item.productId}>
-                      <div>
+                      <div className="mini-cart-heading">
                         <strong>{item.product.name}</strong>
                         <p className="mt-1 text-sm text-slate-500">{formatCurrency(item.product.price)} per item</p>
                       </div>
@@ -299,8 +299,10 @@ export function TransactionPage({
                         <Input type="number" min="1" value={item.quantity} aria-label={`Jumlah ${item.product.name}`} onChange={(event) => updateQuantity(item.productId, Number(event.target.value))} />
                         <Button aria-label={`Tambah ${item.product.name}`} onClick={() => updateQuantity(item.productId, item.quantity + 1)}><Plus aria-hidden="true" /></Button>
                       </div>
-                      <ItemNote name={item.product.name} value={item.note ?? ''} onChange={(note) => updateNote(item.productId, note)} />
-                      <strong>{formatCurrency(item.total)}</strong>
+                      <strong className="mini-cart-total">{formatCurrency(item.total)}</strong>
+                      <div className="mini-cart-note">
+                        <ItemNote name={item.product.name} value={item.note ?? ''} onChange={(note) => updateNote(item.productId, note)} />
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -331,14 +333,13 @@ export function TransactionPage({
               {cartItems.length === 0 && (
                 <div className="empty-state">Pesanan kosong. Klik Kembali untuk memilih produk.</div>
               )}
-              <div className="cart-table grid gap-3">
+              <div className="cart-table grid gap-3" role="region" aria-label="Daftar detail pesanan" tabIndex={0}>
                 {cartItems.map((item) => (
                   <div className="cart-table-row grid gap-3 rounded-lg border border-slate-100 p-3 md:grid-cols-[1fr_120px_120px] md:items-center" key={item.productId}>
                     <div className="review-product-cell flex items-center gap-3 [&_img]:h-14 [&_img]:w-16 [&_img]:rounded-lg [&_img]:object-cover [&_span]:block [&_span]:text-sm [&_span]:text-slate-500 [&_small]:text-xs [&_small]:text-slate-500">
                       <ProductImage src={item.product.image} name={item.product.name} category={item.product.category} />
                       <div>
                         <strong>{item.product.name}</strong>
-                        <span>{item.product.category}</span>
                         <small>{formatCurrency(item.product.price)} per item</small>
                         <ItemNote name={item.product.name} value={item.note ?? ''} onChange={(note) => updateNote(item.productId, note)} />
                       </div>
