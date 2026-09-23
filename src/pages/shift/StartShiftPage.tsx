@@ -20,21 +20,33 @@ function formatRupiah(value: string) {
 export function StartShiftPage({ onStartShift, onBackToLogin }: StartShiftPageProps) {
   const [cashierName, setCashierName] = useState('')
   const [openingCash, setOpeningCash] = useState('')
+  const [openingCashError, setOpeningCashError] = useState('')
   const [note, setNote] = useState('')
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
+    const amount = Number(openingCash)
+    if (!openingCash || !Number.isSafeInteger(amount) || amount < 0) {
+      setOpeningCashError(!openingCash
+        ? 'Modal awal belum diisi. Masukkan nominal kas awal sebelum masuk ke kasir.'
+        : 'Nominal kas awal tidak valid. Masukkan nominal yang lebih kecil.')
+      const input = event.currentTarget.elements.namedItem('openingCash')
+      if (input instanceof HTMLInputElement) input.focus()
+      return
+    }
+
     onStartShift({
       cashierName: cashierName.trim(),
       shiftTime: '',
-      openingCash: Number(openingCash || 0),
+      openingCash: amount,
       note: note.trim(),
     })
   }
 
   function handleOpeningCashChange(value: string) {
     setOpeningCash(value.replace(/\D/g, ''))
+    setOpeningCashError('')
   }
 
   return (
@@ -66,13 +78,23 @@ export function StartShiftPage({ onStartShift, onBackToLogin }: StartShiftPagePr
           </label>
 
           <label>
-            Kas Awal
+            Kas Awal (wajib diisi)
             <Input
+              name="openingCash"
               inputMode="numeric"
+              aria-required="true"
+              aria-invalid={Boolean(openingCashError)}
+              aria-describedby={openingCashError ? 'opening-cash-error' : undefined}
+              className={openingCashError ? 'border-red-500 focus:border-red-500 focus:ring-red-100' : ''}
               value={formatRupiah(openingCash)}
               onChange={(event) => handleOpeningCashChange(event.target.value)}
               placeholder="Contoh: Rp 500.000"
             />
+            {openingCashError && (
+              <span id="opening-cash-error" role="alert" className="text-sm font-medium text-red-600">
+                {openingCashError}
+              </span>
+            )}
           </label>
 
           <label>
