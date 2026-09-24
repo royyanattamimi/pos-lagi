@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ArrowLeft, Plus } from 'lucide-react'
 import { Button } from '../../../component/button/Button'
 import { PageHeader } from '../../../component/header/PageHeader'
@@ -32,6 +32,10 @@ function formatCurrency(value: number) {
   return currency.format(value)
 }
 
+function localDateKey(date: Date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+}
+
 export function TransactionHistoryPage({
   transactions,
   title = 'Transaksi lunas',
@@ -48,7 +52,33 @@ export function TransactionHistoryPage({
 }: TransactionHistoryPageProps) {
   const [query, setQuery] = useState('')
   const [paymentFilter, setPaymentFilter] = useState('Semua')
-  const [dateFilter, setDateFilter] = useState(initialDateFilter)
+  const [today, setToday] = useState(() => localDateKey(new Date()))
+  const [selectedDate, setSelectedDate] = useState(() =>
+    initialDateFilter === localDateKey(new Date()) ? '' : initialDateFilter,
+  )
+  const dateFilter = selectedDate || today
+  const dateLabel = new Date(`${dateFilter}T00:00:00`).toLocaleDateString('id-ID', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+  })
+
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout>
+    const updateToday = () => {
+      const now = new Date()
+      setToday(localDateKey(now))
+      clearTimeout(timer)
+      const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1)
+      timer = setTimeout(updateToday, midnight.getTime() - now.getTime())
+    }
+    updateToday()
+    window.addEventListener('focus', updateToday)
+    document.addEventListener('visibilitychange', updateToday)
+    return () => {
+      clearTimeout(timer)
+      window.removeEventListener('focus', updateToday)
+      document.removeEventListener('visibilitychange', updateToday)
+    }
+  }, [])
 
   const paymentMethods = useMemo(
     () => ['Semua', ...Array.from(new Set(transactions.map((transaction) => transaction.paymentMethod)))],
@@ -64,8 +94,7 @@ export function TransactionHistoryPage({
         .some((value) => value.toLowerCase().includes(normalizedQuery))
       const matchesPayment = paymentFilter === 'Semua' || transaction.paymentMethod === paymentFilter
       const transactionDate = new Date(transaction.createdAt)
-      const localDateKey = `${transactionDate.getFullYear()}-${String(transactionDate.getMonth() + 1).padStart(2, '0')}-${String(transactionDate.getDate()).padStart(2, '0')}`
-      const matchesDate = !dateFilter || localDateKey === dateFilter
+      const matchesDate = localDateKey(transactionDate) === dateFilter
 
       return matchesQuery && matchesPayment && matchesDate
     }).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
@@ -99,7 +128,7 @@ export function TransactionHistoryPage({
         <PageHeader
           eyebrow="Riwayat pembayaran"
           title={title}
-          description="Daftar transaksi yang sudah dibayar lunas beserta rincian pembayarannya."
+          description="Ringkasan transaksi lunas per hari. Tanggal hari ini mengikuti waktu perangkat secara otomatis."
           actions={(
             <>
             <Button type="button" onClick={onDashboard}>
@@ -118,6 +147,20 @@ export function TransactionHistoryPage({
             </>
           )}
         />
+
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <div aria-live="polite">
+            <h2 className="text-base font-bold text-slate-900">
+              {dateFilter === today ? 'Transaksi hari ini' : 'Transaksi harian'}
+            </h2>
+            <p className="text-sm text-slate-500">{dateLabel}</p>
+          </div>
+          {selectedDate && (
+            <Button type="button" size="small" onClick={() => setSelectedDate('')}>
+              Kembali ke hari ini
+            </Button>
+          )}
+        </div>
 
         <section className="transaction-history-stats mb-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4 [&_article]:rounded-lg [&_article]:border [&_article]:border-slate-200 [&_article]:bg-white [&_article]:p-4 [&_article]:shadow-lg [&_article]:shadow-slate-900/5 [&_span]:text-sm [&_span]:font-bold [&_span]:text-slate-500 [&_strong]:mt-1 [&_strong]:block [&_strong]:text-xl [&_strong]:font-black" aria-label="Ringkasan transaksi">
           <article>
@@ -157,7 +200,7 @@ export function TransactionHistoryPage({
             <Input
               type="date"
               value={dateFilter}
-              onChange={(event) => setDateFilter(event.target.value)}
+              onChange={(event) => setSelectedDate(event.target.value === today ? '' : event.target.value)}
               aria-label="Filter tanggal transaksi"
             />
           </div>
@@ -186,7 +229,7 @@ export function TransactionHistoryPage({
                     </Button>
                   </>
                 ) : (
-                  <span>Tidak ada transaksi yang sesuai dengan filter.</span>
+                  <span>Tidak ada transaksi pada tanggal ini yang sesuai dengan filter.</span>
                 )}
               </div>
             ) : filteredTransactions.map((transaction) => (
@@ -201,8 +244,7 @@ export function TransactionHistoryPage({
                   <small>{transaction.cashier}</small>
                 </span>
                 <span>
-                  <strong>{new Date(transaction.createdAt).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}</strong>
-                  <small>{new Date(transaction.createdAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</small>
+                  <strong>{new Date(transaction.createdAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</strong>
                 </span>
                 <span>{transaction.itemCount}</span>
                 <span>{transaction.paymentMethod}</span>
