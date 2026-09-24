@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react'
 import { DashboardPage } from './pages/dashboard/DashboardPage'
 import { ForgotPasswordPage } from './pages/login/ForgotPasswordPage'
 import { LoginPage } from './pages/login/LoginPage'
+import { ShiftReportPage } from './pages/shift/ShiftReportPage'
+import { snapshotShift } from './storage/shiftReport'
 import { StartShiftPage } from './pages/shift/StartShiftPage'
 import { supabase } from './lib/supabase'
 import {
@@ -28,6 +30,9 @@ function App() {
   const [currentShift, setCurrentShift] = useState<ShiftSession | null>(storedData.currentShift)
   const [shiftHistory, setShiftHistory] = useState<ShiftSession[]>(storedData.shiftHistory)
 
+  const [reportView, setReportView] = useState<'history' | 'closing' | null>(null)
+  const [reportShiftId, setReportShiftId] = useState('')
+
   useEffect(() => {
     if (!currentShift || currentShift.status !== 'Berjalan') return
     const activeShift = currentShift
@@ -36,11 +41,13 @@ function App() {
     function checkShift() {
       clearTimeout(timeout)
       const now = Date.now()
-      const endedShift = closeExpiredShift(activeShift, now)
+      const endedShift = snapshotShift(closeExpiredShift(activeShift, now), transactions)
       if (endedShift.status === 'Selesai') {
         setCurrentShift(endedShift)
-        setShiftHistory((history) => history.map((shift) => closeExpiredShift(shift, now)))
+        setShiftHistory((history) => history.map((shift) => snapshotShift(closeExpiredShift(shift, now), transactions)))
         setIsShiftStarted(false)
+        setReportShiftId(endedShift.id)
+        setReportView('history')
         return
       }
 
@@ -60,7 +67,7 @@ function App() {
       window.removeEventListener('pageshow', checkShift)
       document.removeEventListener('visibilitychange', checkShift)
     }
-  }, [currentShift])
+  }, [currentShift, transactions])
 
   useEffect(() => {
     if (!supabase) return
@@ -162,20 +169,26 @@ function App() {
     setIsShiftStarted(true)
   }
 
-  function handleEndShift() {
-    if (!currentShift || currentShift.status === 'Selesai') return
-
-    const endedShift: ShiftSession = {
-      ...currentShift,
-      endAt: new Date().toISOString(),
+  function handleSaveShiftReport(shift: ShiftSession, cash: number, note: string) {
+    const source = shiftHistory.find((entry) => entry.id === shift.id)
+    if (!source) throw new Error('Shift tidak ditemukan.')
+    const ended = snapshotShift({
+      ...source,
+      endAt: source.endAt ?? new Date(Math.min(Date.now(), getShiftDeadline(source))).toISOString(),
       status: 'Selesai',
+    }, transactions)
+    const updated: ShiftSession = {
+      ...ended,
+      report: { ...ended.report!, closingCash: cash, closingNote: note, savedAt: new Date().toISOString() },
     }
-
-    setCurrentShift(endedShift)
-    setShiftHistory((currentHistory) =>
-      currentHistory.map((shift) => (shift.id === endedShift.id ? endedShift : shift)),
-    )
-    setIsShiftStarted(false)
+    const nextHistory = shiftHistory.map((entry) => entry.id === updated.id ? updated : entry)
+    const nextCurrent = currentShift?.id === updated.id ? updated : currentShift
+    savePosData({ products, transactions, currentShift: nextCurrent, shiftHistory: nextHistory }, true)
+    setShiftHistory(nextHistory)
+    setCurrentShift(nextCurrent)
+    if (currentShift?.id === updated.id) setIsShiftStarted(false)
+    setReportShiftId(updated.id)
+    setReportView('history')
   }
 
   function handleAddProduct(data: ProductInput) {
@@ -225,8 +238,9 @@ function App() {
   }
 
   function handleCompleteTransaction(transaction: TransactionRecord) {
-    setTransactions((currentTransactions) => [transaction, ...currentTransactions])
-    createRemoteTransaction(transaction).catch((error) => {
+    const linkedTransaction = { ...transaction, shiftId: currentShift?.id }
+    setTransactions((currentTransactions) => [linkedTransaction, ...currentTransactions])
+    createRemoteTransaction(linkedTransaction).catch((error) => {
       console.error('Gagal menyimpan transaksi ke Supabase:', error.message)
       // Payment has already completed. Keep it locally even if remote storage fails.
     })
@@ -234,6 +248,18 @@ function App() {
 
   if (!isAuthReady) {
     return <main className="app-loading min-h-screen grid place-items-center bg-slate-100 text-slate-600 text-sm font-extrabold">Memuat sesi login...</main>
+  }
+
+  if (isLoggedIn && reportView) {
+    return <ShiftReportPage
+      key={`${reportView}-${reportShiftId}`}
+      shifts={shiftHistory}
+      transactions={transactions}
+      closingShift={reportView === 'closing' && currentShift?.status === 'Berjalan' ? currentShift : null}
+      initialShiftId={reportShiftId}
+      onBack={() => setReportView(null)}
+      onSave={handleSaveShiftReport}
+    />
   }
 
   if (isLoggedIn && isShiftStarted) {
@@ -248,7 +274,8 @@ function App() {
         onUpdateProduct={handleUpdateProduct}
         onDeleteProduct={handleDeleteProduct}
         onCompleteTransaction={handleCompleteTransaction}
-        onEndShift={handleEndShift}
+        onEndShift={() => { setReportShiftId(''); setReportView('closing') }}
+        onShiftReports={(shiftId?: string) => { setReportShiftId(shiftId ?? ''); setReportView('history') }}
         onLogout={handleLogout}
       />
       </ProfileProvider>
@@ -258,6 +285,7 @@ function App() {
   if (isLoggedIn) {
     return (
       <StartShiftPage
+        onShiftReports={() => { setReportShiftId(''); setReportView('history') }}
         onStartShift={handleStartShift}
         onBackToLogin={handleLogout}
       />

@@ -19,6 +19,7 @@ function loadModule(path, dependencies = {}, window = {}) {
 }
 
 const lifecycle = loadModule('../src/storage/shiftLifecycle.ts')
+const reports = loadModule('../src/storage/shiftReport.ts')
 const { closeExpiredShift, getShiftDeadline } = lifecycle
 const shift = {
   id: 'shift-1', cashierName: 'Kasir', shiftTime: 'Malam', openingCash: 100000,
@@ -59,7 +60,7 @@ test('month, leap day and year boundaries follow the local calendar', () => {
 test('loading persisted data reconciles current shift and history and can save the result', () => {
   const oldShift = { ...shift, startAt: '2020-01-01T12:00:00+07:00' }
   let stored = JSON.stringify({ currentShift: oldShift, shiftHistory: [oldShift], products: [], transactions: [] })
-  const storage = loadModule('../src/storage/posStorage.ts', { './shiftLifecycle': lifecycle }, {
+  const storage = loadModule('../src/storage/posStorage.ts', { './shiftLifecycle': lifecycle, './shiftReport': reports }, {
     localStorage: { getItem: () => stored, setItem: (_key, value) => { stored = value } },
   })
   const loaded = storage.loadPosData()
@@ -71,7 +72,7 @@ test('loading persisted data reconciles current shift and history and can save t
   assert.deepEqual(storage.loadPosData(), loaded)
 })
 
-const paymentStorage = loadModule('../src/storage/posStorage.ts', { './shiftLifecycle': lifecycle })
+const paymentStorage = loadModule('../src/storage/posStorage.ts', { './shiftLifecycle': lifecycle, './shiftReport': reports })
 const payment = {
   id: '#POS-local', createdAt: '2026-09-21T03:00:00Z', cashier: 'Kasir',
   items: [{ productId: 1, name: 'Kopi', price: 15000, quantity: 2, total: 30000 }],
@@ -89,7 +90,7 @@ test('an empty or stale server result preserves completed local payments without
 
 test('local payment survives reload and remains counted for the local sales day', () => {
   let stored
-  const storage = loadModule('../src/storage/posStorage.ts', { './shiftLifecycle': lifecycle }, {
+  const storage = loadModule('../src/storage/posStorage.ts', { './shiftLifecycle': lifecycle, './shiftReport': reports }, {
     localStorage: { getItem: () => stored, setItem: (_key, value) => { stored = value } },
   })
   storage.savePosData({ ...storage.emptyPosData, transactions: [payment] })

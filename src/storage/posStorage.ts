@@ -1,4 +1,5 @@
 import type { Product, ShiftSession, TransactionRecord } from '../types'
+import { snapshotShift } from './shiftReport'
 import { closeExpiredShift } from './shiftLifecycle'
 
 const STORAGE_KEY = 'pos-lagi:data:v1'
@@ -35,9 +36,9 @@ export function loadPosData(): PosStoredData {
           }))
         : [],
       transactions: Array.isArray(parsedData.transactions) ? parsedData.transactions : [],
-      currentShift: parsedData.currentShift ? closeExpiredShift(parsedData.currentShift, now) : null,
+      currentShift: parsedData.currentShift ? snapshotShift(closeExpiredShift(parsedData.currentShift, now), parsedData.transactions ?? []) : null,
       shiftHistory: Array.isArray(parsedData.shiftHistory)
-        ? parsedData.shiftHistory.map((shift) => closeExpiredShift(shift, now))
+        ? parsedData.shiftHistory.map((shift) => snapshotShift(closeExpiredShift(shift, now), parsedData.transactions ?? []))
         : [],
     }
   } catch {
@@ -45,10 +46,11 @@ export function loadPosData(): PosStoredData {
   }
 }
 
-export function savePosData(data: PosStoredData) {
+export function savePosData(data: PosStoredData, requireSuccess = false) {
   try {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
   } catch {
+    if (requireSuccess) throw new Error('Laporan belum tersimpan. Penyimpanan browser penuh atau tidak tersedia. Coba lagi setelah ruang penyimpanan tersedia.')
     // The app remains usable when storage is unavailable or full.
   }
 }

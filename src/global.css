@@ -490,3 +490,15 @@
   .thermal-receipt::after { display: none; }
   .thermal-item, .thermal-totals, .thermal-footer { break-inside: avoid; }
 }
+
+@media print {
+  body:has(.shift-report-page), body:has(.shift-report-page) #root {
+    margin: 0; padding: 0; min-width: 0; background: white;
+  }
+  .shift-report-page { padding: 0; min-height: 0; background: white; }
+  .shift-report-controls { display: none !important; }
+  .shift-report-paper { padding: 8mm; border: 0; border-radius: 0; box-shadow: none; color: black; }
+  .shift-report-paper tr, .shift-report-paper section, .shift-report-paper dl { break-inside: avoid; }
+  .shift-report-paper thead { display: table-header-group; }
+  .shift-report-paper .overflow-x-auto { overflow: visible; }
+}

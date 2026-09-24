@@ -23,6 +23,7 @@ type DashboardPageProps = {
   onUpdateProduct: (productId: number, product: ProductInput) => void
   onDeleteProduct: (productId: number) => void
   onCompleteTransaction: (transaction: TransactionRecord) => void
+  onShiftReports: (shiftId?: string) => void
   onEndShift: () => void
   onLogout: () => void
 }
@@ -50,6 +51,7 @@ export function DashboardPage({
   onUpdateProduct,
   onDeleteProduct,
   onCompleteTransaction,
+  onShiftReports,
   onEndShift,
   onLogout,
 }: DashboardPageProps) {
@@ -224,6 +226,7 @@ export function DashboardPage({
         currentShift={currentShift}
         shiftHistory={shiftHistory}
         transactions={transactions}
+        onShiftReports={onShiftReports}
         onEndShift={onEndShift}
       />
     )

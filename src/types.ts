@@ -23,6 +23,7 @@ export type TransactionItem = {
 }
 
 export type TransactionRecord = {
+  shiftId?: string
   id: string
   cashier: string
   createdAt: string
@@ -50,5 +51,13 @@ export type ShiftSession = ShiftInput & {
   id: string
   startAt: string
   endAt?: string
+  report?: ShiftReport
   status: 'Berjalan' | 'Selesai'
+}
+
+export type ShiftReport = {
+  transactions: TransactionRecord[]
+  closingCash: number | null
+  closingNote: string
+  savedAt: string
 }

@@ -1,4 +1,7 @@
 import { useEffect, useState } from 'react'
+import { ArrowLeft, ChevronRight } from 'lucide-react'
+import { buildDailyReports } from '../../storage/dailyReport'
+import { DailyReportDetail } from './DailyReportDetail'
 import { getMonthlyCash, getNextMonthStart } from '../../storage/monthlyCash'
 import { Sidebar } from '../../component/sidebar/Sidebar'
 import { PageHeader } from '../../component/header/PageHeader'
@@ -16,6 +19,7 @@ type ShiftPageProps = {
   currentShift: ShiftSession | null
   shiftHistory: ShiftSession[]
   transactions: TransactionRecord[]
+  onShiftReports: (shiftId?: string) => void
   onEndShift: () => void
 }
 
@@ -89,8 +93,12 @@ export function ShiftPage({
   currentShift,
   shiftHistory,
   transactions,
+  onShiftReports,
   onEndShift,
 }: ShiftPageProps) {
+  const [detailDate, setDetailDate] = useState('')
+  const dailyReports = buildDailyReports(shiftHistory, transactions)
+  const selectedReport = dailyReports.find((day) => day.date === detailDate)
   const [recapView, setRecapView] = useState<RecapView>('daily')
   const [selectedDate, setSelectedDate] = useState(getDateInputValue())
   const isShiftOpen = currentShift?.status === 'Berjalan'
@@ -146,6 +154,7 @@ export function ShiftPage({
     const finishedShifts = periodShifts.filter((shift) => shift.status === 'Selesai').length
 
     return {
+      periodKey,
       period: formatPeriod(firstShift?.startAt ?? periodTransactions[0].createdAt, recapView),
       start: recapView === 'daily' ? formatTime(firstShift?.startAt) : `${periodShifts.length} shift`,
       end: recapView === 'daily' ? formatTime(firstShift?.endAt) : `${finishedShifts} selesai`,
@@ -154,6 +163,19 @@ export function ShiftPage({
       status: periodShifts.some((shift) => shift.status === 'Berjalan') ? 'Berjalan' : 'Selesai',
     }
   })
+
+  if (selectedReport) {
+    return (
+      <main className="shift-report-page min-h-screen bg-slate-100 p-4 text-slate-900 md:p-8">
+        <div className="mx-auto max-w-5xl">
+          <div className="shift-report-controls mb-6">
+            <Button onClick={() => setDetailDate('')}><ArrowLeft /> Kembali ke rekap shift</Button>
+          </div>
+          <DailyReportDetail day={selectedReport} onSelectShift={onShiftReports} />
+        </div>
+      </main>
+    )
+  }
 
   return (
     <main className="shift-page app-shell">
@@ -172,9 +194,12 @@ export function ShiftPage({
           title="Start dan end shift"
           description="Pantau shift berjalan dan lihat rekap kasir per hari, bulan, dan tahun."
           actions={(
+            <div className="flex flex-wrap gap-2">
+            <Button onClick={() => onShiftReports()}>Laporan penutupan shift</Button>
             <Button variant="danger" type="button" onClick={onEndShift} disabled={!isShiftOpen}>
               {isShiftOpen ? 'End Shift' : 'Shift Selesai'}
             </Button>
+            </div>
           )}
         />
 
@@ -276,6 +301,7 @@ export function ShiftPage({
             </div>
           </div>
 
+          {recapView === 'daily' && <p className="mb-3 text-sm text-slate-500">Klik laporan tanggal untuk melihat rincian Cash, QRIS, Debit, dan transaksi pada hari tersebut.</p>}
           <div className="shift-recap-table grid gap-3">
             {activeRecaps.length === 0 ? (
               <div className="shift-recap-row grid gap-2 rounded-lg border border-slate-100 p-3 md:grid-cols-[1fr_120px_140px]">
@@ -284,18 +310,36 @@ export function ShiftPage({
                   <span>Start shift dulu agar data muncul.</span>
                 </div>
               </div>
-            ) : activeRecaps.map((recap) => (
-              <div className="shift-recap-row grid gap-2 rounded-lg border border-slate-100 p-3 md:grid-cols-[1fr_120px_140px]" key={`${recap.period}-${recap.start}`}>
-                <div>
-                  <strong>{recap.period}</strong>
-                  <span>Status: {recap.status}</span>
+            ) : activeRecaps.map((recap) => {
+              const content = (
+                <>
+                  <span>
+                    <strong className="block">{recap.period}</strong>
+                    <span className="block">Status: {recap.status}</span>
+                  </span>
+                  <span>Start: {recap.start}</span>
+                  <span>End: {recap.end}</span>
+                  <strong>{recap.sales}</strong>
+                  <span>Cash: {recap.cash}</span>
+                </>
+              )
+              return recapView === 'daily' ? (
+                <button
+                  type="button"
+                  className="shift-recap-row grid w-full cursor-pointer gap-2 rounded-lg border border-slate-200 bg-white p-3 text-left transition hover:border-teal-400 hover:bg-teal-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 md:grid-cols-[1fr_120px_140px]"
+                  key={recap.periodKey}
+                  onClick={() => setDetailDate(recap.periodKey)}
+                  aria-label={`Lihat rincian laporan ${recap.period}`}
+                >
+                  {content}
+                  <span className="flex items-center gap-1 text-sm font-bold text-teal-700">Lihat rincian <ChevronRight className="h-4 w-4" aria-hidden="true" /></span>
+                </button>
+              ) : (
+                <div className="shift-recap-row grid gap-2 rounded-lg border border-slate-100 p-3 md:grid-cols-[1fr_120px_140px]" key={recap.periodKey}>
+                  {content}
                 </div>
-                <span>Start: {recap.start}</span>
-                <span>End: {recap.end}</span>
-                <strong>{recap.sales}</strong>
-                <span>Cash: {recap.cash}</span>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </section>
       </section>

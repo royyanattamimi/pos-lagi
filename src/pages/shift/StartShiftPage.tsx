@@ -7,6 +7,7 @@ import type { ShiftInput } from '../../types'
 type StartShiftPageProps = {
   onStartShift: (data: ShiftInput) => void
   onBackToLogin: () => void
+  onShiftReports: () => void
 }
 
 const rupiahFormatter = new Intl.NumberFormat('id-ID')
@@ -17,7 +18,7 @@ function formatRupiah(value: string) {
   return `Rp ${rupiahFormatter.format(Number(value))}`
 }
 
-export function StartShiftPage({ onStartShift, onBackToLogin }: StartShiftPageProps) {
+export function StartShiftPage({ onStartShift, onBackToLogin, onShiftReports }: StartShiftPageProps) {
   const [cashierName, setCashierName] = useState('')
   const [openingCash, setOpeningCash] = useState('')
   const [openingCashError, setOpeningCashError] = useState('')
@@ -66,6 +67,8 @@ export function StartShiftPage({ onStartShift, onBackToLogin }: StartShiftPagePr
           <span>Isi data kas awal agar operasional kasir hari ini tercatat rapi.</span>
           <span>Shift otomatis berakhir pukul 00.00 mengikuti waktu perangkat.</span>
         </div>
+
+        <Button className="mb-5" onClick={onShiftReports}>Lihat laporan penutupan shift</Button>
 
         <form className="shift-form grid gap-4 [&_label]:grid [&_label]:gap-2 [&_label]:text-sm [&_label]:font-bold [&_label]:text-slate-600" onSubmit={handleSubmit}>
           <label>
