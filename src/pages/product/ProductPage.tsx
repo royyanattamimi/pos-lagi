@@ -105,7 +105,7 @@ export function ProductPage({
     event.preventDefault()
 
     const price = Number(form.price)
-    if (!form.name.trim() || !form.category || price <= 0) return
+    if (!form.name.trim() || !form.category || !Number.isSafeInteger(price) || price <= 0) return
 
     const productInput = {
       name: form.name.trim(),
@@ -391,14 +391,25 @@ export function ProductPage({
 
               <div className="product-form-row grid gap-3">
                 <label>
-                  Harga
-                  <Input
-                    min="1"
-                    type="number"
-                    value={form.price}
-                    onChange={(event) => setForm({ ...form, price: event.target.value })}
-                    placeholder="25000"
-                  />
+                  Harga (Rupiah)
+                  <div className="relative">
+                    <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm font-semibold text-slate-500" aria-hidden="true">Rp</span>
+                    <Input
+                      className="pl-10 tabular-nums"
+                      type="text"
+                      inputMode="numeric"
+                      autoComplete="off"
+                      required
+                      pattern="[0-9.]*[1-9][0-9.]*"
+                      title="Masukkan harga lebih dari Rp 0."
+                      value={form.price === '' ? '' : Number(form.price).toLocaleString('id-ID')}
+                      onChange={(event) => {
+                        const digits = event.target.value.replace(/\D/g, '')
+                        if (digits.length <= 15) setForm({ ...form, price: digits })
+                      }}
+                      placeholder="25.000"
+                    />
+                  </div>
                 </label>
               </div>
 
