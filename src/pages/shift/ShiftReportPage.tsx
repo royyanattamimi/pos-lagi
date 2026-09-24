@@ -20,10 +20,11 @@ type Props = {
   closingShift: ShiftSession | null
   initialShiftId?: string
   onBack: () => void
+  onFinish?: () => void
   onSave: (shift: ShiftSession, cash: number, note: string) => void
 }
 
-export function ShiftReportPage({ shifts, transactions, closingShift, initialShiftId, onBack, onSave }: Props) {
+export function ShiftReportPage({ shifts, transactions, closingShift, initialShiftId, onBack, onFinish, onSave }: Props) {
   const [selectedId, setSelectedId] = useState(initialShiftId ?? '')
   const [date, setDate] = useState('')
   const [selectedDay, setSelectedDay] = useState('')
@@ -41,7 +42,7 @@ export function ShiftReportPage({ shifts, transactions, closingShift, initialShi
           {selected && !closingShift && <Button onClick={() => { setSelectedDay(reportDateKey(selected.startAt)); setSelectedId('') }}>Lihat pendapatan tanggal ini</Button>}
         </div>
         {selected ? (
-          <ReportDetail key={`${selected.id}-${selected.status}`} shift={selected} transactions={transactions} onSave={onSave} />
+          <ReportDetail key={`${selected.id}-${selected.status}`} shift={selected} transactions={transactions} onSave={onSave} onFinish={onFinish} />
         ) : day ? (
           <DailyReportDetail day={day} onSelectShift={setSelectedId} />
         ) : (
@@ -74,8 +75,8 @@ export function ShiftReportPage({ shifts, transactions, closingShift, initialShi
   )
 }
 
-function ReportDetail({ shift, transactions, onSave }: {
-  shift: ShiftSession; transactions: TransactionRecord[]; onSave: Props['onSave']
+function ReportDetail({ shift, transactions, onSave, onFinish }: {
+  shift: ShiftSession; transactions: TransactionRecord[]; onSave: Props['onSave']; onFinish: Props['onFinish']
 }) {
   const [cash, setCash] = useState(shift.report?.closingCash?.toString() ?? '')
   const [note, setNote] = useState(shift.report?.closingNote ?? '')
@@ -135,7 +136,14 @@ function ReportDetail({ shift, transactions, onSave }: {
       <form className="shift-report-controls mt-5 grid gap-4 rounded-xl border border-slate-200 bg-white p-6" onSubmit={(event) => { event.preventDefault(); save() }}>
         <h2 className="font-bold">{isClosing ? 'Lengkapi penutupan shift' : 'Catatan dan kas fisik laporan'}</h2>
         <label className="grid gap-2 text-sm font-bold">Kas fisik akhir (Rp)
-          <Input type="number" min="0" step="1" required value={cash} onChange={(event) => setCash(event.target.value)} placeholder="Jumlah uang tunai yang dihitung" />
+          <Input
+            type="text"
+            inputMode="numeric"
+            required
+            value={cash ? money(Number(cash)) : ''}
+            onChange={(event) => setCash(event.target.value.replace(/\D/g, ''))}
+            placeholder="Contoh: Rp 500.000"
+          />
         </label>
         <label className="grid gap-2 text-sm font-bold">Catatan penutupan
           <textarea className="min-h-28 rounded-lg border border-slate-200 p-3 font-normal" value={note} onChange={(event) => setNote(event.target.value)} placeholder="Contoh: alasan selisih kas atau pesan untuk shift berikutnya" />
@@ -145,8 +153,9 @@ function ReportDetail({ shift, transactions, onSave }: {
         <div className="flex flex-wrap gap-3">
           <Button variant={isClosing ? 'danger' : 'primary'} type="submit">{isClosing ? 'Simpan laporan & tutup shift' : 'Simpan perubahan'}</Button>
           {!isClosing && <Button disabled={dirty} onClick={() => window.print()}><Printer /> Cetak / Simpan PDF</Button>}
+          {!isClosing && onFinish && <Button variant="primary" disabled={dirty} onClick={onFinish}>Selesai</Button>}
         </div>
-        {!isClosing && dirty && <p className="text-sm text-slate-500">Simpan perubahan sebelum mencetak laporan.</p>}
+        {!isClosing && dirty && <p className="text-sm text-slate-500">Simpan perubahan sebelum mencetak laporan atau menyelesaikan laporan.</p>}
       </form>
     </>
   )

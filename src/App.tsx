@@ -258,6 +258,7 @@ function App() {
       closingShift={reportView === 'closing' && currentShift?.status === 'Berjalan' ? currentShift : null}
       initialShiftId={reportShiftId}
       onBack={() => setReportView(null)}
+      onFinish={!isShiftStarted ? () => { setReportShiftId(''); setReportView(null) } : undefined}
       onSave={handleSaveShiftReport}
     />
   }
