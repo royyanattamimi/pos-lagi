@@ -4,6 +4,7 @@ import { Button } from '../../component/button/Button'
 import { Input } from '../../component/input/Input'
 import { buildDailyReports, reportDateKey } from '../../storage/dailyReport'
 import { DailyReportDetail } from './DailyReportDetail'
+import { ShiftRefundExplanation } from './ShiftRefundExplanation'
 import { PaymentBreakdown } from './PaymentBreakdown'
 import { summarizeShift } from '../../storage/shiftReport'
 import type { ShiftSession, TransactionRecord } from '../../types'
@@ -126,11 +127,13 @@ function ReportDetail({ shift, transactions, onSave, onFinish }: {
         </div>
         <dl className="mb-6 grid grid-cols-2 gap-2 text-sm">
           <dt>Kas awal</dt><dd className="text-right">{money(shift.openingCash)}</dd>
-          <dt>Penjualan tunai − refund Cash</dt><dd className="text-right">{money(summary.cashSales)}</dd>
+          <dt>Penjualan tunai masuk</dt><dd className="text-right">+ {money(summary.cashGrossSales)}</dd>
+          <dt>Uang tunai keluar untuk refund</dt><dd className="text-right text-red-700">− {money(summary.cashRefundTotal)}</dd>
           <dt>Kas seharusnya</dt><dd className="text-right font-bold">{money(summary.expectedCash)}</dd>
           <dt>Kas fisik saat ditutup</dt><dd className="text-right">{shift.report?.closingCash == null ? 'Belum dicatat' : money(shift.report.closingCash)}</dd>
           <dt>Selisih kas fisik − kas seharusnya</dt><dd className="text-right font-bold">{difference === null ? 'Belum dicatat' : `${money(difference)} (${difference === 0 ? 'Sesuai' : difference > 0 ? 'Lebih' : 'Kurang'})`}</dd>
         </dl>
+        <ShiftRefundExplanation shift={shift} transactions={transactions} />
         <section className="mb-5"><h2 className="font-bold">Catatan awal shift</h2><p className="whitespace-pre-wrap break-words text-sm">{shift.note || 'Tidak ada catatan.'}</p></section>
         <section className="mb-5"><h2 className="font-bold">Catatan penutupan</h2><p className="whitespace-pre-wrap break-words text-sm">{shift.report?.closingNote || 'Belum ada catatan penutupan.'}</p></section>
         <PaymentBreakdown records={summary.records} />
@@ -138,7 +141,8 @@ function ReportDetail({ shift, transactions, onSave, onFinish }: {
       </article>
       <form className="shift-report-controls mt-5 grid gap-4 rounded-xl border border-slate-200 bg-white p-6" onSubmit={(event) => { event.preventDefault(); save() }}>
         <h2 className="font-bold">{isClosing ? 'Lengkapi penutupan shift' : 'Catatan dan kas fisik laporan'}</h2>
-        <label className="grid gap-2 text-sm font-bold">Kas fisik akhir (Rp)
+        <p className="rounded-lg bg-slate-50 p-3 text-sm">Kas seharusnya: <strong>{money(summary.expectedCash)}</strong> = kas awal {money(shift.openingCash)} + penjualan tunai {money(summary.cashGrossSales)} − refund tunai {money(summary.cashRefundTotal)}. Hitung uang yang benar-benar ada di laci setelah refund, lalu isi kas fisik di bawah. Refund sudah diperhitungkan; jangan dikurangi lagi dari hasil hitungan fisik.</p>
+        <label className="grid gap-2 text-sm font-bold">Kas fisik akhir hasil hitung (Rp)
           <Input
             type="text"
             inputMode="numeric"
@@ -148,6 +152,7 @@ function ReportDetail({ shift, transactions, onSave, onFinish }: {
             placeholder="Contoh: Rp 500.000"
           />
         </label>
+        {cash !== '' && Number.isSafeInteger(Number(cash)) && <p aria-live="polite" className="text-sm font-bold">Selisih hasil hitung: {money(Number(cash) - summary.expectedCash)} ({Number(cash) === summary.expectedCash ? 'Sesuai' : Number(cash) > summary.expectedCash ? 'Lebih' : 'Kurang'}).</p>}
         <label className="grid gap-2 text-sm font-bold">Catatan penutupan
           <textarea className="min-h-28 rounded-lg border border-slate-200 p-3 font-normal" value={note} onChange={(event) => setNote(event.target.value)} placeholder="Contoh: alasan selisih kas atau pesan untuk shift berikutnya" />
         </label>

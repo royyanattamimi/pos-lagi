@@ -506,3 +506,8 @@
   .shift-report-paper thead { display: table-header-group; }
   .shift-report-paper .overflow-x-auto { overflow: visible; }
 }
+
+@media print {
+  .shift-report-paper .shift-refund-explanation { break-inside: auto; }
+  .shift-refund-explanation article { break-inside: avoid; }
+}

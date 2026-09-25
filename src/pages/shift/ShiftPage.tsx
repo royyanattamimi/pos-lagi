@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { ArrowLeft, ChevronRight } from 'lucide-react'
 import { buildDailyReports } from '../../storage/dailyReport'
 import { DailyReportDetail } from './DailyReportDetail'
+import { summarizeShift } from '../../storage/shiftReport'
 import { getMonthlyCash, getNextMonthStart } from '../../storage/monthlyCash'
 import { Sidebar } from '../../component/sidebar/Sidebar'
 import { PageHeader } from '../../component/header/PageHeader'
@@ -122,6 +123,7 @@ export function ShiftPage({
       document.removeEventListener('visibilitychange', refreshMonth)
     }
   }, [])
+  const shiftCash = currentShift ? summarizeShift(currentShift, transactions) : null
   const estimatedCash = getMonthlyCash(transactions, shiftHistory, currentShift, now)
   const monthLabel = now.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })
   const selectedDateTransactions = transactions.filter(
@@ -203,7 +205,7 @@ export function ShiftPage({
           )}
         />
 
-        <section className="shift-status-grid mb-5 grid gap-3 md:grid-cols-3 [&_article]:rounded-lg [&_article]:border [&_article]:border-slate-200 [&_article]:bg-white [&_article]:p-4 [&_article]:shadow-lg [&_article]:shadow-slate-900/5 [&_span]:text-sm [&_span]:font-bold [&_span]:text-slate-500 [&_strong]:block [&_strong]:text-xl [&_strong]:font-black" aria-label="Status shift">
+        <section className="shift-status-grid mb-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4 [&_article]:rounded-lg [&_article]:border [&_article]:border-slate-200 [&_article]:bg-white [&_article]:p-4 [&_article]:shadow-lg [&_article]:shadow-slate-900/5 [&_span]:text-sm [&_span]:font-bold [&_span]:text-slate-500 [&_strong]:block [&_strong]:text-xl [&_strong]:font-black" aria-label="Status shift">
           <article>
             <span>Status Shift</span>
             <strong>{isShiftOpen ? 'Berjalan' : 'Selesai'}</strong>
@@ -217,6 +219,11 @@ export function ShiftPage({
             <span>Kas Awal</span>
             <strong>{formatCurrency(currentShift?.openingCash ?? 0)}</strong>
             <small>Modal uang tunai saat start shift</small>
+          </article>
+          <article>
+            <span>Kas shift setelah refund</span>
+            <strong>{formatCurrency(shiftCash?.expectedCash ?? 0)}</strong>
+            <small>Kas awal + penjualan tunai − refund Cash {formatCurrency(shiftCash?.cashRefundTotal ?? 0)}</small>
           </article>
           <article>
             <span>Estimasi Kas Akhir Bulan Ini</span>

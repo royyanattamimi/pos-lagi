@@ -50,3 +50,24 @@ test('cash refund reduces current shift cash, while previous closed snapshot sta
 test('noncash refunds do not reduce physical cash', () => {
   assert.equal(getMonthlyCash([sale, makeRefund(1, 10000, 'QRIS')], [], null, new Date(2026, 8, 25)), 30001)
 })
+
+
+test('end-shift refund explanation separates gross cash sales and cash outflows', () => {
+  const current = { id: 'current', cashierName: 'Kasir', openingCash: 50000, note: '', shiftTime: '', status: 'Berjalan', startAt: new Date(2026, 8, 25, 8).toISOString() }
+  const cashSale = { ...sale, id: 'cash-today', shiftId: current.id, createdAt: new Date(2026, 8, 25, 9).toISOString(), grandTotal: 20000 }
+  const refund = makeRefund(1, 10000)
+  const summary = summarizeShift(current, [cashSale, refund])
+  assert.equal(summary.cashGrossSales, 20000)
+  assert.equal(summary.cashRefundTotal, 10000)
+  assert.equal(summary.expectedCash, 60000)
+  assert.equal(summary.refunds[0].originalTransactionId, sale.id)
+  assert.equal(summary.refunds[0].refundReason, 'Rusak')
+})
+
+test('refund receipt retains original payment method and before/after cash for printed history', () => {
+  const refund = refundToTransaction({ id: 'cash-proof', transaction_id: 'qris-sale', shift_id: 'current', cashier: 'Budi', created_at: new Date().toISOString(), reason: 'Barang rusak', payment_method: 'Cash', original_payment_method: 'QRIS', reference: 'Diterima pelanggan', amount: 10000, base_amount: 10000, cash_before: 50000, cash_after: 40000, items: [{ ...item, quantity: 1, total: 10000 }] })
+  assert.equal(refund.paymentMethod, 'Cash')
+  assert.equal(refund.originalPaymentMethod, 'QRIS')
+  assert.equal(refund.refundCashBefore, 50000)
+  assert.equal(refund.refundCashAfter, 40000)
+})

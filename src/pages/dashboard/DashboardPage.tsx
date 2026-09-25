@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { summarizeShift } from '../../storage/shiftReport'
 import { SalesChart } from './SalesChart'
 import { ActiveProductsPage } from '../product/ActiveProductsPage'
 import { ArrowUpRight, Plus, Wallet, ReceiptText, Package, Clock3 } from 'lucide-react'
@@ -126,6 +127,7 @@ export function DashboardPage({
     return (
       <TransactionDetailPage
         transaction={transactions.find((entry) => entry.id === selectedTransaction.id) ?? selectedTransaction}
+        cashAvailable={currentShift ? summarizeShift(currentShift, transactions).expectedCash : 0}
         refunds={transactions.filter((entry) => entry.originalTransactionId === selectedTransaction.id)}
         currentShift={currentShift}
         onRefund={onRefund}

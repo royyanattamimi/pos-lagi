@@ -8,6 +8,7 @@ type TransactionDetailPageProps = {
   transaction: TransactionRecord
   refunds: TransactionRecord[]
   currentShift: ShiftSession | null
+  cashAvailable: number
   onRefund: (input: RefundInput) => Promise<void>
   refundAvailable: boolean
   onBack: () => void
@@ -34,6 +35,7 @@ export function TransactionDetailPage({
   transaction,
   refunds,
   currentShift,
+  cashAvailable,
   onRefund,
   refundAvailable,
   onBack,
@@ -139,7 +141,7 @@ export function TransactionDetailPage({
             </div>
           </aside>
         </section>
-        <RefundPanel key={transaction.id} transaction={transaction} refunds={refunds} currentShift={currentShift} onRefund={onRefund} available={refundAvailable} />
+        <RefundPanel key={transaction.id} transaction={transaction} refunds={refunds} currentShift={currentShift} cashAvailable={cashAvailable} onRefund={onRefund} available={refundAvailable} />
       </section>
     </main>
   )

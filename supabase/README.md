@@ -34,17 +34,23 @@ Pengujian lokal: `npm run build`, `npm run lint`, dan `node --test tests/*.test.
 Pengujian unit memakai adapter database tiruan; verifikasi SQL/RLS dan alur lintas browser perlu dijalankan pada Supabase setelah migrasi.
 
 
-## Refund produk yang sudah dibayar
+## Refund tunai produk yang sudah dibayar
 
-Setelah migrasi penyimpanan utama, jalankan `migrations/202609250001_refunds.sql` melalui SQL Editor lalu muat ulang aplikasi. Fitur refund tidak aktif sampai tabel tersedia; halaman kasir lainnya tetap dapat dipakai.
+Jalankan migrasi sesuai urutan: `202609250001_refunds.sql`, lalu `202609250002_cash_refunds.sql` melalui SQL Editor dan muat ulang aplikasi. Migrasi kedua memperbarui aturan refund baru menjadi Cash serta menyimpan pembayaran asal, kas sebelum, dan kas sesudah refund. Riwayat refund non-tunai yang sudah ada tidak diubah nominal atau metodenya.
 
-Buka **Transaksi lunas → pilih nota → Refund produk**. Pilih jumlah barang atau semua sisa produk, isi alasan, metode pengembalian, dan referensi (wajib untuk QRIS/Debit). Konfirmasi bahwa uang sudah dikembalikan, lalu simpan. Ini pencatatan pengembalian manual, bukan instruksi transfer ke penyedia pembayaran.
+Alur kasir:
 
-- Setiap refund tercatat terpisah dengan kasir, waktu database, nota asal, shift aktif, barang, alasan, nominal, dan referensi. Nota pembayaran asli tetap utuh.
-- Database menghitung nominal berdasarkan item nota, menyesuaikan pajak/diskon secara proporsional, serta mengunci nota selama validasi agar jumlah refund tidak melebihi pembelian. Pembulatan kumulatif memastikan refund penuh berjumlah tepat sama dengan pembayaran.
-- Jumlah yang sudah direfund tidak dapat dikembalikan lagi. Penyimpanan ulang dengan ID refund yang sama mengembalikan catatan yang sudah tersimpan tanpa menambahkan refund baru.
-- Refund hanya bisa dibuat melalui fungsi database; pengguna aplikasi tidak dapat langsung menulis/mengubah/menghapus tabel refund.
-- Laporan hari/shift pengembalian dan estimasi kas Cash berkurang sesuai metode pengembalian. Laporan shift lama yang sudah tersimpan tidak ditulis ulang.
-- Stock barang belum tersedia pada model produk aplikasi, sehingga refund tidak mengubah persediaan.
+1. Buka **Transaksi lunas → pilih nota → Refund produk**. Shift harus masih aktif.
+2. Pilih jumlah produk yang dikembalikan dan isi alasan, serta catatan penerima bila diperlukan.
+3. Pilih **Lanjut: periksa refund**. Periksa nota, barang, nominal, kas menurut sistem sebelum refund, dan kas seharusnya setelah refund.
+4. Cocokkan uang fisik di laci, serahkan uang tunai kepada pelanggan, lalu centang konfirmasi penyerahan. Semua refund baru keluar sebagai Cash, termasuk untuk nota QRIS/Debit. Penerimaan pada metode pembayaran asli tidak dihapus.
+5. Pilih **Simpan refund & kas keluar**. Bukti menyimpan nota asal, waktu, kasir, barang, alasan, metode asli, nominal, kas sebelum/sesudah, serta catatan penyerahan. Pengeluaran dihitung pada hari dan shift saat refund dilakukan.
+6. Saat End Shift, lihat **Penjelasan refund pada shift ini**, hitung uang di laci, lalu isi **Kas fisik akhir hasil hitung**. Aplikasi menunjukkan selisih terhadap kas seharusnya. Penjelasan refund dan rumus kas ikut dicetak/disimpan PDF.
 
-Pengujian SQL lokal memakai PostgreSQL melalui PGlite: `npm test`. Pengujian mencakup hak akses, batas jumlah, pembulatan, pengulangan request, dan penjagaan laporan lama. Ini tidak menjalankan perubahan pada proyek Supabase Anda.
+Rumus kas seharusnya: **kas awal + penjualan tunai − refund tunai**. Contoh: Rp 500.000 + Rp 300.000 − Rp 50.000 = Rp 750.000. Kas fisik tetap hasil hitung kasir, bukan nominal yang diisi otomatis oleh aplikasi. Jangan mengurangi refund lagi dari hasil hitung fisik.
+
+Database menghitung nominal refund dari item nota beserta penyesuaian pajak/diskon. Jumlah produk, nominal yang diperiksa kasir, konfirmasi penyerahan, kepemilikan shift aktif, dan kecukupan saldo kas divalidasi kembali. Nota serta shift dikunci selama proses agar pengembalian bersamaan tidak melampaui sisa pembelian atau saldo kas. Pengulangan ID refund yang sama tidak membuat pengeluaran kedua.
+
+Jika simpan gagal setelah uang diserahkan, jangan menyerahkan uang lagi; gunakan tombol coba simpan ulang atau muat ulang riwayat untuk mencocokkan hasilnya. Refund ini pencatatan manual, bukan transfer otomatis. Stok belum tersedia pada model produk aplikasi sehingga refund tidak mengubah persediaan.
+
+Pengujian lokal memakai PostgreSQL melalui PGlite: `npm test`. Pengujian SQL ini tidak mengubah proyek Supabase Anda.

@@ -85,4 +85,47 @@ test('refund SQL executes with permissions, quantity limits, rounding, and idemp
     await db.exec('reset role; set role anon')
     await assert.rejects(refund({ ...input, id: requestId() }), /permission denied/)
   })
+  await t.test('cash-only upgrade preserves old refunds and enforces cash payout reconciliation', async () => {
+    await db.exec('reset role')
+    const migration = readFileSync(new URL('../supabase/migrations/202609250002_cash_refunds.sql', import.meta.url), 'utf8')
+    await db.exec(migration)
+    await db.exec(migration)
+    await db.query("select set_config('request.jwt.claim.sub', $1, false)", [user])
+    await db.exec('set role authenticated')
+    assert.equal(Number((await db.query('select sum(amount) as total from public.refunds')).rows[0].total), 30001)
+    assert.equal((await db.query("select payment_method from public.refunds where reference = 'QR-123'")).rows[0].payment_method, 'QRIS')
+    await db.query('insert into public.shift_sessions(id, data) values ($1, $2::jsonb)', ['cash-shift', JSON.stringify({ id: 'cash-shift', status: 'Berjalan', cashierName: 'Budi', openingCash: 25000, startAt: new Date().toISOString() })])
+    const qris = { ...receipt, id: 'qris-sale', shiftId: 'cash-shift', paymentMethod: 'QRIS', itemCount: 2, subtotal: 20000, tax: 0, grandTotal: 20000, paid: 20000, change: 0, items: [{ productId: 1, name: 'Kopi', price: 10000, quantity: 2, total: 20000 }] }
+    await db.query('select public.save_pos_transaction($1::jsonb)', [JSON.stringify(qris)])
+    const qrisItem = String((await db.query("select id from public.transaction_items where transaction_id = 'qris-sale'")).rows[0].id)
+    const cashInput = { ...input, id: requestId(), transactionId: qris.id, shiftId: 'cash-shift', paymentMethod: 'Cash', expectedAmount: 10000, cashConfirmed: true, items: [{ itemId: qrisItem, quantity: 1 }] }
+    await assert.rejects(refund({ ...cashInput, paymentMethod: 'QRIS', reference: 'QR-ref' }), /harus dikembalikan secara tunai/)
+    await assert.rejects(refund({ ...cashInput, cashConfirmed: false }), /Konfirmasi penyerahan/)
+    await assert.rejects(refund({ ...cashInput, expectedAmount: 9999 }), /Nominal refund berubah/)
+    const paid = await refund(cashInput)
+    assert.equal(paid.payment_method, 'Cash')
+    assert.equal(paid.original_payment_method, 'QRIS')
+    assert.equal(Number(paid.cash_before), 25000)
+    assert.equal(Number(paid.cash_after), 15000)
+    assert.equal((await refund(cashInput)).id, paid.id)
+    const next = await refund({ ...cashInput, id: requestId() })
+    assert.equal(Number(next.cash_before), 15000)
+    assert.equal(Number(next.cash_after), 5000)
+
+    const debit = { ...qris, id: 'debit-sale', paymentMethod: 'Debit' }
+    await db.query('select public.save_pos_transaction($1::jsonb)', [JSON.stringify(debit)])
+    const debitItem = String((await db.query("select id from public.transaction_items where transaction_id = 'debit-sale'")).rows[0].id)
+    const debitInput = { ...cashInput, id: requestId(), transactionId: debit.id, items: [{ itemId: debitItem, quantity: 1 }] }
+    await assert.rejects(refund(debitInput), /Kas shift tidak cukup/)
+    assert.equal(Number((await db.query("select count(*) from public.refunds where transaction_id = 'debit-sale'")).rows[0].count), 0)
+
+    const cashSale = { ...qris, id: 'cash-sale', paymentMethod: 'Cash' }
+    await db.query('select public.save_pos_transaction($1::jsonb)', [JSON.stringify(cashSale)])
+    const afterCashSale = await refund(debitInput)
+    assert.equal(afterCashSale.original_payment_method, 'Debit')
+    assert.equal(Number(afterCashSale.cash_before), 25000)
+    assert.equal(Number(afterCashSale.cash_after), 15000)
+    assert.equal(Number((await db.query("select grand_total from public.transactions where id = 'qris-sale'")).rows[0].grand_total), 20000)
+  })
+
 })
