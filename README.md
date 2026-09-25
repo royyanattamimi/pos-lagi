@@ -1,3 +1,7 @@
+# POS Lagi
+
+Panduan aktivasi penyimpanan Supabase dan impor data lokal lama tersedia di [supabase/README.md](supabase/README.md).
+
 # React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.

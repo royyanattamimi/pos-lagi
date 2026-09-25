@@ -1,5 +1,5 @@
 import { ProfileProvider } from './context/ProfileContext'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { DashboardPage } from './pages/dashboard/DashboardPage'
 import { ForgotPasswordPage } from './pages/login/ForgotPasswordPage'
 import { LoginPage } from './pages/login/LoginPage'
@@ -14,13 +14,21 @@ import {
   updateRemoteProduct,
 } from './storage/productStorage'
 import { createRemoteTransaction, loadRemoteTransactions } from './storage/transactionStorage'
-import { loadPosData, mergeTransactions, savePosData } from './storage/posStorage'
+import { loadPosData, emptyPosData } from './storage/posStorage'
+import { loadRemoteShifts, saveRemoteShift } from './storage/shiftStorage'
+import { Button } from './component/button/Button'
 import { closeExpiredShift, getShiftDeadline } from './storage/shiftLifecycle'
 import type { Product, ProductInput, ShiftInput, ShiftSession, TransactionRecord } from './types'
 
 function App() {
   const [accountId, setAccountId] = useState('local')
-  const [storedData] = useState(loadPosData)
+  const storedData = emptyPosData
+  const [dataReady, setDataReady] = useState(false)
+  const [dataError, setDataError] = useState('')
+  const [reload, setReload] = useState(0)
+  const [loadedKey, setLoadedKey] = useState('')
+  const databaseKey = `${accountId}:${reload}`
+  const closingRef = useRef(false)
   const [isAuthReady, setIsAuthReady] = useState(!supabase)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false)
@@ -34,15 +42,24 @@ function App() {
   const [reportShiftId, setReportShiftId] = useState('')
 
   useEffect(() => {
-    if (!currentShift || currentShift.status !== 'Berjalan') return
+    if (!isLoggedIn || loadedKey !== databaseKey || !dataReady || !currentShift || currentShift.status !== 'Berjalan') return
     const activeShift = currentShift
 
     let timeout: ReturnType<typeof setTimeout>
-    function checkShift() {
+    async function checkShift() {
       clearTimeout(timeout)
       const now = Date.now()
       const endedShift = snapshotShift(closeExpiredShift(activeShift, now), transactions)
       if (endedShift.status === 'Selesai') {
+        if (closingRef.current) return
+        closingRef.current = true
+        try {
+          await saveRemoteShift(endedShift, activeShift)
+        } catch (error) {
+          setDataError(error instanceof Error ? error.message : 'Gagal menutup shift.')
+          setDataReady(false)
+          return
+        } finally { closingRef.current = false }
         setCurrentShift(endedShift)
         setShiftHistory((history) => history.map((shift) => snapshotShift(closeExpiredShift(shift, now), transactions)))
         setIsShiftStarted(false)
@@ -67,7 +84,7 @@ function App() {
       window.removeEventListener('pageshow', checkShift)
       document.removeEventListener('visibilitychange', checkShift)
     }
-  }, [currentShift, transactions])
+  }, [currentShift, transactions, dataReady, isLoggedIn, loadedKey, databaseKey])
 
   useEffect(() => {
     if (!supabase) return
@@ -94,28 +111,56 @@ function App() {
   }, [])
 
   useEffect(() => {
-    savePosData({ products, transactions, currentShift, shiftHistory })
-  }, [products, transactions, currentShift, shiftHistory])
-
-  useEffect(() => {
+    let cancelled = false
     if (!isLoggedIn) return
-
-    let isMounted = true
-
-    loadRemoteProducts(loadPosData().products).then((remoteProducts) => {
-      if (!isMounted) return
-      setProducts(remoteProducts)
-    })
-
-    loadRemoteTransactions(loadPosData().transactions).then((remoteTransactions) => {
-      if (!isMounted) return
-      setTransactions((currentTransactions) => mergeTransactions(currentTransactions, remoteTransactions))
-    })
-
-    return () => {
-      isMounted = false
+    async function load() {
+      try {
+        const [remoteProducts, remoteTransactions, remoteShifts] = await Promise.all([
+          loadRemoteProducts(), loadRemoteTransactions(), loadRemoteShifts(),
+        ])
+        const shifts: ShiftSession[] = []
+        for (const shift of remoteShifts) {
+          const reconciled = snapshotShift(closeExpiredShift(shift), remoteTransactions)
+          if (reconciled !== shift) await saveRemoteShift(reconciled, shift)
+          shifts.push(reconciled)
+        }
+        if (cancelled) return
+        const active = shifts.find((shift) => shift.status === 'Berjalan') ?? null
+        setProducts(remoteProducts)
+        setTransactions(remoteTransactions)
+        setShiftHistory(shifts)
+        setCurrentShift(active)
+        setIsShiftStarted(Boolean(active))
+        setReportView(null)
+        setDataError('')
+        setLoadedKey(`${accountId}:${reload}`)
+        setDataReady(true)
+      } catch (error) {
+        if (!cancelled) setDataError(error instanceof Error ? error.message : 'Gagal memuat database.')
+      }
     }
-  }, [isLoggedIn])
+    void load()
+    return () => { cancelled = true }
+  }, [isLoggedIn, accountId, reload])
+
+  async function handleImportLocal() {
+    const legacy = loadPosData()
+    const [remoteProducts, remoteTransactions, remoteShifts] = await Promise.all([
+      loadRemoteProducts(), loadRemoteTransactions(), loadRemoteShifts(),
+    ])
+    for (const product of legacy.products) {
+      if (!remoteProducts.some((entry) => entry.id === product.id)) await createRemoteProduct(product)
+    }
+    for (const transaction of legacy.transactions) {
+      if (!remoteTransactions.some((entry) => entry.id === transaction.id)) await createRemoteTransaction(transaction)
+    }
+    const shifts = new Map(legacy.shiftHistory.map((shift) => [shift.id, shift]))
+    if (legacy.currentShift) shifts.set(legacy.currentShift.id, legacy.currentShift)
+    for (const shift of shifts.values()) {
+      if (!remoteShifts.some((entry) => entry.id === shift.id)) await saveRemoteShift(shift)
+    }
+    setReload((value) => value + 1)
+  }
 
   async function handleLogin(email: string, password: string) {
     if (!supabase) {
@@ -156,20 +201,21 @@ function App() {
     if (error) throw new Error(error.message)
   }
 
-  function handleStartShift(data: ShiftInput) {
+  async function handleStartShift(data: ShiftInput) {
     const shift: ShiftSession = {
       ...data,
-      id: `SHIFT-${Date.now()}`,
+      id: `SHIFT-${crypto.randomUUID()}`,
       startAt: new Date().toISOString(),
       status: 'Berjalan',
     }
 
+    await saveRemoteShift(shift)
     setCurrentShift(shift)
     setShiftHistory((currentHistory) => [shift, ...currentHistory])
     setIsShiftStarted(true)
   }
 
-  function handleSaveShiftReport(shift: ShiftSession, cash: number, note: string) {
+  async function handleSaveShiftReport(shift: ShiftSession, cash: number, note: string) {
     const source = shiftHistory.find((entry) => entry.id === shift.id)
     if (!source) throw new Error('Shift tidak ditemukan.')
     const ended = snapshotShift({
@@ -183,7 +229,7 @@ function App() {
     }
     const nextHistory = shiftHistory.map((entry) => entry.id === updated.id ? updated : entry)
     const nextCurrent = currentShift?.id === updated.id ? updated : currentShift
-    savePosData({ products, transactions, currentShift: nextCurrent, shiftHistory: nextHistory }, true)
+    await saveRemoteShift(updated, source)
     setShiftHistory(nextHistory)
     setCurrentShift(nextCurrent)
     if (currentShift?.id === updated.id) setIsShiftStarted(false)
@@ -191,63 +237,42 @@ function App() {
     setReportView('history')
   }
 
-  function handleAddProduct(data: ProductInput) {
-    const nextProduct: Product = {
-      ...data,
-      id: Date.now(),
+  async function handleAddProduct(data: ProductInput) {
+    const product: Product = { ...data, id: Date.now() }
+    await createRemoteProduct(product)
+    setProducts((current) => [product, ...current])
+  }
+
+  async function handleUpdateProduct(productId: number, data: ProductInput) {
+    await updateRemoteProduct(productId, data)
+    setProducts((current) => current.map((product) => product.id === productId ? { ...product, ...data } : product))
+  }
+
+  async function handleDeleteProduct(productId: number) {
+    await deleteRemoteProduct(productId)
+    setProducts((current) => current.filter((product) => product.id !== productId))
+  }
+
+  async function handleCompleteTransaction(transaction: TransactionRecord) {
+    if (!currentShift || currentShift.status !== 'Berjalan' || Date.now() >= getShiftDeadline(currentShift)) {
+      throw new Error('Shift sudah berakhir. Mulai shift baru sebelum transaksi.')
     }
-
-    setProducts((currentProducts) => [nextProduct, ...currentProducts])
-    createRemoteProduct(nextProduct).catch((error) => {
-      console.error('Gagal menambah product ke Supabase:', error.message)
-      setProducts((currentProducts) =>
-        currentProducts.filter((product) => product.id !== nextProduct.id),
-      )
-    })
-  }
-
-  function handleUpdateProduct(productId: number, data: ProductInput) {
-    const previousProducts = products
-
-    setProducts((currentProducts) =>
-      currentProducts.map((product) =>
-        product.id === productId
-          ? {
-              ...product,
-              ...data,
-            }
-          : product,
-      ),
-    )
-    updateRemoteProduct(productId, data).catch((error) => {
-      console.error('Gagal mengubah product di Supabase:', error.message)
-      setProducts(previousProducts)
-    })
-  }
-
-  function handleDeleteProduct(productId: number) {
-    const previousProducts = products
-
-    setProducts((currentProducts) =>
-      currentProducts.filter((product) => product.id !== productId),
-    )
-    deleteRemoteProduct(productId).catch((error) => {
-      console.error('Gagal menghapus product di Supabase:', error.message)
-      setProducts(previousProducts)
-    })
-  }
-
-  function handleCompleteTransaction(transaction: TransactionRecord) {
-    const linkedTransaction = { ...transaction, shiftId: currentShift?.id }
-    setTransactions((currentTransactions) => [linkedTransaction, ...currentTransactions])
-    createRemoteTransaction(linkedTransaction).catch((error) => {
-      console.error('Gagal menyimpan transaksi ke Supabase:', error.message)
-      // Payment has already completed. Keep it locally even if remote storage fails.
-    })
+    const linked = { ...transaction, shiftId: currentShift.id }
+    await createRemoteTransaction(linked)
+    setTransactions((current) => [linked, ...current.filter((entry) => entry.id !== linked.id)])
   }
 
   if (!isAuthReady) {
     return <main className="app-loading min-h-screen grid place-items-center bg-slate-100 text-slate-600 text-sm font-extrabold">Memuat sesi login...</main>
+  }
+
+  if (isLoggedIn && (!dataReady || loadedKey !== databaseKey)) {
+    return <main className="min-h-screen grid place-items-center bg-slate-100 p-6">
+      <section className="max-w-lg rounded-xl bg-white p-6">
+        <h1 className="text-xl font-bold">{dataError ? 'Database belum bisa dimuat' : 'Memuat data dari database…'}</h1>
+        {dataError && <><p role="alert" className="my-4 text-sm text-red-600">{dataError}</p><p className="mb-4 text-sm">Pastikan migrasi database sudah dijalankan dan koneksi tersedia.</p><Button onClick={() => { setDataError(''); setReload((value) => value + 1) }}>Coba lagi</Button></>}
+      </section>
+    </main>
   }
 
   if (isLoggedIn && reportView) {
@@ -286,6 +311,7 @@ function App() {
   if (isLoggedIn) {
     return (
       <StartShiftPage
+        onImportLocal={handleImportLocal}
         onShiftReports={() => { setReportShiftId(''); setReportView('history') }}
         onStartShift={handleStartShift}
         onBackToLogin={handleLogout}

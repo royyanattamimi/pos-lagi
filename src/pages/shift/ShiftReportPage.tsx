@@ -21,7 +21,7 @@ type Props = {
   initialShiftId?: string
   onBack: () => void
   onFinish?: () => void
-  onSave: (shift: ShiftSession, cash: number, note: string) => void
+  onSave: (shift: ShiftSession, cash: number, note: string) => Promise<void>
 }
 
 export function ShiftReportPage({ shifts, transactions, closingShift, initialShiftId, onBack, onFinish, onSave }: Props) {
@@ -49,7 +49,7 @@ export function ShiftReportPage({ shifts, transactions, closingShift, initialShi
           <section className="rounded-xl border border-slate-200 bg-white p-6">
             <h1 className="text-2xl font-black">Riwayat laporan harian & shift</h1>
             <p className="mt-2 text-sm text-slate-500">Klik tanggal untuk mencocokkan pendapatan Cash, QRIS, Debit, dan detail transaksi hari itu. Laporan penutupan setiap shift tersedia di dalamnya.</p>
-            <p className="mt-1 text-sm text-slate-500">Laporan tersimpan di browser perangkat ini. Gunakan Cetak / Simpan PDF untuk menyimpan salinan file.</p>
+            <p className="mt-1 text-sm text-slate-500">Laporan tersimpan di database akun Anda. Gunakan Cetak / Simpan PDF untuk menyimpan salinan file.</p>
             <label className="my-5 block max-w-xs text-sm font-bold">Tanggal laporan
               <Input type="date" value={date} onChange={(event) => setDate(event.target.value)} />
             </label>
@@ -82,27 +82,30 @@ function ReportDetail({ shift, transactions, onSave, onFinish }: {
   const [note, setNote] = useState(shift.report?.closingNote ?? '')
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
+  const [saving, setSaving] = useState(false)
   const summary = summarizeShift(shift, transactions)
   const isClosing = shift.status === 'Berjalan'
   const dirty = cash !== (shift.report?.closingCash?.toString() ?? '') || note !== (shift.report?.closingNote ?? '')
   const difference = shift.report?.closingCash == null ? null : shift.report.closingCash - summary.expectedCash
 
-  function save() {
+  async function save() {
+    if (saving) return
     setMessage('')
     const amount = Number(cash)
     if (!cash.trim() || !Number.isSafeInteger(amount) || amount < 0) {
       setError('Isi kas fisik dengan nominal rupiah bulat, minimal 0.')
       return
     }
+    setSaving(true)
     try {
-      onSave(shift, amount, note.trim())
+      await onSave(shift, amount, note.trim())
       setNote(note.trim())
       setCash(String(amount))
       setError('')
       setMessage('Laporan berhasil disimpan.')
     } catch (failure) {
       setError(failure instanceof Error ? failure.message : 'Laporan gagal disimpan. Silakan coba lagi.')
-    }
+    } finally { setSaving(false) }
   }
 
   return (
@@ -151,9 +154,9 @@ function ReportDetail({ shift, transactions, onSave, onFinish }: {
         {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
         {message && <p role="status" className="text-sm text-teal-700">{message}</p>}
         <div className="flex flex-wrap gap-3">
-          <Button variant={isClosing ? 'danger' : 'primary'} type="submit">{isClosing ? 'Simpan laporan & tutup shift' : 'Simpan perubahan'}</Button>
-          {!isClosing && <Button disabled={dirty} onClick={() => window.print()}><Printer /> Cetak / Simpan PDF</Button>}
-          {!isClosing && onFinish && <Button variant="primary" disabled={dirty} onClick={onFinish}>Selesai</Button>}
+          <Button variant={isClosing ? 'danger' : 'primary'} type="submit" disabled={saving}>{saving ? 'Menyimpan…' : isClosing ? 'Simpan laporan & tutup shift' : 'Simpan perubahan'}</Button>
+          {!isClosing && <Button disabled={dirty || saving} onClick={() => window.print()}><Printer /> Cetak / Simpan PDF</Button>}
+          {!isClosing && onFinish && <Button variant="primary" disabled={dirty || saving} onClick={onFinish}>Selesai</Button>}
         </div>
         {!isClosing && dirty && <p className="text-sm text-slate-500">Simpan perubahan sebelum mencetak laporan atau menyelesaikan laporan.</p>}
       </form>

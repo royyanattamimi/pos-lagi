@@ -9,24 +9,27 @@ type ProductRow = {
   image: string
 }
 
-export async function loadRemoteProducts(fallbackProducts: Product[]): Promise<Product[]> {
-  if (!supabase) return fallbackProducts
+export async function loadRemoteProducts(): Promise<Product[]> {
+  if (!supabase) throw new Error('Database belum dikonfigurasi.')
 
+  const records: Product[] = []
+  for (let offset = 0; ; offset += 500) {
   const { data, error } = await supabase
     .from('products')
     .select('id, name, category, price, image')
-    .order('created_at', { ascending: false })
+    .order('created_at', { ascending: false }).order('id', { ascending: false }).range(offset, offset + 499)
 
   if (error) {
-    console.error('Gagal memuat products dari Supabase:', error.message)
-    return fallbackProducts
+    throw new Error(`Gagal memuat produk: ${error.message}`)
   }
 
-  return Array.isArray(data) ? data.map(mapProductRow) : fallbackProducts
+  records.push(...data.map(mapProductRow))
+  if (data.length < 500) return records
+  }
 }
 
 export async function createRemoteProduct(product: Product) {
-  if (!supabase) return
+  if (!supabase) throw new Error('Database belum dikonfigurasi.')
 
   const { error } = await supabase
     .from('products')
@@ -36,7 +39,7 @@ export async function createRemoteProduct(product: Product) {
 }
 
 export async function updateRemoteProduct(productId: number, product: ProductInput) {
-  if (!supabase) return
+  if (!supabase) throw new Error('Database belum dikonfigurasi.')
 
   const { error } = await supabase
     .from('products')
@@ -47,7 +50,7 @@ export async function updateRemoteProduct(productId: number, product: ProductInp
 }
 
 export async function deleteRemoteProduct(productId: number) {
-  if (!supabase) return
+  if (!supabase) throw new Error('Database belum dikonfigurasi.')
 
   const { error } = await supabase
     .from('products')

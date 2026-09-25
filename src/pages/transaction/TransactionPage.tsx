@@ -18,7 +18,7 @@ type TransactionPageProps = {
   onProfile: () => void
   products: Product[]
   currentShift: ShiftSession | null
-  onCompleteTransaction: (transaction: TransactionRecord) => void
+  onCompleteTransaction: (transaction: TransactionRecord) => Promise<void>
 }
 
 type Step = 'select' | 'payment' | 'finish'
@@ -57,6 +57,9 @@ export function TransactionPage({
   const [cart, setCart] = useState<CartItem[]>([])
   const [paymentMethod, setPaymentMethod] = useState('Cash')
   const [paidAmount, setPaidAmount] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState('')
+  const [pendingTransaction, setPendingTransaction] = useState<TransactionRecord | null>(null)
   const [receipt, setReceipt] = useState<TransactionRecord | null>(null)
   const categories = useMemo(
     () => ['Semua', ...Array.from(new Set(products.map((product) => product.category)))],
@@ -126,8 +129,8 @@ export function TransactionPage({
     setReceipt(null)
   }
 
-  function finishPayment() {
-    if (!canFinish) return
+  async function finishPayment() {
+    if (!canFinish || saving) return
 
     const items: TransactionItem[] = cartItems.map((item) => ({
       productId: item.productId,
@@ -153,9 +156,28 @@ export function TransactionPage({
       status: 'Lunas',
     }
 
-    setReceipt(transaction)
-    onCompleteTransaction(transaction)
-    setStep('finish')
+    const pending = pendingTransaction ?? transaction
+    setPendingTransaction(pending)
+    setSaving(true)
+    setSaveError('')
+    try {
+      await onCompleteTransaction(pending)
+      setReceipt(pending)
+      setPendingTransaction(null)
+      setStep('finish')
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : 'Gagal menyimpan pembayaran. Coba lagi.')
+    } finally { setSaving(false) }
+  }
+
+  if (pendingTransaction) {
+    return <main className="min-h-screen grid place-items-center bg-slate-100 p-6"><section className="max-w-lg rounded-xl bg-white p-6">
+      <h1 className="text-xl font-bold">Menyimpan pembayaran</h1>
+      <p className="my-3">{pendingTransaction.id}</p>
+      {saveError && <p role="alert" className="mb-4 text-red-600">{saveError}</p>}
+      <p className="mb-4 text-sm">Tunggu konfirmasi penyimpanan sebelum menutup halaman. Percobaan ulang menggunakan nomor transaksi yang sama.</p>
+      <Button disabled={saving} onClick={finishPayment}>{saving ? 'Menyimpan…' : 'Coba simpan lagi'}</Button>
+    </section></main>
   }
 
   if (step === 'finish') {

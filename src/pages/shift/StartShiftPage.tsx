@@ -5,7 +5,8 @@ import { Input } from '../../component/input/Input'
 import type { ShiftInput } from '../../types'
 
 type StartShiftPageProps = {
-  onStartShift: (data: ShiftInput) => void
+  onStartShift: (data: ShiftInput) => Promise<void>
+  onImportLocal: () => Promise<void>
   onBackToLogin: () => void
   onShiftReports: () => void
 }
@@ -18,14 +19,17 @@ function formatRupiah(value: string) {
   return `Rp ${rupiahFormatter.format(Number(value))}`
 }
 
-export function StartShiftPage({ onStartShift, onBackToLogin, onShiftReports }: StartShiftPageProps) {
+export function StartShiftPage({ onStartShift, onBackToLogin, onShiftReports, onImportLocal }: StartShiftPageProps) {
   const [cashierName, setCashierName] = useState('')
   const [openingCash, setOpeningCash] = useState('')
   const [openingCashError, setOpeningCashError] = useState('')
   const [note, setNote] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState('')
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    if (saving) return
 
     const amount = Number(openingCash)
     if (!openingCash || !Number.isSafeInteger(amount) || amount < 0) {
@@ -37,12 +41,17 @@ export function StartShiftPage({ onStartShift, onBackToLogin, onShiftReports }: 
       return
     }
 
-    onStartShift({
-      cashierName: cashierName.trim(),
-      shiftTime: '',
-      openingCash: amount,
-      note: note.trim(),
-    })
+    setSaving(true)
+    setSaveError('')
+    try {
+      await onStartShift({
+        cashierName: cashierName.trim(),
+        shiftTime: '',
+        openingCash: amount,
+        note: note.trim(),
+      })
+    } catch (error) { setSaveError(error instanceof Error ? error.message : 'Gagal memulai shift.') }
+    finally { setSaving(false) }
   }
 
   function handleOpeningCashChange(value: string) {
@@ -70,6 +79,16 @@ export function StartShiftPage({ onStartShift, onBackToLogin, onShiftReports }: 
 
         <Button className="mb-5" onClick={onShiftReports}>Lihat laporan penutupan shift</Button>
 
+        <div className="mb-5 rounded-lg border border-slate-200 p-3 text-sm">
+          <p className="mb-2">Punya riwayat dari versi lama di browser ini? Impor hanya jika data tersebut milik akun Anda. Data yang sudah ada di database tidak ditimpa.</p>
+          <Button disabled={saving} onClick={async () => {
+            setSaving(true); setSaveError('')
+            try { await onImportLocal() }
+            catch (error) { setSaveError(error instanceof Error ? error.message : 'Impor gagal. Coba lagi.') }
+            finally { setSaving(false) }
+          }}>Impor data lokal lama</Button>
+        </div>
+        {saveError && <p role="alert" className="mb-4 text-sm text-red-600">{saveError}</p>}
         <form className="shift-form grid gap-4 [&_label]:grid [&_label]:gap-2 [&_label]:text-sm [&_label]:font-bold [&_label]:text-slate-600" onSubmit={handleSubmit}>
           <label>
             Nama Kasir
@@ -113,7 +132,7 @@ export function StartShiftPage({ onStartShift, onBackToLogin, onShiftReports }: 
             <Button className="secondary-shift-button" type="button" onClick={onBackToLogin}>
               Kembali
             </Button>
-            <Button className="primary-shift-button" variant="primary" size="large" type="submit">
+            <Button className="primary-shift-button" variant="primary" size="large" type="submit" disabled={saving}>
               Start Shift
             </Button>
           </div>

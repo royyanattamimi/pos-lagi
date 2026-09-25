@@ -3,6 +3,7 @@ import type { TransactionItem, TransactionRecord } from '../types'
 
 type TransactionRow = {
   id: string
+  shift_id?: string
   cashier: string
   created_at: string
   item_count: number
@@ -26,14 +27,16 @@ type TransactionItemRow = {
 }
 
 export async function loadRemoteTransactions(
-  fallbackTransactions: TransactionRecord[],
 ): Promise<TransactionRecord[]> {
-  if (!supabase) return fallbackTransactions
+  if (!supabase) throw new Error('Database belum dikonfigurasi.')
 
+  const records: TransactionRecord[] = []
+  for (let offset = 0; ; offset += 500) {
   const { data, error } = await supabase
     .from('transactions')
     .select(`
       id,
+      shift_id,
       cashier,
       created_at,
       item_count,
@@ -53,57 +56,27 @@ export async function loadRemoteTransactions(
         total
       )
     `)
-    .order('created_at', { ascending: false })
+    .order('created_at', { ascending: false }).order('id', { ascending: false }).range(offset, offset + 499)
 
   if (error) {
-    console.error('Gagal memuat transactions dari Supabase:', error.message)
-    return fallbackTransactions
+    throw new Error(`Gagal memuat transaksi: ${error.message}`)
   }
 
-  return Array.isArray(data) ? data.map(mapTransactionRow) : fallbackTransactions
+  records.push(...data.map(mapTransactionRow))
+  if (data.length < 500) return records
+  }
 }
 
 export async function createRemoteTransaction(transaction: TransactionRecord) {
-  if (!supabase) return
-
-  const { error: transactionError } = await supabase
-    .from('transactions')
-    .insert({
-      id: transaction.id,
-      cashier: transaction.cashier,
-      created_at: transaction.createdAt,
-      item_count: transaction.itemCount,
-      subtotal: transaction.subtotal,
-      tax: transaction.tax,
-      grand_total: transaction.grandTotal,
-      paid: transaction.paid,
-      change: transaction.change,
-      payment_method: transaction.paymentMethod,
-      status: transaction.status,
-    })
-
-  if (transactionError) throw new Error(transactionError.message)
-
-  const transactionItems = transaction.items.map((item) => ({
-    transaction_id: transaction.id,
-    product_id: item.productId,
-    name: item.name,
-    price: item.price,
-    quantity: item.quantity,
-    total: item.total,
-    note: item.note?.trim() || null,
-  }))
-
-  const { error: itemError } = await supabase
-    .from('transaction_items')
-    .insert(transactionItems)
-
-  if (itemError) throw new Error(itemError.message)
+  if (!supabase) throw new Error('Database belum dikonfigurasi.')
+  const { error } = await supabase.rpc('save_pos_transaction', { receipt: transaction })
+  if (error) throw new Error(`Transaksi belum tersimpan: ${error.message}`)
 }
 
 function mapTransactionRow(row: TransactionRow): TransactionRecord {
   return {
     id: row.id,
+    shiftId: row.shift_id,
     cashier: row.cashier,
     createdAt: row.created_at,
     items: Array.isArray(row.transaction_items)

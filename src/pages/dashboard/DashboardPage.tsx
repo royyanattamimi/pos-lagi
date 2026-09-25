@@ -19,10 +19,10 @@ type DashboardPageProps = {
   transactions: TransactionRecord[]
   currentShift: ShiftSession | null
   shiftHistory: ShiftSession[]
-  onAddProduct: (product: ProductInput) => void
-  onUpdateProduct: (productId: number, product: ProductInput) => void
-  onDeleteProduct: (productId: number) => void
-  onCompleteTransaction: (transaction: TransactionRecord) => void
+  onAddProduct: (product: ProductInput) => Promise<void>
+  onUpdateProduct: (productId: number, product: ProductInput) => Promise<void>
+  onDeleteProduct: (productId: number) => Promise<void>
+  onCompleteTransaction: (transaction: TransactionRecord) => Promise<void>
   onShiftReports: (shiftId?: string) => void
   onEndShift: () => void
   onLogout: () => void

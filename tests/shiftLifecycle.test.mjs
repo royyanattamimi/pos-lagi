@@ -57,7 +57,7 @@ test('month, leap day and year boundaries follow the local calendar', () => {
   }
 })
 
-test('loading persisted data reconciles current shift and history and can save the result', () => {
+test('legacy import reconciles expired shifts without losing their data', () => {
   const oldShift = { ...shift, startAt: '2020-01-01T12:00:00+07:00' }
   let stored = JSON.stringify({ currentShift: oldShift, shiftHistory: [oldShift], products: [], transactions: [] })
   const storage = loadModule('../src/storage/posStorage.ts', { './shiftLifecycle': lifecycle, './shiftReport': reports }, {
@@ -67,7 +67,7 @@ test('loading persisted data reconciles current shift and history and can save t
   assert.equal(loaded.currentShift.status, 'Selesai')
   assert.equal(loaded.currentShift.endAt, '2020-01-01T17:00:00.000Z')
   assert.deepEqual(loaded.shiftHistory, [loaded.currentShift])
-  storage.savePosData(loaded)
+  stored = JSON.stringify(loaded)
   assert.deepEqual(JSON.parse(stored), loaded)
   assert.deepEqual(storage.loadPosData(), loaded)
 })
@@ -93,7 +93,7 @@ test('local payment survives reload and remains counted for the local sales day'
   const storage = loadModule('../src/storage/posStorage.ts', { './shiftLifecycle': lifecycle, './shiftReport': reports }, {
     localStorage: { getItem: () => stored, setItem: (_key, value) => { stored = value } },
   })
-  storage.savePosData({ ...storage.emptyPosData, transactions: [payment] })
+  stored = JSON.stringify({ ...storage.emptyPosData, transactions: [payment] })
   const reloaded = storage.mergeTransactions(storage.loadPosData().transactions, [])
   const day = new Date('2026-09-21T12:00:00+07:00').toLocaleDateString('id-ID')
   const sales = reloaded.filter((record) => new Date(record.createdAt).toLocaleDateString('id-ID') === day)

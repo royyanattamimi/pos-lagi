@@ -43,6 +43,7 @@ export function ProfilePage({
   const [baseline, setBaseline] = useState(initialProfile)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
+  const [saving, setSaving] = useState(false)
   const isDirty = JSON.stringify(profile) !== JSON.stringify(baseline)
   const configuredFields = [profile.name, profile.email, profile.phone, profile.staffId, profile.role, profile.branch]
   const completed = configuredFields.filter((value) => value.trim()).length
@@ -54,23 +55,25 @@ export function ProfilePage({
     setError('')
   }
 
-  function handleSave(event: FormEvent<HTMLFormElement>) {
+  async function handleSave(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    if (saving) return
     if (!profile.name.trim()) {
       setError('Nama lengkap wajib diisi.')
       return
     }
     const next = Object.fromEntries(Object.entries(profile).map(([key, value]) => [key, value.trim()])) as UserProfile
+    setSaving(true)
     try {
-      updateProfile(next)
+      await updateProfile(next)
       setProfile(next)
       setBaseline(next)
       setError('')
-      setMessage('Profil berhasil disimpan di browser ini.')
-    } catch {
+      setMessage('Profil berhasil disimpan di database.')
+    } catch (failure) {
       setMessage('')
-      setError('Profil belum tersimpan. Penyimpanan browser tidak tersedia atau penuh. Coba simpan kembali.')
-    }
+      setError(failure instanceof Error ? failure.message : 'Profil belum tersimpan. Periksa koneksi dan coba lagi.')
+    } finally { setSaving(false) }
   }
 
   return (
@@ -155,12 +158,12 @@ export function ProfilePage({
             {message && <p role="status" className="mb-3 text-sm font-semibold text-emerald-700">{message}</p>}
             {error && <p role="alert" className="mb-3 text-sm font-semibold text-red-700">{error}</p>}
             <div className="flex flex-wrap items-center justify-between gap-4">
-              <p className="text-sm text-slate-500">Profil tersimpan untuk akun ini di browser yang sedang digunakan.</p>
+              <p className="text-sm text-slate-500">Profil tersimpan di database dan dapat dibuka melalui akun yang sama di perangkat lain.</p>
               <div className="flex flex-wrap gap-2">
-                <Button disabled={!isDirty} onClick={() => { setProfile({ ...baseline }); setMessage('Perubahan dibatalkan.'); setError('') }}>
+                <Button disabled={!isDirty || saving} onClick={() => { setProfile({ ...baseline }); setMessage('Perubahan dibatalkan.'); setError('') }}>
                   <RotateCcw aria-hidden="true" /> Batalkan perubahan
                 </Button>
-                <Button variant="primary" type="submit"><Save aria-hidden="true" /> Simpan profil</Button>
+                <Button variant="primary" type="submit" disabled={saving}><Save aria-hidden="true" /> Simpan profil</Button>
               </div>
             </div>
           </div>

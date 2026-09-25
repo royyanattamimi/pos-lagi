@@ -18,9 +18,9 @@ type ProductPageProps = {
   onShift: () => void
   onProfile: () => void
   products: Product[]
-  onAddProduct: (product: ProductInput) => void
-  onUpdateProduct: (productId: number, product: ProductInput) => void
-  onDeleteProduct: (productId: number) => void
+  onAddProduct: (product: ProductInput) => Promise<void>
+  onUpdateProduct: (productId: number, product: ProductInput) => Promise<void>
+  onDeleteProduct: (productId: number) => Promise<void>
 }
 
 type ProductDetail = 'total-product' | 'category' | null
@@ -101,8 +101,12 @@ export function ProductPage({
     ? 'Rincian Kategori'
     : 'Rincian Total Product'
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState('')
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    if (saving) return
 
     const price = Number(form.price)
     if (!form.name.trim() || !form.category || !Number.isSafeInteger(price) || price <= 0) return
@@ -114,14 +118,19 @@ export function ProductPage({
       image: form.image || defaultProductPhoto(form.category),
     }
 
-    if (editingProductId) {
-      onUpdateProduct(editingProductId, productInput)
-    } else {
-      onAddProduct(productInput)
-    }
+    setSaving(true)
+    setSaveError('')
+    try {
+      if (editingProductId) {
+        await onUpdateProduct(editingProductId, productInput)
+      } else {
+        await onAddProduct(productInput)
+      }
 
-    setEditingProductId(null)
-    setForm({ name: '', category: '', price: '', image: '' })
+      setEditingProductId(null)
+      setForm({ name: '', category: '', price: '', image: '' })
+    } catch (error) { setSaveError(error instanceof Error ? error.message : 'Produk gagal disimpan.') }
+    finally { setSaving(false) }
   }
 
   function handleEditProduct(product: Product) {
@@ -140,12 +149,18 @@ export function ProductPage({
     setForm({ name: '', category: '', price: '', image: '' })
   }
 
-  function handleDeleteProduct(product: Product) {
+  async function handleDeleteProduct(product: Product) {
+    if (saving) return
     const shouldDelete = window.confirm(`Hapus product "${product.name}"?`)
     if (!shouldDelete) return
 
-    onDeleteProduct(product.id)
-    if (editingProductId === product.id) handleCancelEdit()
+    setSaving(true)
+    setSaveError('')
+    try {
+      await onDeleteProduct(product.id)
+      if (editingProductId === product.id) handleCancelEdit()
+    } catch (error) { setSaveError(error instanceof Error ? error.message : 'Produk gagal dihapus.') }
+    finally { setSaving(false) }
   }
 
   function openCategoryDetail() {
@@ -182,6 +197,7 @@ export function ProductPage({
       />
 
       <section className="product-content content-shell">
+        {saveError && <p role="alert" className="mb-4 text-red-600">{saveError}</p>}
         <PageHeader
           eyebrow="Product"
           title="Kelola data product"
@@ -440,7 +456,7 @@ export function ProductPage({
                 </div>
               </fieldset>
 
-              <Button className="product-primary" variant="primary" type="submit">
+              <Button className="product-primary" variant="primary" type="submit" disabled={saving}>
                 {editingProductId ? 'Update Product' : 'Simpan Product'}
               </Button>
             </form>
@@ -478,7 +494,7 @@ export function ProductPage({
                   <option value={category} key={category}>{category}</option>
                 ))}
               </Select>
-              <Button variant="primary" type="submit">
+              <Button variant="primary" type="submit" disabled={saving}>
                 <Search aria-hidden="true" />
                 Search
               </Button>

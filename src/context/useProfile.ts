@@ -3,7 +3,7 @@ import { emptyProfile, type UserProfile } from '../storage/profileStorage'
 
 export const ProfileContext = createContext({
   profile: emptyProfile,
-  updateProfile: (_profile: UserProfile) => {},
+  updateProfile: async (_profile: UserProfile): Promise<void> => {},
 })
 
 export function useProfile() {

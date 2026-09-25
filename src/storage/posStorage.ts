@@ -18,6 +18,7 @@ export const emptyPosData: PosStoredData = {
   shiftHistory: [],
 }
 
+// Read-only compatibility reader for the explicit legacy import. New data is saved to Supabase.
 export function loadPosData(): PosStoredData {
   try {
     const storedValue = window.localStorage.getItem(STORAGE_KEY)
@@ -43,15 +44,6 @@ export function loadPosData(): PosStoredData {
     }
   } catch {
     return emptyPosData
-  }
-}
-
-export function savePosData(data: PosStoredData, requireSuccess = false) {
-  try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
-  } catch {
-    if (requireSuccess) throw new Error('Laporan belum tersimpan. Penyimpanan browser penuh atau tidak tersedia. Coba lagi setelah ruang penyimpanan tersedia.')
-    // The app remains usable when storage is unavailable or full.
   }
 }
 
