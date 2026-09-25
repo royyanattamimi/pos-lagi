@@ -7,7 +7,7 @@ Local storage hanya dibaca untuk impor data versi lama; SDK Supabase tetap menge
 
 1. Buka SQL Editor di project Supabase yang sesuai dengan `VITE_SUPABASE_URL`.
 2. Jika tabel `products` belum ada, jalankan `products.sql` terlebih dahulu.
-3. Jalankan `migrations/202609240001_database_storage.sql`. Skrip ini dijalankan dalam satu transaksi dan dapat diulang.
+3. Jalankan `migrations/202609240001_database_storage.sql`. Skrip ini dijalankan dalam satu transaksi dan dapat diulang. Jika `shift_sessions` sudah dibuat manual tetapi masih kosong, skrip akan menambahkan kolom yang dibutuhkan dan menyesuaikan ID tanpa menghapus tabel. Jika struktur tabel berbeda dan sudah berisi data, skrip berhenti agar data lama dapat dipetakan terlebih dahulu.
 4. Jalankan aplikasi, login, lalu gunakan **Impor data lokal lama** di halaman Start Shift pada browser yang menyimpan data lama. Impor ini memasukkan data yang belum tersedia; tidak menimpa data database dan tidak menghapus salinan lama. Jika impor gagal sebagian, ulangi dari browser yang sama.
 5. Profil lama dengan ID akun yang sama diimpor saat profil pertama kali dimuat jika database belum memiliki profil akun tersebut.
 

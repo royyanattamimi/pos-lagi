@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 type SalesChartProps = {
   data: { label: string; date: string; total: number }[]
@@ -11,14 +11,33 @@ const currency = new Intl.NumberFormat('id-ID', {
 
 export function SalesChart({ data, description }: SalesChartProps) {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
-  const width = Math.max(600, 150 + data.length * 38)
-  const left = 125
-  const right = width - 30
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [containerWidth, setContainerWidth] = useState(600)
+  useEffect(() => {
+    const container = containerRef.current
+    if (!container) return
+    const updateWidth = () => setContainerWidth(container.getBoundingClientRect().width)
+    const observer = new ResizeObserver(updateWidth)
+    observer.observe(container)
+    window.addEventListener('pageshow', updateWidth)
+    window.addEventListener('resize', updateWidth)
+    const frame = requestAnimationFrame(updateWidth)
+    return () => {
+      cancelAnimationFrame(frame)
+      observer.disconnect()
+      window.removeEventListener('pageshow', updateWidth)
+      window.removeEventListener('resize', updateWidth)
+    }
+  }, [])
   const top = 20
   const bottom = 220
   const maximum = Math.max(...data.map((point) => point.total), 1000)
   const magnitude = 10 ** Math.floor(Math.log10(maximum))
   const ceiling = Math.ceil(maximum / magnitude) * magnitude
+  const left = Math.max(60, currency.format(ceiling).length * 6.5 + 10)
+  const minimumWidth = left + 16 + Math.max(data.length - 1, 1) * 38
+  const width = Math.max(containerWidth, minimumWidth)
+  const right = width - 16
   const points = data.map((point, index) => ({
     ...point,
     x: left + index * (right - left) / Math.max(data.length - 1, 1),
@@ -29,10 +48,11 @@ export function SalesChart({ data, description }: SalesChartProps) {
 
   return (
     <div className="mt-4">
-      <div className="overflow-x-auto pb-2">
+      <div ref={containerRef} className="dashboard-chart-viewport">
         <svg
           viewBox={`0 0 ${width} 260`}
-          style={{ width: '100%', minWidth: width, height: 260 }}
+          preserveAspectRatio="none"
+          style={{ display: 'block', width: '100%', minWidth: minimumWidth, maxWidth: 'none', height: 260 }}
           aria-label={`Grafik garis penjualan ${description}`}
         >
           <title>{`Penjualan ${description}. Pilih titik untuk melihat nominal penjualan.`}</title>

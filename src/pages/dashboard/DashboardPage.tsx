@@ -290,7 +290,7 @@ export function DashboardPage({
             <div className="section-heading">
               <div><h2>Aktivitas penjualan</h2><span className="text-sm text-slate-500">{periodDescription}</span></div>
               <select
-                className="status-badge cursor-pointer border border-slate-200 focus:outline-2 focus:outline-teal-600"
+                className="sales-period-select status-badge cursor-pointer border border-slate-200 focus:outline-2 focus:outline-teal-600"
                 aria-label="Periode aktivitas penjualan"
                 value={salesPeriod}
                 onChange={(event) => setSalesPeriod(event.target.value as SalesPeriod)}

@@ -1,5 +1,27 @@
 -- Apply in Supabase SQL Editor before running this app version.
 begin;
+-- Accept an empty table created manually in Table Editor without dropping it.
+-- Existing records with an unknown structure need explicit mapping, not deletion.
+do $$
+begin
+  if to_regclass('public.shift_sessions') is not null and (
+    select count(*) < 4 from information_schema.columns
+    where table_schema = 'public' and table_name = 'shift_sessions'
+      and column_name in ('id', 'user_id', 'data', 'updated_at')
+  ) then
+    if exists (select 1 from public.shift_sessions limit 1) then
+      raise exception 'shift_sessions berisi data dengan struktur lama. Data tidak diubah; petakan kolom lama sebelum melanjutkan migrasi.';
+    end if;
+    alter table public.shift_sessions alter column id drop identity if exists;
+    alter table public.shift_sessions alter column id drop default;
+    alter table public.shift_sessions alter column id type text using id::text;
+    alter table public.shift_sessions
+      add column if not exists user_id uuid not null default auth.uid() references auth.users(id),
+      add column if not exists data jsonb not null,
+      add column if not exists updated_at timestamptz not null default now();
+  end if;
+end;
+$$;
 create table if not exists public.shift_sessions (
   id text primary key,
   user_id uuid not null default auth.uid() references auth.users(id),
@@ -94,4 +116,6 @@ end;
 $$;
 revoke all on function public.save_pos_transaction(jsonb) from public, anon;
 grant execute on function public.save_pos_transaction(jsonb) to authenticated;
+-- Refresh the API schema after this transaction commits.
+notify pgrst, 'reload schema';
 commit;
