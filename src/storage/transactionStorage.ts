@@ -18,6 +18,7 @@ type TransactionRow = {
 }
 
 type TransactionItemRow = {
+  id?: string | number
   note?: string | null
   product_id: number
   name: string
@@ -48,6 +49,7 @@ export async function loadRemoteTransactions(
       payment_method,
       status,
       transaction_items (
+        id,
         product_id,
         name,
         price,
@@ -95,6 +97,7 @@ function mapTransactionRow(row: TransactionRow): TransactionRecord {
 
 function mapTransactionItemRow(row: TransactionItemRow): TransactionItem {
   return {
+    itemId: row.id == null ? undefined : String(row.id),
     productId: Number(row.product_id),
     name: row.name,
     price: Number(row.price),

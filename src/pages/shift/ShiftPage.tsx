@@ -221,7 +221,7 @@ export function ShiftPage({
           <article>
             <span>Estimasi Kas Akhir Bulan Ini</span>
             <strong>{formatCurrency(estimatedCash)}</strong>
-            <small className="block">{monthLabel} · Kas awal shift + penjualan tunai bulan ini</small>
+            <small className="block">{monthLabel} · Kas awal shift + penjualan tunai − refund Cash bulan ini</small>
             <small className="mt-1 block text-slate-500">Mulai dari Rp 0 setiap awal bulan. Riwayat tetap tersimpan.</small>
           </article>
         </section>
@@ -241,14 +241,14 @@ export function ShiftPage({
           <div className="shift-date-summary mb-4 grid gap-3 md:grid-cols-3 [&_article]:rounded-lg [&_article]:bg-slate-50 [&_article]:p-3 [&_span]:text-xs [&_span]:font-extrabold [&_span]:text-slate-500 [&_strong]:block [&_strong]:font-black">
             <article>
               <span>Total Transaksi</span>
-              <strong>{selectedDateTransactions.length}</strong>
+              <strong>{selectedDateTransactions.filter((record) => record.kind !== 'Refund').length}</strong>
             </article>
             <article>
-              <span>Total Penjualan</span>
+              <span>Pendapatan bersih</span>
               <strong>{formatCurrency(selectedDateSales)}</strong>
             </article>
             <article>
-              <span>Cash</span>
+              <span>Cash setelah refund</span>
               <strong>{formatCurrency(selectedDateCash)}</strong>
             </article>
           </div>
@@ -262,7 +262,7 @@ export function ShiftPage({
                   <strong>{transaction.id}</strong>
                   <span>{formatTime(transaction.createdAt)} - {transaction.cashier}</span>
                 </div>
-                <span>{transaction.itemCount} item</span>
+                <span>{transaction.kind === 'Refund' ? 'Refund' : `${transaction.itemCount} item`}</span>
                 <span>{transaction.paymentMethod}</span>
                 <strong>{formatCurrency(transaction.grandTotal)}</strong>
               </div>

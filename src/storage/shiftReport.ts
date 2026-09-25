@@ -34,7 +34,12 @@ export function summarizeShift(shift: ShiftSession, transactions: TransactionRec
   }
   const sales = records.reduce((sum, record) => sum + record.grandTotal, 0)
   const cashSales = payments.get('Cash')?.total ?? 0
+  const refunds = records.filter((record) => record.kind === 'Refund')
+  const cashGrossSales = records.filter((record) => record.kind !== 'Refund' && record.paymentMethod === 'Cash').reduce((sum, record) => sum + record.grandTotal, 0)
+  const cashRefundTotal = -refunds.filter((record) => record.paymentMethod === 'Cash').reduce((sum, record) => sum + record.grandTotal, 0)
+  const refundTotal = -refunds.reduce((sum, record) => sum + record.grandTotal, 0)
   return {
+    refunds, cashGrossSales, cashRefundTotal, refundTotal,
     records, payments: [...payments.entries()], sales, cashSales,
     items: records.reduce((sum, record) => sum + record.itemCount, 0),
     expectedCash: shift.openingCash + cashSales,

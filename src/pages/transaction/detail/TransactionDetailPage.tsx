@@ -1,10 +1,15 @@
 import { Button } from '../../../component/button/Button'
 import { PageHeader } from '../../../component/header/PageHeader'
 import { Sidebar } from '../../../component/sidebar/Sidebar'
-import type { TransactionRecord } from '../../../types'
+import { RefundPanel } from './RefundPanel'
+import type { RefundInput, ShiftSession, TransactionRecord } from '../../../types'
 
 type TransactionDetailPageProps = {
   transaction: TransactionRecord
+  refunds: TransactionRecord[]
+  currentShift: ShiftSession | null
+  onRefund: (input: RefundInput) => Promise<void>
+  refundAvailable: boolean
   onBack: () => void
   onDashboard: () => void
   onProduct: () => void
@@ -27,6 +32,10 @@ function formatCurrency(value: number) {
 
 export function TransactionDetailPage({
   transaction,
+  refunds,
+  currentShift,
+  onRefund,
+  refundAvailable,
   onBack,
   onDashboard,
   onProduct,
@@ -130,6 +139,7 @@ export function TransactionDetailPage({
             </div>
           </aside>
         </section>
+        <RefundPanel key={transaction.id} transaction={transaction} refunds={refunds} currentShift={currentShift} onRefund={onRefund} available={refundAvailable} />
       </section>
     </main>
   )

@@ -13,12 +13,13 @@ import {
   loadRemoteProducts,
   updateRemoteProduct,
 } from './storage/productStorage'
+import { createRemoteRefund, loadRemoteRefunds } from './storage/refundStorage'
 import { createRemoteTransaction, loadRemoteTransactions } from './storage/transactionStorage'
 import { loadPosData, emptyPosData } from './storage/posStorage'
 import { loadRemoteShifts, saveRemoteShift } from './storage/shiftStorage'
 import { Button } from './component/button/Button'
 import { closeExpiredShift, getShiftDeadline } from './storage/shiftLifecycle'
-import type { Product, ProductInput, ShiftInput, ShiftSession, TransactionRecord } from './types'
+import type { RefundInput, Product, ProductInput, ShiftInput, ShiftSession, TransactionRecord } from './types'
 
 function App() {
   const [accountId, setAccountId] = useState('local')
@@ -40,6 +41,7 @@ function App() {
 
   const [reportView, setReportView] = useState<'history' | 'closing' | null>(null)
   const [reportShiftId, setReportShiftId] = useState('')
+  const [refundAvailable, setRefundAvailable] = useState(false)
 
   useEffect(() => {
     if (!isLoggedIn || loadedKey !== databaseKey || !dataReady || !currentShift || currentShift.status !== 'Berjalan') return
@@ -115,9 +117,10 @@ function App() {
     if (!isLoggedIn) return
     async function load() {
       try {
-        const [remoteProducts, remoteTransactions, remoteShifts] = await Promise.all([
-          loadRemoteProducts(), loadRemoteTransactions(), loadRemoteShifts(),
+        const [remoteProducts, sales, refunds, remoteShifts] = await Promise.all([
+          loadRemoteProducts(), loadRemoteTransactions(), loadRemoteRefunds(), loadRemoteShifts(),
         ])
+        const remoteTransactions = [...sales, ...refunds.records]
         const shifts: ShiftSession[] = []
         for (const shift of remoteShifts) {
           const reconciled = snapshotShift(closeExpiredShift(shift), remoteTransactions)
@@ -126,6 +129,7 @@ function App() {
         }
         if (cancelled) return
         const active = shifts.find((shift) => shift.status === 'Berjalan') ?? null
+        setRefundAvailable(refunds.available)
         setProducts(remoteProducts)
         setTransactions(remoteTransactions)
         setShiftHistory(shifts)
@@ -218,11 +222,13 @@ function App() {
   async function handleSaveShiftReport(shift: ShiftSession, cash: number, note: string) {
     const source = shiftHistory.find((entry) => entry.id === shift.id)
     if (!source) throw new Error('Shift tidak ditemukan.')
+    const [sales, refunds] = await Promise.all([loadRemoteTransactions(), loadRemoteRefunds()])
+    const latestTransactions = [...sales, ...refunds.records]
     const ended = snapshotShift({
       ...source,
       endAt: source.endAt ?? new Date(Math.min(Date.now(), getShiftDeadline(source))).toISOString(),
       status: 'Selesai',
-    }, transactions)
+    }, latestTransactions)
     const updated: ShiftSession = {
       ...ended,
       report: { ...ended.report!, closingCash: cash, closingNote: note, savedAt: new Date().toISOString() },
@@ -230,6 +236,7 @@ function App() {
     const nextHistory = shiftHistory.map((entry) => entry.id === updated.id ? updated : entry)
     const nextCurrent = currentShift?.id === updated.id ? updated : currentShift
     await saveRemoteShift(updated, source)
+    setTransactions(latestTransactions)
     setShiftHistory(nextHistory)
     setCurrentShift(nextCurrent)
     if (currentShift?.id === updated.id) setIsShiftStarted(false)
@@ -259,7 +266,24 @@ function App() {
     }
     const linked = { ...transaction, shiftId: currentShift.id }
     await createRemoteTransaction(linked)
-    setTransactions((current) => [linked, ...current.filter((entry) => entry.id !== linked.id)])
+    const [sales, refunds] = await Promise.all([loadRemoteTransactions(), loadRemoteRefunds()])
+    setTransactions([...sales, ...refunds.records])
+    setRefundAvailable(refunds.available)
+  }
+
+  async function handleRefund(input: RefundInput) {
+    if (!currentShift || currentShift.id !== input.shiftId || currentShift.status !== 'Berjalan') {
+      throw new Error('Shift aktif tidak ditemukan.')
+    }
+    const refund = await createRemoteRefund(input)
+    const shifts = await loadRemoteShifts()
+    setShiftHistory(shifts)
+    const latestShift = shifts.find((shift) => shift.id === input.shiftId)
+    if (latestShift) {
+      setCurrentShift(latestShift)
+      setIsShiftStarted(latestShift.status === 'Berjalan')
+    }
+    setTransactions((current) => [refund, ...current.filter((entry) => entry.id !== refund.id)])
   }
 
   if (!isAuthReady) {
@@ -300,6 +324,8 @@ function App() {
         onUpdateProduct={handleUpdateProduct}
         onDeleteProduct={handleDeleteProduct}
         onCompleteTransaction={handleCompleteTransaction}
+        onRefund={handleRefund}
+        refundAvailable={refundAvailable}
         onEndShift={() => { setReportShiftId(''); setReportView('closing') }}
         onShiftReports={(shiftId?: string) => { setReportShiftId(shiftId ?? ''); setReportView('history') }}
         onLogout={handleLogout}

@@ -32,3 +32,19 @@ Putuskan koneksi saat menyimpan untuk memastikan aplikasi tidak menampilkan kebe
 
 Pengujian lokal: `npm run build`, `npm run lint`, dan `node --test tests/*.test.mjs` (Node 22.18+).
 Pengujian unit memakai adapter database tiruan; verifikasi SQL/RLS dan alur lintas browser perlu dijalankan pada Supabase setelah migrasi.
+
+
+## Refund produk yang sudah dibayar
+
+Setelah migrasi penyimpanan utama, jalankan `migrations/202609250001_refunds.sql` melalui SQL Editor lalu muat ulang aplikasi. Fitur refund tidak aktif sampai tabel tersedia; halaman kasir lainnya tetap dapat dipakai.
+
+Buka **Transaksi lunas → pilih nota → Refund produk**. Pilih jumlah barang atau semua sisa produk, isi alasan, metode pengembalian, dan referensi (wajib untuk QRIS/Debit). Konfirmasi bahwa uang sudah dikembalikan, lalu simpan. Ini pencatatan pengembalian manual, bukan instruksi transfer ke penyedia pembayaran.
+
+- Setiap refund tercatat terpisah dengan kasir, waktu database, nota asal, shift aktif, barang, alasan, nominal, dan referensi. Nota pembayaran asli tetap utuh.
+- Database menghitung nominal berdasarkan item nota, menyesuaikan pajak/diskon secara proporsional, serta mengunci nota selama validasi agar jumlah refund tidak melebihi pembelian. Pembulatan kumulatif memastikan refund penuh berjumlah tepat sama dengan pembayaran.
+- Jumlah yang sudah direfund tidak dapat dikembalikan lagi. Penyimpanan ulang dengan ID refund yang sama mengembalikan catatan yang sudah tersimpan tanpa menambahkan refund baru.
+- Refund hanya bisa dibuat melalui fungsi database; pengguna aplikasi tidak dapat langsung menulis/mengubah/menghapus tabel refund.
+- Laporan hari/shift pengembalian dan estimasi kas Cash berkurang sesuai metode pengembalian. Laporan shift lama yang sudah tersimpan tidak ditulis ulang.
+- Stock barang belum tersedia pada model produk aplikasi, sehingga refund tidak mengubah persediaan.
+
+Pengujian SQL lokal memakai PostgreSQL melalui PGlite: `npm test`. Pengujian mencakup hak akses, batas jumlah, pembulatan, pengulangan request, dan penjagaan laporan lama. Ini tidak menjalankan perubahan pada proyek Supabase Anda.

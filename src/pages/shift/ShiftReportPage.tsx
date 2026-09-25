@@ -63,7 +63,7 @@ export function ShiftReportPage({ shifts, transactions, closingShift, initialShi
                   <span className="flex flex-wrap gap-x-5 gap-y-2 text-xs text-slate-600">
                     {entry.payments.map(([method, payment]) => <span key={method}>{method}: {money(payment.total)}</span>)}
                   </span>
-                  <span className="text-xs text-teal-700">{entry.records.length} transaksi · {entry.shifts.length} shift · Lihat rincian harian</span>
+                  <span className="text-xs text-teal-700">{entry.salesCount} transaksi · {entry.refundCount} refund · {entry.shifts.length} shift · Lihat rincian harian</span>
                 </Button>
               ))}
               {!days.some((entry) => !date || entry.date === date) && <p className="py-8 text-center text-slate-500">Belum ada laporan{date ? ' pada tanggal ini' : ''}.</p>}
@@ -120,13 +120,13 @@ function ReportDetail({ shift, transactions, onSave, onFinish }: {
         </header>
         <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-4">
           {[
-            ['Total penjualan', money(summary.sales)], ['Transaksi lunas', summary.records.length],
-            ['Item terjual', summary.items], ['Kas seharusnya', money(summary.expectedCash)],
+            ['Pendapatan bersih', money(summary.sales)], ['Transaksi lunas', summary.records.filter((record) => record.kind !== 'Refund').length],
+            ['Item bersih', summary.items], ['Kas seharusnya', money(summary.expectedCash)],
           ].map(([label, value]) => <div key={label} className="rounded-lg bg-slate-50 p-3"><p className="text-sm text-slate-500">{label}</p><strong className="text-lg">{value}</strong></div>)}
         </div>
         <dl className="mb-6 grid grid-cols-2 gap-2 text-sm">
           <dt>Kas awal</dt><dd className="text-right">{money(shift.openingCash)}</dd>
-          <dt>Penjualan tunai (setelah kembalian)</dt><dd className="text-right">{money(summary.cashSales)}</dd>
+          <dt>Penjualan tunai − refund Cash</dt><dd className="text-right">{money(summary.cashSales)}</dd>
           <dt>Kas seharusnya</dt><dd className="text-right font-bold">{money(summary.expectedCash)}</dd>
           <dt>Kas fisik saat ditutup</dt><dd className="text-right">{shift.report?.closingCash == null ? 'Belum dicatat' : money(shift.report.closingCash)}</dd>
           <dt>Selisih kas fisik − kas seharusnya</dt><dd className="text-right font-bold">{difference === null ? 'Belum dicatat' : `${money(difference)} (${difference === 0 ? 'Sesuai' : difference > 0 ? 'Lebih' : 'Kurang'})`}</dd>

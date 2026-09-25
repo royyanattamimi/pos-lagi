@@ -2,12 +2,13 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { test } from 'node:test'
 import ts from 'typescript'
+import { refundToTransaction } from '../src/storage/refund.ts'
 
 function load(path, supabase) {
   const source = readFileSync(new URL(path, import.meta.url), 'utf8')
   const { outputText } = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS } })
   const exports = {}
-  new Function('exports', 'require', outputText)(exports, () => ({ supabase }))
+  new Function('exports', 'require', outputText)(exports, (name) => name === './refund' ? { refundToTransaction } : { supabase })
   return exports
 }
 
@@ -61,4 +62,12 @@ test('transaction loader paginates beyond the first page and preserves shift ass
   assert.equal(records.length, 501)
   assert.equal(records[500].shiftId, 'shift-1')
   assert.deepEqual(ranges, [[0, 499], [500, 999]])
+})
+
+
+test('missing refund migration disables only the new feature, while network errors remain visible', async () => {
+  const missing = load('../src/storage/refundStorage.ts', { from: () => fakeQuery({ data: null, error: { code: 'PGRST205', message: 'Table missing' } }, []) })
+  assert.deepEqual(await missing.loadRemoteRefunds(), { records: [], available: false })
+  const offline = load('../src/storage/refundStorage.ts', { from: () => fakeQuery({ data: null, error: { message: 'Offline' } }, []) })
+  await assert.rejects(offline.loadRemoteRefunds(), /Offline/)
 })

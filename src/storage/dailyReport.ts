@@ -12,6 +12,10 @@ export function summarizePayments(records: TransactionRecord[]) {
     payments.set(record.paymentMethod, { count: payment.count + 1, total: payment.total + record.grandTotal })
   }
   return {
+    salesCount: records.filter((record) => record.kind !== 'Refund').length,
+    refundCount: records.filter((record) => record.kind === 'Refund').length,
+    gross: records.filter((record) => record.kind !== 'Refund').reduce((sum, record) => sum + record.grandTotal, 0),
+    refundTotal: -records.filter((record) => record.kind === 'Refund').reduce((sum, record) => sum + record.grandTotal, 0),
     payments: [...payments.entries()],
     total: records.reduce((sum, record) => sum + record.grandTotal, 0),
   }

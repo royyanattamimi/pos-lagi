@@ -12,7 +12,7 @@ import { ShiftPage } from '../shift/ShiftPage'
 import { TransactionPage } from '../transaction/TransactionPage'
 import { TransactionDetailPage } from '../transaction/detail/TransactionDetailPage'
 import { TransactionHistoryPage } from '../transaction/history/TransactionHistoryPage'
-import type { Product, ProductInput, ShiftSession, TransactionRecord } from '../../types'
+import type { RefundInput, Product, ProductInput, ShiftSession, TransactionRecord } from '../../types'
 
 type DashboardPageProps = {
   products: Product[]
@@ -22,6 +22,8 @@ type DashboardPageProps = {
   onAddProduct: (product: ProductInput) => Promise<void>
   onUpdateProduct: (productId: number, product: ProductInput) => Promise<void>
   onDeleteProduct: (productId: number) => Promise<void>
+  onRefund: (input: RefundInput) => Promise<void>
+  refundAvailable: boolean
   onCompleteTransaction: (transaction: TransactionRecord) => Promise<void>
   onShiftReports: (shiftId?: string) => void
   onEndShift: () => void
@@ -51,6 +53,8 @@ export function DashboardPage({
   onUpdateProduct,
   onDeleteProduct,
   onCompleteTransaction,
+  onRefund,
+  refundAvailable,
   onShiftReports,
   onEndShift,
   onLogout,
@@ -79,8 +83,8 @@ export function DashboardPage({
   const salesToday = todayTransactions.reduce((total, transaction) => total + transaction.grandTotal, 0)
   const activeProducts = products
   const stats = [
-    { key: 'sales-today', label: 'Penjualan hari ini', value: formatCurrency(salesToday), icon: Wallet, tone: 'green' },
-    { key: 'transactions', label: 'Total transaksi hari ini', value: String(todayTransactions.length), icon: ReceiptText, tone: 'blue' },
+    { key: 'sales-today', label: 'Pendapatan bersih hari ini', value: formatCurrency(salesToday), icon: Wallet, tone: 'green' },
+    { key: 'transactions', label: 'Total transaksi hari ini', value: String(todayTransactions.filter((entry) => entry.kind !== 'Refund').length), icon: ReceiptText, tone: 'blue' },
     { key: 'active-products', label: 'Produk aktif', value: String(activeProducts.length), icon: Package, tone: 'amber' },
   ]
   const now = new Date()
@@ -114,14 +118,18 @@ export function DashboardPage({
     return { label, date, total }
   })
   const periodTotal = periodSales.reduce((sum, day) => sum + day.total, 0)
-  const recentTransactions = [...transactions]
+  const recentTransactions = transactions.filter((entry) => entry.kind !== 'Refund')
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .slice(0, 5)
 
   if (selectedTransaction) {
     return (
       <TransactionDetailPage
-        transaction={selectedTransaction}
+        transaction={transactions.find((entry) => entry.id === selectedTransaction.id) ?? selectedTransaction}
+        refunds={transactions.filter((entry) => entry.originalTransactionId === selectedTransaction.id)}
+        currentShift={currentShift}
+        onRefund={onRefund}
+        refundAvailable={refundAvailable}
         onShift={() => { setSelectedTransaction(null); setActivePage('shift') }}
         onBack={() => setSelectedTransaction(null)}
         onDashboard={() => {
@@ -169,7 +177,7 @@ export function DashboardPage({
         onTransaction={openCheckout} onPaidTransactions={openTransactions}
         onProfile={() => setActivePage('profile')}
         onNewTransaction={() => setActivePage('checkout')}
-        onSelectTransaction={setSelectedTransaction}
+        onSelectTransaction={(entry) => setSelectedTransaction(transactions.find((sale) => sale.id === (entry.originalTransactionId ?? entry.id)) ?? entry)}
         profileName={currentShift?.cashierName}
       />
     )
@@ -280,7 +288,7 @@ export function DashboardPage({
             >
               <span className="metric-label"><span className="metric-icon"><stat.icon size={20} aria-hidden="true" /></span>{stat.label}<ArrowUpRight size={16} aria-hidden="true" /></span>
               <strong>{stat.value}</strong>
-              <small>{stat.key === 'sales-today' ? `${todayTransactions.length} transaksi hari ini` : 'Lihat rincian'} <ArrowUpRight size={13} aria-hidden="true" /></small>
+              <small>{stat.key === 'sales-today' ? `${todayTransactions.filter((entry) => entry.kind !== 'Refund').length} penjualan · ${todayTransactions.filter((entry) => entry.kind === 'Refund').length} refund` : 'Lihat rincian'} <ArrowUpRight size={13} aria-hidden="true" /></small>
             </button>
           ))}
         </section>
@@ -302,13 +310,13 @@ export function DashboardPage({
             </div>
             <strong className="weekly-total">{formatCurrency(periodTotal)}</strong>
             <SalesChart key={salesPeriod} data={periodSales} description={periodDescription} />
-            {periodTotal === 0 && <p className="text-center text-xs text-slate-500">Belum ada penjualan pada periode ini.</p>}
+            {periodSales.every((point) => point.total === 0) && <p className="text-center text-xs text-slate-500">Pendapatan bersih pada periode ini Rp 0.</p>}
           </section>
           <section className="shift-overview">
             <div className="section-heading"><h2>Shift saat ini</h2><Clock3 size={20} className="text-emerald-700" aria-hidden="true" /></div>
             <span className={`status-badge ${isShiftOpen ? 'status-open' : ''}`}>{isShiftOpen ? 'Berjalan' : 'Tidak aktif'}</span>
             <strong className="mt-5 block text-xl font-semibold break-words">{currentShift?.cashierName || 'Belum ada kasir'}</strong>
-            <dl className="shift-details"><div><dt>Jadwal shift</dt><dd>{currentShift?.shiftTime || '-'}</dd></div><div><dt>Kas awal</dt><dd>{formatCurrency(currentShift?.openingCash || 0)}</dd></div><div><dt>Transaksi hari ini</dt><dd>{todayTransactions.length}</dd></div></dl>
+            <dl className="shift-details"><div><dt>Jadwal shift</dt><dd>{currentShift?.shiftTime || '-'}</dd></div><div><dt>Kas awal</dt><dd>{formatCurrency(currentShift?.openingCash || 0)}</dd></div><div><dt>Transaksi hari ini</dt><dd>{todayTransactions.filter((entry) => entry.kind !== 'Refund').length}</dd></div></dl>
             <Button className="w-full" onClick={() => setActivePage('shift')}>Detail shift <ArrowUpRight aria-hidden="true" /></Button>
           </section>
         </div>
@@ -365,7 +373,7 @@ export function DashboardPage({
                     className="sales-detail-row transaction-detail-trigger grid w-full grid-cols-[1fr_auto] gap-3 data-row text-left hover:border-slate-300"
                     type="button"
                     key={sale.id}
-                    onClick={() => setSelectedTransaction(sale)}
+                    onClick={() => setSelectedTransaction(transactions.find((entry) => entry.id === (sale.originalTransactionId ?? sale.id)) ?? sale)}
                   >
                     <div>
                       <strong>{new Date(sale.createdAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</strong>

@@ -14,6 +14,7 @@ export type ProductInput = {
 }
 
 export type TransactionItem = {
+  itemId?: string
   note?: string
   productId: number
   name: string
@@ -23,6 +24,13 @@ export type TransactionItem = {
 }
 
 export type TransactionRecord = {
+  kind?: 'Refund'
+  originalTransactionId?: string
+  refundReason?: string
+  refundReference?: string
+  originalPaymentMethod?: string
+  refundCashBefore?: number
+  refundCashAfter?: number
   shiftId?: string
   id: string
   cashier: string
@@ -48,6 +56,7 @@ export type ShiftInput = {
 }
 
 export type ShiftSession = ShiftInput & {
+  refundRevision?: number
   id: string
   startAt: string
   endAt?: string
@@ -60,4 +69,33 @@ export type ShiftReport = {
   closingCash: number | null
   closingNote: string
   savedAt: string
+}
+
+export type RefundInput = {
+  expectedAmount: number
+  cashConfirmed: boolean
+  id: string
+  transactionId: string
+  shiftId: string
+  reason: string
+  paymentMethod: string
+  reference: string
+  items: { itemId: string; quantity: number }[]
+}
+
+export type RefundRecord = {
+  original_payment_method?: string
+  cash_before?: number | null
+  cash_after?: number | null
+  id: string
+  transaction_id: string
+  shift_id: string
+  cashier: string
+  created_at: string
+  reason: string
+  payment_method: string
+  reference: string
+  amount: number
+  base_amount: number
+  items: (TransactionItem & { itemId: string })[]
 }

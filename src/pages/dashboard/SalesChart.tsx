@@ -34,14 +34,18 @@ export function SalesChart({ data, description }: SalesChartProps) {
   const maximum = Math.max(...data.map((point) => point.total), 1000)
   const magnitude = 10 ** Math.floor(Math.log10(maximum))
   const ceiling = Math.ceil(maximum / magnitude) * magnitude
-  const left = Math.max(60, currency.format(ceiling).length * 6.5 + 10)
+  const minimum = Math.min(...data.map((point) => point.total), 0)
+  const floor = Math.floor(minimum / magnitude) * magnitude
+  const range = ceiling - floor
+  const zeroY = bottom - (0 - floor) / range * (bottom - top)
+  const left = Math.max(60, Math.max(currency.format(ceiling).length, currency.format(floor).length) * 6.5 + 10)
   const minimumWidth = left + 16 + Math.max(data.length - 1, 1) * 38
   const width = Math.max(containerWidth, minimumWidth)
   const right = width - 16
   const points = data.map((point, index) => ({
     ...point,
     x: left + index * (right - left) / Math.max(data.length - 1, 1),
-    y: bottom - point.total / ceiling * (bottom - top),
+    y: bottom - (point.total - floor) / range * (bottom - top),
   }))
   const line = points.map((point) => `${point.x},${point.y}`).join(' ')
   const selected = selectedIndex === null ? null : points[selectedIndex]
@@ -62,12 +66,12 @@ export function SalesChart({ data, description }: SalesChartProps) {
               <g key={index}>
                 <line x1={left} x2={right} y1={y} y2={y} stroke="#e2e8f0" strokeDasharray="4 4" />
                 <text x={left - 12} y={y + 4} textAnchor="end" fontSize="11" fill="#64748b">
-                  {currency.format(ceiling * index / 4)}
+                  {currency.format(floor + range * index / 4)}
                 </text>
               </g>
             )
           })}
-          <polygon points={`${left},${bottom} ${line} ${right},${bottom}`} fill="#d1fae5" fillOpacity="0.45" />
+          <polygon points={`${left},${zeroY} ${line} ${right},${zeroY}`} fill="#d1fae5" fillOpacity="0.45" />
           <polyline points={line} fill="none" stroke="#047857" strokeWidth="3" strokeLinejoin="round" />
           {points.map((point, index) => (
             <g key={point.date}>

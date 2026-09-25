@@ -90,7 +90,7 @@ export function TransactionHistoryPage({
 
     return transactions.filter((transaction) => {
       if (transaction.status !== 'Lunas') return false
-      const matchesQuery = !normalizedQuery || [transaction.id, transaction.cashier]
+      const matchesQuery = !normalizedQuery || [transaction.id, transaction.cashier, transaction.originalTransactionId ?? '']
         .some((value) => value.toLowerCase().includes(normalizedQuery))
       const matchesPayment = paymentFilter === 'Semua' || transaction.paymentMethod === paymentFilter
       const transactionDate = new Date(transaction.createdAt)
@@ -108,8 +108,9 @@ export function TransactionHistoryPage({
     (total, transaction) => total + transaction.itemCount,
     0,
   )
-  const averageTransaction = filteredTransactions.length
-    ? totalRevenue / filteredTransactions.length
+  const salesTransactions = filteredTransactions.filter((record) => record.kind !== 'Refund')
+  const averageTransaction = salesTransactions.length
+    ? salesTransactions.reduce((sum, record) => sum + record.grandTotal, 0) / salesTransactions.length
     : 0
 
   return (
@@ -165,10 +166,10 @@ export function TransactionHistoryPage({
         <section className="transaction-history-stats mb-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4 [&_article]:rounded-lg [&_article]:border [&_article]:border-slate-200 [&_article]:bg-white [&_article]:p-4 [&_article]:shadow-lg [&_article]:shadow-slate-900/5 [&_span]:text-sm [&_span]:font-bold [&_span]:text-slate-500 [&_strong]:mt-1 [&_strong]:block [&_strong]:text-xl [&_strong]:font-black" aria-label="Ringkasan transaksi">
           <article>
             <span>Total Transaksi</span>
-            <strong>{filteredTransactions.length}</strong>
+            <strong>{salesTransactions.length}</strong>
           </article>
           <article>
-            <span>Total Penjualan</span>
+            <span>Pendapatan bersih</span>
             <strong>{formatCurrency(totalRevenue)}</strong>
           </article>
           <article>
@@ -176,7 +177,7 @@ export function TransactionHistoryPage({
             <strong>{formatCurrency(averageTransaction)}</strong>
           </article>
           <article>
-            <span>Total Item</span>
+            <span>Item bersih setelah refund</span>
             <strong>{totalItems}</strong>
           </article>
         </section>
@@ -241,7 +242,7 @@ export function TransactionHistoryPage({
               >
                 <span>
                   <strong>{transaction.id}</strong>
-                  <small>{transaction.cashier}</small>
+                  <small>{transaction.cashier}{transaction.kind === 'Refund' ? ` · Nota asal ${transaction.originalTransactionId}` : ''}</small>
                 </span>
                 <span>
                   <strong>{new Date(transaction.createdAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</strong>
@@ -249,7 +250,7 @@ export function TransactionHistoryPage({
                 <span>{transaction.itemCount}</span>
                 <span>{transaction.paymentMethod}</span>
                 <strong>{formatCurrency(transaction.grandTotal)}</strong>
-                <em>{transaction.status}</em>
+                <em>{transaction.kind === 'Refund' ? 'Refund' : transaction.status}</em>
               </Button>
             ))}
           </div>

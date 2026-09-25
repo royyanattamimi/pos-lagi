@@ -19,7 +19,7 @@ export function DailyReportDetail({ day, onSelectShift }: Props) {
           <p className="text-sm font-bold text-teal-700">POS Lagi · Pendapatan harian</p>
           <h1 className="mt-1 text-2xl font-black">Rincian laporan harian</h1>
           <p className="mt-2 font-bold">{date}</p>
-          <p className="mt-1 text-sm text-slate-500">Seluruh transaksi lunas pada tanggal ini, termasuk shift yang masih berjalan.</p>
+          <p className="mt-1 text-sm text-slate-500">Seluruh penjualan dan refund pada tanggal ini, termasuk shift yang masih berjalan.</p>
         </header>
         <PaymentBreakdown key={day.date} records={day.records} />
         <section className="mt-6 border-t border-slate-200 pt-5">
