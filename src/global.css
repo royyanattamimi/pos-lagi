@@ -196,8 +196,27 @@
 .transaction-page .paid-input input { min-height: 52px; border-radius: 10px; }
 .transaction-page .checkout-action { border-radius: 10px; }
 @media (min-width: 1024px) {
-  .transaction-page .order-panel { position: sticky; top: 24px; }
-  .transaction-page .order-panel .mini-cart { max-height: 52dvh; overflow-y: auto; padding-right: 4px; }
+  .transaction-page .transaction-select-layout > .order-panel {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 24px;
+    align-self: start;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    height: calc(100vh - 48px);
+    height: calc(100dvh - 48px);
+    min-height: 0;
+  }
+  .transaction-page .order-panel .mini-cart {
+    min-height: 0;
+    max-height: none;
+    align-content: start;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    padding-right: 4px;
+  }
+  .transaction-page .order-panel .order-empty { min-height: 0; overflow-y: auto; align-content: center; }
+  .transaction-page .order-panel .selection-footer { margin-top: 16px; padding-top: 16px; background: white; }
 }
 @media (min-width: 1024px) {
   .transaction-page .cart-table-row { grid-template-columns: minmax(0, 1fr) 144px minmax(100px, auto); }
