@@ -2,6 +2,10 @@
 
 Panduan aktivasi penyimpanan Supabase dan impor data lokal lama tersedia di [supabase/README.md](supabase/README.md).
 
+Menu **Pengaturan** di sidebar mengatur identitas toko pada nota, ukuran kertas 58/80 mm, pesan penutup, tampilan kasir dan catatan produk, foto menu, metode pembayaran awal, serta periode awal grafik. Preview nota membantu memeriksa tampilan sebelum menekan **Simpan pengaturan**.
+
+Pengaturan tersimpan per akun dalam `user_profiles.data.settings` di Supabase, menggunakan tabel dan kebijakan akses yang sudah ada tanpa migrasi tambahan. Perangkat lain memuat perubahan setelah login atau muat ulang. Menyimpan profil tetap mempertahankan pengaturan, dan sebaliknya.
+
 # React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.

@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { summarizeShift } from '../../storage/shiftReport'
+import { useProfile } from '../../context/useProfile'
+import { SettingsPage } from '../settings/SettingsPage'
 import { SalesChart } from './SalesChart'
 import { ActiveProductsPage } from '../product/ActiveProductsPage'
 import { ArrowUpRight, Plus, Wallet, ReceiptText, Package, Clock3 } from 'lucide-react'
@@ -31,7 +33,7 @@ type DashboardPageProps = {
   onLogout: () => void
 }
 
-type ActivePage = 'dashboard' | 'product' | 'active-products' | 'transaction' | 'checkout' | 'shift' | 'profile'
+type ActivePage = 'dashboard' | 'product' | 'active-products' | 'transaction' | 'checkout' | 'shift' | 'profile' | 'settings'
 type SalesPeriod = 'weekly' | 'monthly' | 'yearly'
 type DashboardDetail = 'sales-today' | 'transactions' | null
 
@@ -60,11 +62,17 @@ export function DashboardPage({
   onEndShift,
   onLogout,
 }: DashboardPageProps) {
+  const { settings } = useProfile()
   const [activePage, setActivePage] = useState<ActivePage>('dashboard')
   const [activeDetail, setActiveDetail] = useState<DashboardDetail>(null)
-  const [salesPeriod, setSalesPeriod] = useState<SalesPeriod>('weekly')
+  const [salesPeriod, setSalesPeriod] = useState<SalesPeriod>(settings.defaultSalesPeriod)
   const [historyDateFilter, setHistoryDateFilter] = useState('')
   const [selectedTransaction, setSelectedTransaction] = useState<TransactionRecord | null>(null)
+  function openSettings() {
+    setSelectedTransaction(null)
+    setActivePage('settings')
+  }
+
   function openCheckout() {
     setSelectedTransaction(null)
     setActivePage('checkout')
@@ -143,13 +151,26 @@ export function DashboardPage({
           setActivePage('product')
         }}
         onTransaction={openCheckout} onPaidTransactions={openTransactions}
-        onProfile={() => {
+        onSettings={openSettings} onProfile={() => {
           setSelectedTransaction(null)
           setActivePage('profile')
         }}
         profileName={currentShift?.cashierName}
       />
     )
+  }
+
+  if (activePage === 'settings') {
+    return <SettingsPage
+      onDashboard={() => setActivePage('dashboard')}
+      onProduct={() => setActivePage('product')}
+      onTransaction={openCheckout} onPaidTransactions={openTransactions}
+      onShift={() => setActivePage('shift')}
+      onProfile={() => setActivePage('profile')}
+      onSettings={openSettings}
+      profileName={currentShift?.cashierName}
+      onSaved={(next) => setSalesPeriod(next.defaultSalesPeriod)}
+    />
   }
 
   if (activePage === 'checkout') {
@@ -159,7 +180,7 @@ export function DashboardPage({
         onProduct={() => setActivePage('product')}
         onTransaction={openCheckout} onPaidTransactions={openTransactions}
         onShift={() => setActivePage('shift')}
-        onProfile={() => setActivePage('profile')}
+        onSettings={openSettings} onProfile={() => setActivePage('profile')}
         products={products}
         currentShift={currentShift}
         onCompleteTransaction={onCompleteTransaction}
@@ -177,7 +198,7 @@ export function DashboardPage({
         onDashboard={() => setActivePage('dashboard')}
         onProduct={() => setActivePage('product')}
         onTransaction={openCheckout} onPaidTransactions={openTransactions}
-        onProfile={() => setActivePage('profile')}
+        onSettings={openSettings} onProfile={() => setActivePage('profile')}
         onNewTransaction={() => setActivePage('checkout')}
         onSelectTransaction={(entry) => setSelectedTransaction(transactions.find((sale) => sale.id === (entry.originalTransactionId ?? entry.id)) ?? entry)}
         profileName={currentShift?.cashierName}
@@ -191,7 +212,7 @@ export function DashboardPage({
       onProduct={() => setActivePage('product')}
       onTransaction={openCheckout} onPaidTransactions={openTransactions}
       onShift={() => setActivePage('shift')}
-      onProfile={() => setActivePage('profile')} />
+      onSettings={openSettings} onProfile={() => setActivePage('profile')} />
   }
 
   if (activePage === 'product') {
@@ -201,7 +222,7 @@ export function DashboardPage({
         onProduct={() => setActivePage('product')}
         onTransaction={openCheckout} onPaidTransactions={openTransactions}
         onShift={() => setActivePage('shift')}
-        onProfile={() => setActivePage('profile')}
+        onSettings={openSettings} onProfile={() => setActivePage('profile')}
         products={products}
         onAddProduct={onAddProduct}
         onUpdateProduct={onUpdateProduct}
@@ -217,7 +238,7 @@ export function DashboardPage({
         onProduct={() => setActivePage('product')}
         onTransaction={openCheckout} onPaidTransactions={openTransactions}
         onShift={() => setActivePage('shift')}
-        onProfile={() => setActivePage('profile')}
+        onSettings={openSettings} onProfile={() => setActivePage('profile')}
         onLogout={onLogout}
         isShiftOpen={isShiftOpen}
         currentShift={currentShift}
@@ -232,7 +253,7 @@ export function DashboardPage({
         onProduct={() => setActivePage('product')}
         onTransaction={openCheckout} onPaidTransactions={openTransactions}
         onShift={() => setActivePage('shift')}
-        onProfile={() => setActivePage('profile')}
+        onSettings={openSettings} onProfile={() => setActivePage('profile')}
         currentShift={currentShift}
         shiftHistory={shiftHistory}
         transactions={transactions}
@@ -250,7 +271,7 @@ export function DashboardPage({
         onProduct={() => setActivePage('product')}
         onTransaction={openCheckout} onPaidTransactions={openTransactions}
         onShift={() => setActivePage('shift')}
-        onProfile={() => setActivePage('profile')}
+        onSettings={openSettings} onProfile={() => setActivePage('profile')}
         profileName={currentShift?.cashierName}
       />
 

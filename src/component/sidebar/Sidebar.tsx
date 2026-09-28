@@ -1,8 +1,8 @@
 import { useProfile } from '../../context/useProfile'
 import { Button } from '../button/Button'
-import { LayoutDashboard, Package, ShoppingCart, Clock3, Store, ChevronRight, ReceiptText } from 'lucide-react'
+import { LayoutDashboard, Package, ShoppingCart, Clock3, Store, Settings, ChevronRight, ReceiptText } from 'lucide-react'
 
-type SidebarPage = 'dashboard' | 'product' | 'transaction' | 'paid-transactions' | 'shift' | 'profile'
+type SidebarPage = 'dashboard' | 'product' | 'transaction' | 'paid-transactions' | 'shift' | 'profile' | 'settings'
 
 type SidebarProps = {
   activePage: SidebarPage
@@ -11,6 +11,7 @@ type SidebarProps = {
   onTransaction: () => void
   onPaidTransactions: () => void
   onShift: () => void
+  onSettings: () => void
   onProfile: () => void
   profileName?: string
 }
@@ -22,10 +23,11 @@ export function Sidebar({
   onTransaction,
   onPaidTransactions,
   onShift,
+  onSettings,
   onProfile,
   profileName,
 }: SidebarProps) {
-  const { profile } = useProfile()
+  const { profile, settings } = useProfile()
   const displayName = profile.name || profileName || 'Administrator'
   const navigation = [
     { key: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, action: onDashboard },
@@ -33,6 +35,7 @@ export function Sidebar({
     { key: 'paid-transactions', label: 'Transaksi lunas', icon: ReceiptText, action: onPaidTransactions },
     { key: 'product', label: 'Produk', icon: Package, action: onProduct },
     { key: 'shift', label: 'Shift kasir', icon: Clock3, action: onShift },
+    { key: 'settings', label: 'Pengaturan', icon: Settings, action: onSettings },
   ]
   const initials = displayName
     .split(' ')
@@ -46,7 +49,7 @@ export function Sidebar({
       <div className="sidebar-brand flex items-center gap-3">
         <span className="brand-symbol"><Store size={23} aria-hidden="true" /></span>
         <div>
-          <strong className="block text-lg text-slate-950">POS Lagi<span className="text-emerald-600">.</span></strong>
+          <strong className="block text-lg text-slate-950">{settings.storeName}<span className="text-emerald-600">.</span></strong>
           <small className="block text-xs font-bold text-slate-500">{profile.branch || 'Cabang Utama'}</small>
         </div>
       </div>

@@ -530,3 +530,9 @@
   .shift-report-paper .shift-refund-explanation { break-inside: auto; }
   .shift-refund-explanation article { break-inside: avoid; }
 }
+
+.transaction-page[data-product-images="false"] .catalog-item { grid-template-rows: repeat(4, auto); }
+.receipt-page[data-paper="58"] .thermal-receipt { max-width: 280px; padding-inline: 16px; font-size: 11px; }
+@media print {
+  .receipt-page[data-paper="58"] .thermal-receipt { width: 50mm; max-width: 100%; padding: 4mm 2mm; font-size: 9pt; }
+}

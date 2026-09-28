@@ -16,6 +16,7 @@ type ProductPageProps = {
   onTransaction: () => void
   onPaidTransactions: () => void
   onShift: () => void
+  onSettings: () => void
   onProfile: () => void
   products: Product[]
   onAddProduct: (product: ProductInput) => Promise<void>
@@ -43,6 +44,7 @@ export function ProductPage({
   onTransaction,
   onPaidTransactions,
   onShift,
+  onSettings,
   onProfile,
   products,
   onAddProduct,
@@ -193,7 +195,7 @@ export function ProductPage({
         onProduct={onProduct}
         onTransaction={onTransaction} onPaidTransactions={onPaidTransactions}
         onShift={onShift}
-        onProfile={onProfile}
+        onSettings={onSettings} onProfile={onProfile}
       />
 
       <section className="product-content content-shell">

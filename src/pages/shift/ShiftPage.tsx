@@ -16,6 +16,7 @@ type ShiftPageProps = {
   onTransaction: () => void
   onPaidTransactions: () => void
   onShift: () => void
+  onSettings: () => void
   onProfile: () => void
   currentShift: ShiftSession | null
   shiftHistory: ShiftSession[]
@@ -90,6 +91,7 @@ export function ShiftPage({
   onTransaction,
   onPaidTransactions,
   onShift,
+  onSettings,
   onProfile,
   currentShift,
   shiftHistory,
@@ -187,7 +189,7 @@ export function ShiftPage({
         onProduct={onProduct}
         onTransaction={onTransaction} onPaidTransactions={onPaidTransactions}
         onShift={onShift}
-        onProfile={onProfile}
+        onSettings={onSettings} onProfile={onProfile}
       />
 
       <section className="shift-content content-shell">

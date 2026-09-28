@@ -16,6 +16,7 @@ type TransactionDetailPageProps = {
   onProduct: () => void
   onTransaction: () => void
   onPaidTransactions: () => void
+  onSettings: () => void
   onProfile: () => void
   onShift: () => void
   profileName?: string
@@ -43,6 +44,7 @@ export function TransactionDetailPage({
   onProduct,
   onTransaction,
   onPaidTransactions,
+  onSettings,
   onProfile,
   onShift,
   profileName,
@@ -61,7 +63,7 @@ export function TransactionDetailPage({
         onProduct={onProduct}
         onTransaction={onTransaction} onPaidTransactions={onPaidTransactions}
         onShift={onShift}
-        onProfile={onProfile}
+        onSettings={onSettings} onProfile={onProfile}
         profileName={profileName}
       />
 

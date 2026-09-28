@@ -15,6 +15,7 @@ type TransactionHistoryPageProps = {
   onProduct: () => void
   onTransaction: () => void
   onPaidTransactions: () => void
+  onSettings: () => void
   onProfile: () => void
   onShift: () => void
   onNewTransaction: () => void
@@ -44,6 +45,7 @@ export function TransactionHistoryPage({
   onProduct,
   onTransaction,
   onPaidTransactions,
+  onSettings,
   onProfile,
   onShift,
   onNewTransaction,
@@ -121,7 +123,7 @@ export function TransactionHistoryPage({
         onProduct={onProduct}
         onTransaction={onTransaction} onPaidTransactions={onPaidTransactions}
         onShift={onShift}
-        onProfile={onProfile}
+        onSettings={onSettings} onProfile={onProfile}
         profileName={profileName}
       />
 

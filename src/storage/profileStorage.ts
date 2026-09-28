@@ -1,3 +1,4 @@
+import { patchUserDocument } from './userDocument'
 import { supabase } from '../lib/supabase'
 
 export type UserProfile = {
@@ -35,8 +36,7 @@ export async function loadProfile(accountId: string): Promise<UserProfile> {
 
 export async function saveProfile(accountId: string, profile: UserProfile) {
   if (!supabase) throw new Error('Database belum dikonfigurasi.')
-  const { error } = await supabase.from('user_profiles').upsert({ user_id: accountId, data: profile })
-  if (error) throw new Error(`Profil belum tersimpan: ${error.message}`)
+  await patchUserDocument(accountId, { ...profile })
 }
 
 export function normalizeProfile(value: unknown): UserProfile {

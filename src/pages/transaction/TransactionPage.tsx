@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Minus, Plus, ArrowLeft, ArrowRight, Check, Search, ShoppingBag, Banknote, QrCode, CreditCard } from 'lucide-react'
+import { useProfile } from '../../context/useProfile'
 import { ProductImage } from '../../component/product/ProductImage'
 import { Sidebar } from '../../component/sidebar/Sidebar'
 import { PageHeader } from '../../component/header/PageHeader'
@@ -15,6 +16,7 @@ type TransactionPageProps = {
   onTransaction: () => void
   onPaidTransactions: () => void
   onShift: () => void
+  onSettings: () => void
   onProfile: () => void
   products: Product[]
   currentShift: ShiftSession | null
@@ -45,17 +47,19 @@ export function TransactionPage({
   onTransaction,
   onPaidTransactions,
   onShift,
+  onSettings,
   onProfile,
   products,
   currentShift,
   onCompleteTransaction,
 }: TransactionPageProps) {
+  const { settings } = useProfile()
   const [step, setStep] = useState<Step>('select')
   const [selectedCategory, setSelectedCategory] = useState('Semua')
   const [searchInput, setSearchInput] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
   const [cart, setCart] = useState<CartItem[]>([])
-  const [paymentMethod, setPaymentMethod] = useState('Cash')
+  const [paymentMethod, setPaymentMethod] = useState<string>(settings.defaultPaymentMethod)
   const [paidAmount, setPaidAmount] = useState('')
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState('')
@@ -124,7 +128,7 @@ export function TransactionPage({
     setSearchInput('')
     setSearchQuery('')
     setCart([])
-    setPaymentMethod('Cash')
+    setPaymentMethod(settings.defaultPaymentMethod)
     setPaidAmount('')
     setReceipt(null)
   }
@@ -190,20 +194,20 @@ export function TransactionPage({
         onProduct={onProduct}
         onTransaction={resetTransaction} onPaidTransactions={onPaidTransactions}
         onShift={onShift}
-        onProfile={onProfile}
+        onSettings={onSettings} onProfile={onProfile}
       />
     )
   }
 
   return (
-    <main className="transaction-page app-shell">
+    <main className="transaction-page app-shell" data-product-images={settings.showProductImages}>
       <Sidebar
         activePage="transaction"
         onDashboard={onDashboard}
         onProduct={onProduct}
         onTransaction={onTransaction} onPaidTransactions={onPaidTransactions}
         onShift={onShift}
-        onProfile={onProfile}
+        onSettings={onSettings} onProfile={onProfile}
       />
 
       <section className="transaction-content content-shell">
@@ -293,7 +297,7 @@ export function TransactionPage({
                     aria-label={`Tambah ${product.name} ke pesanan`}
                     onClick={() => addProduct(product)}
                   >
-                    <ProductImage src={product.image} name={product.name} category={product.category} />
+                    {settings.showProductImages && <ProductImage src={product.image} name={product.name} category={product.category} />}
                     <strong>{product.name}</strong>
                     <span>{product.category}</span>
                     <b>{formatCurrency(product.price)}</b>
@@ -359,7 +363,7 @@ export function TransactionPage({
                 {cartItems.map((item) => (
                   <div className="cart-table-row grid gap-3 rounded-lg border border-slate-100 p-3 md:grid-cols-[1fr_120px_120px] md:items-center" key={item.productId}>
                     <div className="review-product-cell flex items-center gap-3 [&_img]:h-14 [&_img]:w-16 [&_img]:rounded-lg [&_img]:object-cover [&_span]:block [&_span]:text-sm [&_span]:text-slate-500 [&_small]:text-xs [&_small]:text-slate-500">
-                      <ProductImage src={item.product.image} name={item.product.name} category={item.product.category} />
+                      {settings.showProductImages && <ProductImage src={item.product.image} name={item.product.name} category={item.product.category} />}
                       <div>
                         <strong>{item.product.name}</strong>
                         <small>{formatCurrency(item.product.price)} per item</small>

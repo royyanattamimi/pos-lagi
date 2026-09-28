@@ -1,3 +1,4 @@
+import { useProfile } from '../../../context/useProfile'
 import { Check, Printer } from 'lucide-react'
 import { Sidebar } from '../../../component/sidebar/Sidebar'
 import { PageHeader } from '../../../component/header/PageHeader'
@@ -11,6 +12,7 @@ type ReceiptPageProps = {
   onTransaction: () => void
   onPaidTransactions: () => void
   onShift: () => void
+  onSettings: () => void
   onProfile: () => void
 }
 
@@ -31,8 +33,10 @@ export function ReceiptPage({
   onTransaction,
   onPaidTransactions,
   onShift,
+  onSettings,
   onProfile,
 }: ReceiptPageProps) {
+  const { settings, profile } = useProfile()
   const totalItems = transaction.items.reduce((total, item) => total + item.quantity, 0)
 
   function handlePrint() {
@@ -40,14 +44,14 @@ export function ReceiptPage({
   }
 
   return (
-    <main className="receipt-page app-shell">
+    <main className="receipt-page app-shell" data-paper={settings.receiptPaper}>
       <Sidebar
         activePage="paid-transactions"
         onDashboard={onDashboard}
         onProduct={onProduct}
         onTransaction={onTransaction} onPaidTransactions={onPaidTransactions}
         onShift={onShift}
-        onProfile={onProfile}
+        onSettings={onSettings} onProfile={onProfile}
       />
 
       <section className="receipt-content content-shell">
@@ -71,8 +75,10 @@ export function ReceiptPage({
 
           <article className="thermal-receipt" aria-label={`Nota ${transaction.id}`}>
             <header className="thermal-store">
-              <h2>POS LAGI</h2>
-              <p>Cabang Utama</p>
+              <h2>{settings.storeName}</h2>
+              <p>{profile.branch || 'Cabang Utama'}</p>
+              {settings.storeAddress && <p className="whitespace-pre-wrap">{settings.storeAddress}</p>}
+              {settings.storePhone && <p>{settings.storePhone}</p>}
               <p className="thermal-caption">NOTA PEMBAYARAN</p>
             </header>
 
@@ -80,7 +86,7 @@ export function ReceiptPage({
               <div><dt>No. nota</dt><dd>{transaction.id}</dd></div>
               <div><dt>Tanggal</dt><dd>{new Date(transaction.createdAt).toLocaleDateString('id-ID')}</dd></div>
               <div><dt>Waktu</dt><dd>{new Date(transaction.createdAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</dd></div>
-              <div><dt>Kasir</dt><dd>{transaction.cashier}</dd></div>
+              {settings.showCashierOnReceipt && <div><dt>Kasir</dt><dd>{transaction.cashier}</dd></div>}
             </dl>
 
             <div className="thermal-items thermal-divider">
@@ -91,7 +97,7 @@ export function ReceiptPage({
                     <span>{item.quantity} x {formatCurrency(item.price)}</span>
                     <span>{formatCurrency(item.total)}</span>
                   </div>
-                  {item.note && <p className="thermal-note">Catatan: {item.note}</p>}
+                  {settings.showNotesOnReceipt && item.note && <p className="thermal-note">Catatan: {item.note}</p>}
                 </div>
               ))}
             </div>
@@ -108,7 +114,7 @@ export function ReceiptPage({
 
             <footer className="thermal-footer">
               <strong className="thermal-paid">LUNAS</strong>
-              <p>Terima kasih atas kunjungan Anda.</p>
+              <p className="whitespace-pre-wrap">{settings.receiptFooter}</p>
               <p>Simpan nota ini sebagai bukti pembayaran.</p>
               <span>*** Sampai jumpa kembali ***</span>
             </footer>
