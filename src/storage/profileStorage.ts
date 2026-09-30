@@ -3,6 +3,11 @@ import { supabase } from '../lib/supabase'
 
 export type UserProfile = {
   name: string
+  nickname: string
+  birthplace: string
+  birthDate: string
+  city: string
+  postalCode: string
   email: string
   phone: string
   staffId: string
@@ -14,6 +19,7 @@ export type UserProfile = {
 }
 
 export const emptyProfile: UserProfile = {
+  nickname: '', birthplace: '', birthDate: '', city: '', postalCode: '',
   name: '', email: '', phone: '', staffId: '', role: '', branch: '', shift: '', address: '', notes: '',
 }
 

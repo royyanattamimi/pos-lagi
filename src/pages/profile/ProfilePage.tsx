@@ -1,12 +1,11 @@
 import { useState, type FormEvent } from 'react'
-import { Save, RotateCcw, UserRound, Settings } from 'lucide-react'
+import { Save, RotateCcw, UserRound } from 'lucide-react'
 import { useProfile } from '../../context/useProfile'
 import type { UserProfile } from '../../storage/profileStorage'
 import { Sidebar } from '../../component/sidebar/Sidebar'
 import { PageHeader } from '../../component/header/PageHeader'
 import { Button } from '../../component/button/Button'
 import { Input } from '../../component/input/Input'
-import { Select } from '../../component/select/Select'
 import type { ShiftSession } from '../../types'
 
 type ProfilePageProps = {
@@ -39,7 +38,6 @@ export function ProfilePage({
   const initialProfile = {
     ...savedProfile,
     name: savedProfile.name || currentShift?.cashierName || '',
-    shift: savedProfile.shift || currentShift?.shiftTime || '',
   }
   const [profile, setProfile] = useState(initialProfile)
   const [baseline, setBaseline] = useState(initialProfile)
@@ -47,7 +45,7 @@ export function ProfilePage({
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
   const isDirty = JSON.stringify(profile) !== JSON.stringify(baseline)
-  const configuredFields = [profile.name, profile.email, profile.phone, profile.staffId, profile.role, profile.branch]
+  const configuredFields = [profile.name, profile.email, profile.phone, profile.address, profile.city, profile.postalCode]
   const completed = configuredFields.filter((value) => value.trim()).length
   const initials = (profile.name.trim() || 'P').split(/\s+/).map((word) => word[0]).join('').slice(0, 2).toUpperCase()
 
@@ -94,7 +92,7 @@ export function ProfilePage({
         <PageHeader
           eyebrow="Profil"
           title="Pengaturan profil"
-          description="Lengkapi identitas dan pengaturan kerja, lalu simpan perubahan Anda."
+          description="Lengkapi identitas, informasi kontak, dan alamat pribadi Anda."
           actions={<Button type="button" onClick={onDashboard}>Kembali ke dashboard</Button>}
         />
 
@@ -102,59 +100,64 @@ export function ProfilePage({
           <div className="grid h-20 w-20 shrink-0 place-items-center rounded-full bg-teal-100 text-2xl font-black text-teal-800" aria-hidden="true">{initials}</div>
           <div className="min-w-0 flex-1">
             <h2 className="break-words text-xl font-semibold">{profile.name || 'Nama belum diisi'}</h2>
-            <p className="text-sm text-slate-500">{profile.role || 'Jabatan belum diisi'} · {profile.branch || 'Cabang belum diisi'}</p>
+            <p className="text-sm text-slate-500">{profile.email || 'Email belum diisi'} · {profile.phone || 'Nomor telepon belum diisi'}</p>
             <p className="mt-1 text-xs text-slate-500">Pratinjau profil · {completed} dari 6 informasi utama terisi</p>
           </div>
           <span className="rounded-full bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-600">{isDirty ? 'Ada perubahan belum disimpan' : 'Tidak ada perubahan'}</span>
         </section>
 
         <form onSubmit={handleSave} className="mb-5 grid gap-5">
-          <div className="grid items-start gap-5 xl:grid-cols-2">
-            <section className="surface-panel">
-              <h2 className="mb-1 flex items-center gap-2 text-lg font-semibold"><UserRound size={20} aria-hidden="true" /> Informasi pribadi</h2>
-              <p className="mb-5 text-sm text-slate-500">Nama wajib diisi. Informasi lainnya dapat dilengkapi nanti.</p>
-              <div className="grid gap-4">
+          <section className="surface-panel">
+            <h2 className="mb-1 flex items-center gap-2 text-lg font-semibold"><UserRound size={20} aria-hidden="true" /> Informasi pribadi</h2>
+            <p className="mb-5 text-sm text-slate-500">Lengkapi data agar profil Anda mudah dikenali dan dihubungi. Hanya nama lengkap yang wajib diisi.</p>
+            <div className="grid items-start gap-6 lg:grid-cols-2">
+              <fieldset className="grid min-w-0 gap-4">
+                <legend className="mb-4 text-base font-semibold">Identitas diri</legend>
                 <label className="grid gap-2 text-sm font-semibold">Nama lengkap *
                   <Input required maxLength={100} autoComplete="name" placeholder="Contoh: Budi Santoso" value={profile.name} onChange={(event) => edit('name', event.target.value)} />
+                  <span className="text-xs font-normal text-slate-500">Nama yang ditampilkan pada profil Anda.</span>
                 </label>
+                <label className="grid gap-2 text-sm font-semibold">Nama panggilan
+                  <Input maxLength={50} autoComplete="nickname" placeholder="Contoh: Budi" value={profile.nickname} onChange={(event) => edit('nickname', event.target.value)} />
+                </label>
+                <label className="grid gap-2 text-sm font-semibold">Tempat lahir
+                  <Input maxLength={100} placeholder="Contoh: Bandung" value={profile.birthplace} onChange={(event) => edit('birthplace', event.target.value)} />
+                </label>
+                <label className="grid gap-2 text-sm font-semibold">Tanggal lahir
+                  <Input type="date" autoComplete="bday" max={new Date().toLocaleDateString('sv-SE')} value={profile.birthDate} onChange={(event) => edit('birthDate', event.target.value)} />
+                </label>
+              </fieldset>
+              <fieldset className="grid min-w-0 gap-4">
+                <legend className="mb-4 text-base font-semibold">Informasi kontak</legend>
                 <label className="grid gap-2 text-sm font-semibold">Email kontak
                   <Input type="email" maxLength={254} autoComplete="email" placeholder="nama@contoh.com" value={profile.email} onChange={(event) => edit('email', event.target.value)} />
                   <span className="text-xs font-normal text-slate-500">Untuk informasi kontak; tidak mengubah email login.</span>
                 </label>
                 <label className="grid gap-2 text-sm font-semibold">Nomor telepon
                   <Input type="tel" maxLength={25} autoComplete="tel" placeholder="Contoh: 0812 3456 7890" value={profile.phone} onChange={(event) => edit('phone', event.target.value)} />
+                  <span className="text-xs font-normal text-slate-500">Gunakan nomor aktif yang dapat dihubungi, termasuk kode negara jika diperlukan.</span>
                 </label>
-                <label className="grid gap-2 text-sm font-semibold">Alamat
-                  <textarea className="rounded-lg border border-slate-200 p-3 font-normal focus:outline-teal-600" rows={3} maxLength={500} autoComplete="street-address" placeholder="Alamat kontak (opsional)" value={profile.address} onChange={(event) => edit('address', event.target.value)} />
+              </fieldset>
+              <fieldset className="grid min-w-0 gap-4 lg:col-span-2">
+                <legend className="mb-4 text-base font-semibold">Alamat domisili</legend>
+                <label className="grid gap-2 text-sm font-semibold">Alamat lengkap
+                  <textarea className="rounded-lg border border-slate-200 p-3 font-normal focus:outline-teal-600" rows={3} maxLength={500} autoComplete="street-address" placeholder="Nama jalan, nomor rumah, RT/RW, kelurahan, dan kecamatan" value={profile.address} onChange={(event) => edit('address', event.target.value)} />
                 </label>
-              </div>
-            </section>
-
-            <section className="surface-panel">
-              <h2 className="mb-1 flex items-center gap-2 text-lg font-semibold"><Settings size={20} aria-hidden="true" /> Pengaturan kerja</h2>
-              <p className="mb-5 text-sm text-slate-500">Informasi profil kerja. Tidak mengubah hak akses atau shift yang sedang berjalan.</p>
-              <div className="grid gap-4">
-                <label className="grid gap-2 text-sm font-semibold">ID staf
-                  <Input maxLength={50} placeholder="Contoh: KSR-001" value={profile.staffId} onChange={(event) => edit('staffId', event.target.value)} />
-                </label>
-                <label className="grid gap-2 text-sm font-semibold">Jabatan
-                  <Select value={profile.role} onChange={(event) => edit('role', event.target.value)}>
-                    <option value="">Pilih jabatan</option>
-                    <option>Kasir Utama</option><option>Admin Toko</option><option>Supervisor</option>
-                  </Select>
-                </label>
-                <label className="grid gap-2 text-sm font-semibold">Nama cabang
-                  <Input maxLength={100} placeholder="Contoh: Cabang Utama" value={profile.branch} onChange={(event) => edit('branch', event.target.value)} />
-                </label>
-                <label className="grid gap-2 text-sm font-semibold">Jadwal kerja preferensi
-                  <Input maxLength={100} placeholder="Contoh: 08:00 - 16:00" value={profile.shift} onChange={(event) => edit('shift', event.target.value)} />
-                </label>
-                <label className="grid gap-2 text-sm font-semibold">Catatan profil
-                  <textarea className="rounded-lg border border-slate-200 p-3 font-normal focus:outline-teal-600" rows={3} maxLength={500} placeholder="Informasi tambahan (opsional)" value={profile.notes} onChange={(event) => edit('notes', event.target.value)} />
-                </label>
-              </div>
-            </section>
-          </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <label className="grid gap-2 text-sm font-semibold">Kota / kabupaten
+                    <Input maxLength={100} autoComplete="address-level2" placeholder="Contoh: Jakarta Selatan" value={profile.city} onChange={(event) => edit('city', event.target.value)} />
+                  </label>
+                  <label className="grid gap-2 text-sm font-semibold">Kode pos
+                    <Input maxLength={10} autoComplete="postal-code" placeholder="Contoh: 12110" value={profile.postalCode} onChange={(event) => edit('postalCode', event.target.value)} />
+                  </label>
+                </div>
+              </fieldset>
+              <label className="grid gap-2 text-sm font-semibold lg:col-span-2">Catatan pribadi
+                <textarea className="rounded-lg border border-slate-200 p-3 font-normal focus:outline-teal-600" rows={3} maxLength={500} placeholder="Informasi tambahan tentang diri Anda (opsional)" value={profile.notes} onChange={(event) => edit('notes', event.target.value)} />
+                <span className="text-xs font-normal text-slate-500">{profile.notes.length}/500 karakter</span>
+              </label>
+            </div>
+          </section>
 
           <div className="surface-panel">
             {message && <p role="status" className="mb-3 text-sm font-semibold text-emerald-700">{message}</p>}
