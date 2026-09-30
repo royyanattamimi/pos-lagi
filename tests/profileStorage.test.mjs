@@ -34,3 +34,26 @@ test('legacy profile imports only when no database profile exists', async () => 
   entries.set('account', { ...storage.emptyProfile, name: 'Database' })
   assert.equal((await storage.loadProfile('account')).name, 'Database')
 })
+
+test('company details persist without turning personal identity into business data', async () => {
+  const entries = new Map([['account', { name: 'Budi', email: 'budi@example.com', birthDate: '1990-01-01' }]])
+  const storage = storageModule(entries)
+  const previous = await storage.loadProfile('account')
+  assert.equal(previous.companyName, '')
+  assert.equal(previous.companyEmail, '')
+  const company = {
+    ...previous,
+    companyName: 'Kopi Senja', businessType: 'Coffee Shop',
+    companyLegalName: 'PT Kopi Senja', companyBranch: 'Kemang',
+    companyEmail: 'halo@kopisenja.com', companyPhone: '+62 812 3456 7890',
+    companyWebsite: 'https://kopisenja.com', companyInstagram: '@kopisenja',
+    companyAddress: 'Jalan Kemang 10', companyCity: 'Jakarta Selatan',
+    companyProvince: 'DKI Jakarta', companyPostalCode: '12730',
+    companyOperatingHours: 'Senin–Minggu 08.00–22.00', companyDescription: 'Kopi lokal dan pastry',
+  }
+  await storage.saveProfile('account', company)
+  const reloaded = await storageModule(entries).loadProfile('account')
+  assert.deepEqual(reloaded, company)
+  assert.equal(reloaded.name, 'Budi')
+  assert.equal(reloaded.email, 'budi@example.com')
+})

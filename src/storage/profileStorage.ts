@@ -2,6 +2,21 @@ import { patchUserDocument } from './userDocument'
 import { supabase } from '../lib/supabase'
 
 export type UserProfile = {
+  companyName: string
+  businessType: string
+  companyLegalName: string
+  companyBranch: string
+  companyEmail: string
+  companyPhone: string
+  companyWebsite: string
+  companyInstagram: string
+  companyAddress: string
+  companyCity: string
+  companyProvince: string
+  companyPostalCode: string
+  companyOperatingHours: string
+  companyDescription: string
+
   name: string
   nickname: string
   birthplace: string
@@ -19,6 +34,21 @@ export type UserProfile = {
 }
 
 export const emptyProfile: UserProfile = {
+  companyName: '',
+  businessType: '',
+  companyLegalName: '',
+  companyBranch: '',
+  companyEmail: '',
+  companyPhone: '',
+  companyWebsite: '',
+  companyInstagram: '',
+  companyAddress: '',
+  companyCity: '',
+  companyProvince: '',
+  companyPostalCode: '',
+  companyOperatingHours: '',
+  companyDescription: '',
+
   nickname: '', birthplace: '', birthDate: '', city: '', postalCode: '',
   name: '', email: '', phone: '', staffId: '', role: '', branch: '', shift: '', address: '', notes: '',
 }
