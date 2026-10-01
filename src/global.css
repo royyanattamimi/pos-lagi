@@ -532,7 +532,14 @@
 }
 
 .transaction-page[data-product-images="false"] .catalog-item { grid-template-rows: repeat(4, auto); }
-.receipt-page[data-paper="58"] .thermal-receipt { max-width: 280px; padding-inline: 16px; font-size: 11px; }
+:is(.receipt-page, .settings-page)[data-paper="58"] .thermal-receipt { max-width: 280px; padding-inline: 16px; font-size: 11px; }
 @media print {
-  .receipt-page[data-paper="58"] .thermal-receipt { width: 50mm; max-width: 100%; padding: 4mm 2mm; font-size: 9pt; }
+  :is(.receipt-page, .settings-page)[data-paper="58"] .thermal-receipt { width: 50mm; max-width: 100%; padding: 4mm 2mm; font-size: 9pt; }
+}
+
+.settings-preview .thermal-receipt { margin-inline: auto; }
+@media print {
+  body:has(.settings-page[data-section="receipt"]), body:has(.settings-page[data-section="receipt"]) #root { margin: 0; padding: 0; min-width: 0; background: white; }
+  .settings-page[data-section="receipt"] :is(.app-sidebar, .page-heading, .settings-menu, .settings-editor, .settings-save, .settings-preview-controls) { display: none !important; }
+  .settings-page[data-section="receipt"], .settings-page[data-section="receipt"] :is(.content-shell, form, .settings-fields, .settings-preview) { display: block; position: static; width: 100%; min-height: 0; margin: 0; padding: 0; border: 0; background: white; }
 }

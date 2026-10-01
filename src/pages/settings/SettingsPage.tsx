@@ -1,5 +1,7 @@
+import { ThermalReceipt } from '../transaction/receipt/ThermalReceipt'
+import type { TransactionRecord } from '../../types'
 import { useState, type ComponentProps, type FormEvent } from 'react'
-import { Save, RotateCcw, Store, ReceiptText, SlidersHorizontal } from 'lucide-react'
+import { Save, RotateCcw, Store, ReceiptText, SlidersHorizontal, Printer } from 'lucide-react'
 import { Sidebar } from '../../component/sidebar/Sidebar'
 import { PageHeader } from '../../component/header/PageHeader'
 import { Button } from '../../component/button/Button'
@@ -15,6 +17,13 @@ type Props = Omit<ComponentProps<typeof Sidebar>, 'activePage'> & {
 export function SettingsPage({ onSaved, ...navigation }: Props) {
   const { settings, updateSettings, profile } = useProfile()
   const [draft, setDraft] = useState({ ...settings })
+  const [section, setSection] = useState<'receipt' | 'general'>('receipt')
+  const [sampleDate] = useState(() => new Date().toISOString())
+  const sample: TransactionRecord = {
+    id: 'CONTOH-001', createdAt: sampleDate, cashier: profile.name || 'Kasir',
+    items: [{ productId: 1, name: 'Kopi susu', quantity: 2, price: 20000, total: 40000, note: 'Tanpa gula' }],
+    itemCount: 2, subtotal: 40000, tax: 0, grandTotal: 40000, paid: 50000, change: 10000, paymentMethod: 'Cash', status: 'Lunas',
+  }
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
@@ -26,7 +35,7 @@ export function SettingsPage({ onSaved, ...navigation }: Props) {
   async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (saving) return
-    if (!draft.storeName.trim()) { setError('Nama toko wajib diisi.'); return }
+    if (!draft.storeName.trim()) { setSection('receipt'); setError('Nama toko wajib diisi.'); return }
     setSaving(true); setError(''); setMessage('')
     try {
       const next = normalizeSettings(draft)
@@ -39,14 +48,18 @@ export function SettingsPage({ onSaved, ...navigation }: Props) {
     } finally { setSaving(false) }
   }
   return (
-    <main className="settings-page app-shell">
+    <main className="settings-page app-shell" data-paper={draft.receiptPaper} data-section={section}>
       <Sidebar activePage="settings" {...navigation} />
       <section className="content-shell">
         <PageHeader eyebrow="Preferensi akun" title="Pengaturan" description="Sesuaikan nota dan cara kerja kasir. Pengaturan tersimpan untuk akun ini dan berlaku di perangkat lain setelah login atau muat ulang." />
-        <form onSubmit={save} className="grid gap-5">
-          <fieldset disabled={saving} className="grid min-w-0 gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
-            <div className="grid gap-5">
-              <section className="rounded-xl border border-slate-200 bg-white p-5">
+        <nav aria-label="Menu pengaturan" className="settings-menu mb-5 flex flex-wrap gap-3">
+          <Button variant={section === 'receipt' ? 'primary' : 'secondary'} aria-pressed={section === 'receipt'} onClick={() => setSection('receipt')}><ReceiptText /> Setup nota</Button>
+          <Button variant={section === 'general' ? 'primary' : 'secondary'} aria-pressed={section === 'general'} onClick={() => setSection('general')}><SlidersHorizontal /> Transaksi & dashboard</Button>
+        </nav>
+        <form noValidate onSubmit={save} className="grid gap-5">
+          <fieldset disabled={saving} className={`settings-fields grid min-w-0 gap-5 ${section === 'receipt' ? 'xl:grid-cols-[minmax(0,1fr)_360px]' : ''}`}>
+            <div className="settings-editor grid gap-5">
+              <section hidden={section !== 'receipt'} className="rounded-xl border border-slate-200 bg-white p-5">
                 <h2 className="mb-1 flex items-center gap-2 text-lg font-bold"><Store size={20} /> Identitas toko pada nota</h2>
                 <p className="mb-4 text-sm text-slate-500">Nama toko juga tampil di sidebar. Pengaturan ini berlaku untuk akun Anda.</p>
                 <div className="grid gap-4 [&_label]:grid [&_label]:gap-2 [&_label]:text-sm [&_label]:font-bold">
@@ -55,7 +68,7 @@ export function SettingsPage({ onSaved, ...navigation }: Props) {
                   <label>Telepon toko<Input type="tel" maxLength={30} value={draft.storePhone} onChange={(event) => edit('storePhone', event.target.value)} placeholder="Contoh: 0812 3456 7890" /></label>
                 </div>
               </section>
-              <section className="rounded-xl border border-slate-200 bg-white p-5">
+              <section hidden={section !== 'receipt'} className="rounded-xl border border-slate-200 bg-white p-5">
                 <h2 className="mb-4 flex items-center gap-2 text-lg font-bold"><ReceiptText size={20} /> Nota & pencetakan</h2>
                 <div className="grid gap-4">
                   <label className="grid gap-2 text-sm font-bold">Ukuran kertas nota<Select value={draft.receiptPaper} onChange={(event) => edit('receiptPaper', event.target.value as AppSettings['receiptPaper'])}><option value="80">80 mm</option><option value="58">58 mm</option></Select></label>
@@ -65,7 +78,7 @@ export function SettingsPage({ onSaved, ...navigation }: Props) {
                   <p className="text-xs text-slate-500">Saat mencetak, pilih ukuran kertas yang sama pada pengaturan printer.</p>
                 </div>
               </section>
-              <section className="rounded-xl border border-slate-200 bg-white p-5">
+              <section hidden={section !== 'general'} className="rounded-xl border border-slate-200 bg-white p-5">
                 <h2 className="mb-4 flex items-center gap-2 text-lg font-bold"><SlidersHorizontal size={20} /> Transaksi & dashboard</h2>
                 <div className="grid gap-4">
                   <label className="grid gap-2 text-sm font-bold">Metode pembayaran awal<Select value={draft.defaultPaymentMethod} onChange={(event) => edit('defaultPaymentMethod', event.target.value as AppSettings['defaultPaymentMethod'])}>{['Cash', 'QRIS', 'Debit'].map((method) => <option key={method}>{method}</option>)}</Select><small className="font-normal text-slate-500">Dipilih otomatis pada transaksi baru. Kasir tetap bisa menggantinya saat pembayaran.</small></label>
@@ -74,18 +87,17 @@ export function SettingsPage({ onSaved, ...navigation }: Props) {
                 </div>
               </section>
             </div>
-            <aside className="h-fit rounded-xl border border-slate-200 bg-white p-5 xl:sticky xl:top-6">
-              <h2 className="mb-1 font-bold">Preview nota</h2><p className="mb-4 text-xs text-slate-500">Contoh tampilan · Kertas {draft.receiptPaper} mm</p>
-              <div className={`mx-auto border border-dashed border-slate-300 p-4 font-mono text-xs ${draft.receiptPaper === '58' ? 'max-w-52' : 'w-full'}`}>
-                <div className="mb-4 text-center"><strong className="block break-words text-lg">{draft.storeName || 'Nama toko'}</strong><p>{profile.branch || 'Cabang Utama'}</p><p className="whitespace-pre-wrap break-words">{draft.storeAddress}</p><p>{draft.storePhone}</p></div>
-                {draft.showCashierOnReceipt && <p>Kasir: {profile.name || 'Kasir'}</p>}
-                <div className="my-3 border-y border-dashed border-slate-300 py-3"><strong>Kopi susu</strong><p>1 × Rp 20.000</p>{draft.showNotesOnReceipt && <p>Catatan: tanpa gula</p>}</div>
-                <p className="flex justify-between font-bold"><span>TOTAL</span><span>Rp 20.000</span></p>
-                <p className="mt-4 whitespace-pre-wrap break-words text-center">{draft.receiptFooter}</p>
+            {section === 'receipt' && <aside className="settings-preview h-fit rounded-xl border border-slate-200 bg-slate-50 p-5 xl:sticky xl:top-6">
+              <div className="settings-preview-controls">
+                <h2 className="mb-1 font-bold">Pratinjau nota</h2>
+                <p className="mb-4 text-xs text-slate-500">Contoh tampilan · Kertas {draft.receiptPaper} mm. Pratinjau mengikuti perubahan sebelum disimpan.</p>
+                <Button className="mb-5 w-full" onClick={() => window.print()}><Printer /> Cetak contoh nota</Button>
               </div>
-            </aside>
+              <ThermalReceipt transaction={sample} settings={{ ...draft, storeName: draft.storeName || 'Nama toko' }} branch={profile.branch} sample />
+            </aside>}
+
           </fieldset>
-          <div className="rounded-xl border border-slate-200 bg-white p-5">
+          <div className="settings-save rounded-xl border border-slate-200 bg-white p-5">
             {error && <p role="alert" className="mb-3 text-sm text-red-600">{error}</p>}
             {message && <p role="status" className="mb-3 text-sm text-teal-700">{message}</p>}
             {dirty && <p className="mb-3 text-sm text-amber-700">Ada perubahan yang belum disimpan.</p>}
