@@ -53,8 +53,8 @@ export function SettingsPage({ onSaved, ...navigation }: Props) {
       <section className="content-shell">
         <PageHeader eyebrow="Preferensi akun" title="Pengaturan" description="Sesuaikan nota dan cara kerja kasir. Pengaturan tersimpan untuk akun ini dan berlaku di perangkat lain setelah login atau muat ulang." />
         <nav aria-label="Menu pengaturan" className="settings-menu mb-5 flex flex-wrap gap-3">
-          <Button variant={section === 'receipt' ? 'primary' : 'secondary'} aria-pressed={section === 'receipt'} onClick={() => setSection('receipt')}><ReceiptText /> Setup nota</Button>
           <Button variant={section === 'general' ? 'primary' : 'secondary'} aria-pressed={section === 'general'} onClick={() => setSection('general')}><SlidersHorizontal /> Transaksi & dashboard</Button>
+          <Button variant={section === 'receipt' ? 'primary' : 'secondary'} aria-pressed={section === 'receipt'} onClick={() => setSection('receipt')}><ReceiptText /> Setup nota</Button>
         </nav>
         <form noValidate onSubmit={save} className="grid gap-5">
           <fieldset disabled={saving} className={`settings-fields grid min-w-0 gap-5 ${section === 'receipt' ? 'xl:grid-cols-[minmax(0,1fr)_360px]' : ''}`}>
